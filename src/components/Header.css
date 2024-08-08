@@ -1,0 +1,25 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #282c34;
+  border-bottom: 2px solid #ddd;
+}
+
+.header__title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.header__select select {
+  padding: 0.5rem;
+  font-size: 21px;
+  cursor: pointer;
+  background-color: transparent;
+  border: transparent;
+  color: #ffffff;
+  text-align: center;
+  background-image: none; /* Remove default arrow */
+}
+

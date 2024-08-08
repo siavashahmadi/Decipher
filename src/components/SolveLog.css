@@ -1,0 +1,28 @@
+.solve-log {
+  padding: 0.5rem;
+  overflow-y: auto;
+  background-color: #2c323c;
+  border-radius: 1rem;
+}
+
+.solve-log ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.solve-log-item {
+  display: block flex;
+  justify-content: space-around; /* Position items at opposite ends */
+  margin: 6px 0;
+  font-size: large;
+}
+
+.solve-number {
+  padding-left: 2rem;
+  color: #ddd;
+}
+
+.solve-time {
+  padding-right: 2rem;
+  color: #ddd;
+}
