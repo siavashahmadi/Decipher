@@ -21,3 +21,9 @@
   padding: 3rem 6rem;
   font-size: x-large;
 }
+
+@media (max-width: 1024px) {
+  .scramble-text {
+    padding: 1.5rem 1.5rem;  /* or even smaller like 0.25rem if you prefer */
+  }
+}

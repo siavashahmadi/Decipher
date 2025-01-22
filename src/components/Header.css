@@ -3,17 +3,31 @@
   display: flex;
   align-items: center;
   gap: 2rem;  /* Space between title and buttons */
+  color: #fff;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem;
 }
 
 .title {
-  margin: 0;  /* Remove default margin */
+  font-size: 3rem;
+  margin: 2px;  /* Remove default margin */
   min-width: fit-content;  /* Prevent title from shrinking */
+}
+
+.header-logo {
+  width: 41px;
+  height: 41px;
+  background-color: #fff;
+  border-radius: 10px;
 }
 
 .puzzle-buttons {
   display: flex;
-  overflow-x: auto;  /* This enables horizontal scrolling */
-  -webkit-overflow-scrolling: touch;  /* Smooth scroll on iOS */
   gap: 8px;
   padding: 4px 0
 }
@@ -31,7 +45,23 @@
 }
 
 .puzzle-select {
+  color: #fff;
   display: none;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  margin: 10px;
+  background-color: #2c323c;
+  cursor: pointer;
+}
+
+.puzzle-select:hover {
+  border-color: #5b5b5b;
+}
+
+.puzzle-select:focus {
+  outline: none;
+  border-color: #676c76;
 }
 
 /* Switch to dropdown on smaller screens */

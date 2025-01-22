@@ -1,5 +1,6 @@
 import React from 'react';
 import './Header.css';
+import logo from '../logo.svg'
 
 const Header = ({ type, setPuzzleType, handleTypeChange }) => {
 
@@ -19,7 +20,10 @@ const puzzleTypes = [
 
   return (
     <header className="header">
-      <h1 className="title">Ao5</h1>
+      <div className="title-container">
+        <img src={logo} alt="Ao5 logo" className="header-logo" />
+        <h1 className="title">Ao5</h1>
+      </div>
       <div className="puzzle-buttons">
         {puzzleTypes.map(puzzle => (
           <button
