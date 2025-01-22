@@ -1,8 +1,8 @@
 .solve-session {
+  /* Remove the height: 100vh constraint */
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
 }
 
 .main-content {

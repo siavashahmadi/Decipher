@@ -86,7 +86,7 @@ const SolveSession = () => {
 
   return (
     <div className="solve-session">
-      <Header type={puzzleType} handleTypeChange={handleTypeChange} resetTimer={resetTimer} />
+      <Header type={puzzleType} handleTypeChange={handleTypeChange} />
       <div className="main-content">
         <div className="timer-section">
           <Timer 
