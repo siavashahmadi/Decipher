@@ -1,8 +1,17 @@
+/* First, ensure the body and html can scroll */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: auto;
+  overflow-y: auto;
+}
+
 .solve-session {
-  /* Remove the height: 100vh constraint */
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh; /* changed from height to min-height */
+  position: relative; /* added */
 }
 
 .main-content {
@@ -11,23 +20,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative; /* added */
 }
 
 .timer-section {
   text-align: center;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .scramble-container {
   margin-top: -20px;
+  width: 100%;
 }
 
 .mid-section {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
-  margin-bottom: 20px;
+  position: relative; /* added */
 }
 
 .left-section {
@@ -48,12 +59,17 @@
   }
 
   .left-section, .right-section {
-    height: 100%;
+    width: 100%;
+    margin-bottom: 10px;
   }
 }
 
 @media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+  
   .left-section, .right-section {
-    height: 100%;
+    padding-inline: 5px;
   }
 }
