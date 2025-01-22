@@ -43,12 +43,13 @@ const Timer = ({ onSolveStart, onSolveComplete }) => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.code === "Space" && !isRunning) {
         event.preventDefault();
         setIsReady(true);
-        setTime(0); // Reset the time when preparing for a new solve
+        setTime(0);
       }
     };
 
@@ -72,9 +73,32 @@ const Timer = ({ onSolveStart, onSolveComplete }) => {
     };
   }, [isReady, isRunning, startTimer, stopTimer]);
 
+  // Handle touch events
+  const handleTouchStart = useCallback((e) => {
+    e.preventDefault();
+    if (!isRunning) {
+      setIsReady(true);
+      setTime(0);
+    }
+  }, [isRunning]);
+
+  const handleTouchEnd = useCallback((e) => {
+    e.preventDefault();
+    if (isReady && !isRunning) {
+      startTimer();
+    } else if (isRunning) {
+      stopTimer();
+    }
+  }, [isReady, isRunning, startTimer, stopTimer]);
+
   return (
     <div>
-      <div id="timer" className={isReady ? 'ready' : isRunning ? 'running' : ''}>
+      <div 
+        id="timer" 
+        className={isReady ? 'ready' : isRunning ? 'running' : ''}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {formatTime(time)}
       </div>
       <button onClick={resetTimer}>Reset Timer</button>

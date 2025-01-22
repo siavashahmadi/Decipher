@@ -3,6 +3,10 @@
   font-size: 4em;
   font-family: monospace;
   transition: color 0.2s ease;
+    touch-action: none;  /* Prevents scrolling while touching timer */
+  user-select: none;   /* Prevents text selection */
+  -webkit-user-select: none;  /* For Safari */
+  -webkit-touch-callout: none; /* Prevents callout on long-press */
 }
 
 #timer.ready {
