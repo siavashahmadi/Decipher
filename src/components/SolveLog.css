@@ -1,28 +1,130 @@
 .solve-log {
-  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  height: 100%;
   overflow-y: auto;
-  background-color: #2c323c;
-  border-radius: 1rem;
 }
 
-.solve-log ul {
-  list-style-type: none;
+.reset-button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  background: #2c323c;  /* Light grey */
+  color: #ffffff;      /* Darker grey text */
+  cursor: pointer;
+  align-self: center;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;  /* Smooth transition for hover */
+}
+
+.reset-button:hover {
+  background: #ef4444;  /* Red on hover */
+  color: white;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Default: 4 columns on large screens */
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 2px solid;
+  border-color: #60678dfd;
+  border-radius: 8px;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  padding-bottom: 2px;
+  color: #b6bccc;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.solves-list {
+  list-style: none;
   padding: 0;
+  margin: 0;
+  overflow-y: auto;
 }
 
 .solve-log-item {
-  display: block flex;
-  justify-content: space-around; /* Position items at opposite ends */
-  margin: 6px 0;
-  font-size: large;
-}
-
-.solve-number {
-  padding-left: 2rem;
-  color: #ddd;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #646464;
 }
 
 .solve-time {
-  padding-right: 2rem;
-  color: #ddd;
+  flex: 1;
+  font-weight: 600;
+}
+
+.solve-ao5 {
+  font-size: 0.75em;
+  color: #757575;
+  margin-right: 1rem;
+}
+
+.solve-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dnf-button, .plus2-button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: opacity 0.2s;
+}
+
+.dnf-button {
+  background: #ef4444;
+  color: white;
+}
+
+.plus2-button {
+  background: #f59e0b;
+  color: white;
+}
+
+.dnf-button.active, .plus2-button.active {
+  opacity: 0.7;
+}
+
+.solve-log-item:hover {
+  background-color: #1b2a48;
+}
+
+.delete-button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  background: #6b7280;
+  color: white;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.delete-button:hover {
+  opacity: 0.8;
+  background: #ef4444;
 }

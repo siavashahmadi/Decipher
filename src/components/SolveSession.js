@@ -5,30 +5,84 @@ import Header from './Header';
 import SolveLog from './SolveLog';
 import './SolveSession.css';
 
+const PUZZLE_TYPES = {
+  '333': '3x3',
+  '222': '2x2',
+  '444': '4x4',
+  '555': '5x5',
+  '666': '6x6',
+  '777': '7x7',
+  'pyram': 'Pyraminx',
+  'minx': 'Megaminx',
+  'skewb': 'Skewb',
+  'sq1': 'SQ1',
+  'clock': 'Clock',
+};
+
 const SolveSession = () => {
   const [isSolving, setIsSolving] = useState(false);
   const [solveCount, setSolveCount] = useState(0);
-  const [type, setType] = useState('333'); // Default puzzle type is 3x3
+  const [type, setType] = useState('333');
   const [solves, setSolves] = useState([]);
+  const [currentScramble, setCurrentScramble] = useState('');
+
+  // Load solves from localStorage on component mount
+  useEffect(() => {
+    const savedSolves = localStorage.getItem('ao5-solves');
+    if (savedSolves) {
+      setSolves(JSON.parse(savedSolves));
+      setSolveCount(JSON.parse(savedSolves).length);
+    }
+  }, []);
+
+  // Save solves to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('ao5-solves', JSON.stringify(solves));
+  }, [solves]);
 
   const handleSolveStart = useCallback(() => {
     setIsSolving(true);
   }, []);
 
+  // Modified this function to include id, dnf, and plus2
   const handleSolveComplete = useCallback((time) => {
     setIsSolving(false);
     setSolveCount(prev => prev + 1);
-    setSolves(prev => [{ time }, ...prev]); // save solve time to state or send to a server
+    
+    // Create new solve with additional properties
+    const newSolve = {
+      id: Date.now(),  // Add this
+      time: time,
+      dnf: false,      // Add this
+      plus2: false,    // Add this
+    };
+    
+    setSolves(prev => [newSolve, ...prev]);
     console.log(`Solve completed in ${time} seconds`);
   }, []);
+
+  // Add this new function
+  const handleSolveUpdate = (updatedSolve) => {
+    setSolves(prev => prev.map(solve => 
+      solve.id === updatedSolve.id ? updatedSolve : solve
+    ));
+  };
 
   const handleTypeChange = (event) => {
     setType(event.target.value);
   };
 
   const resetTimer = useCallback(() => {
-    setSolveCount(0);
+    if (window.confirm('Are you sure you want to reset this session? All times will be deleted.')) {
+      setSolveCount(0);
+      setSolves([]); // This clears all the solve times
+    }
   }, []);
+  
+
+  const handleSolveDelete = (solveToDelete) => {
+    setSolves(prev => prev.filter(solve => solve.id !== solveToDelete.id));
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -60,7 +114,12 @@ const SolveSession = () => {
             <Scramble key={solveCount} type={type} />
           </div>
           <div className="right-section">
-            <SolveLog solves={solves} />
+            <SolveLog 
+              solves={solves}
+              onSolveUpdate={handleSolveUpdate}
+              onSolveDelete={handleSolveDelete}
+              onReset={resetTimer}
+            />
           </div>
         </div>
       </div>

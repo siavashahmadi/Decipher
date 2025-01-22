@@ -3,18 +3,35 @@ import './Scramble.css';
 
 const Scramble = ({ type }) => {
   const [scramble, setScramble] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const generateScramble = useCallback(async () => {
+    setLoading(true);
     try {
-      console.log(`Requesting scramble for type: ${type}`);
       const { randomScrambleForEvent } = await import('https://cdn.cubing.net/js/cubing/scramble');
-      const scramble = await randomScrambleForEvent(type);
-      const scrambleString = scramble.toString();
-      console.log('Scramble response:', scrambleString);
+      const eventId = 
+        type === '222' ? '222' :
+        type === '333' ? '333' :
+        type === '444' ? '444' :
+        type === '555' ? '555' :
+        type === '666' ? '666' :
+        type === '777' ? '777' :
+        type === 'sq1' ? 'sq1' :
+        type === 'minx' ? 'minx' :
+        type === 'clock' ? 'clock' :
+        type === 'pyram' ? 'pyram' : 
+        type === 'skewb' ? 'skewb' : '333';
+
+      console.log('Generating scramble for:', eventId);
+      const scrambleObj = await randomScrambleForEvent(eventId);
+      const scrambleString = scrambleObj.toString();
+      console.log('Generated scramble:', scrambleString);
       setScramble(scrambleString);
     } catch (error) {
-      console.error('Error fetching scramble:', error);
-      setScramble('Error fetching scramble');
+      console.error('Error generating scramble:', error);
+      setScramble('Error generating scramble');
+    } finally {
+      setLoading(false);
     }
   }, [type]);
 
@@ -24,7 +41,11 @@ const Scramble = ({ type }) => {
 
   return (
     <div className="scramble-container">
-      <h2 className="scramble-text">{scramble}</h2>
+      {loading ? (
+        <h2 className="scramble-text">Generating scramble...</h2>
+      ) : (
+        <h2 className="scramble-text">{scramble}</h2>
+      )}
     </div>
   );
 };
