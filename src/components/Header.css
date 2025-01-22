@@ -12,10 +12,10 @@
 
 .puzzle-buttons {
   display: flex;
-  gap: 10px;
-  flex-grow: 1;  /* Take up remaining space */
-  justify-content: center;
-  margin: 0;  /* Remove margin since we're using gap in header */
+  overflow-x: auto;  /* This enables horizontal scrolling */
+  -webkit-overflow-scrolling: touch;  /* Smooth scroll on iOS */
+  gap: 8px;
+  padding: 4px 0
 }
 
 .puzzle-button {
@@ -30,11 +30,20 @@
   color: white;
 }
 
-.reset-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background: #c85555b0;
-  color: white;
-  cursor: pointer;
+.puzzle-select {
+  display: none;
+}
+
+/* Switch to dropdown on smaller screens */
+@media (max-width: 1024px) {
+  .puzzle-buttons {
+    display: none;
+  }
+
+  .puzzle-select {
+    display: block;
+    padding: 8px;
+    border-radius: 4px;
+    margin-left: 1rem;
+  }
 }

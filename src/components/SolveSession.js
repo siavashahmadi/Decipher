@@ -5,24 +5,10 @@ import Header from './Header';
 import SolveLog from './SolveLog';
 import './SolveSession.css';
 
-// const PUZZLE_TYPES = {
-//   '333': '3x3',
-//   '222': '2x2',
-//   '444': '4x4',
-//   '555': '5x5',
-//   '666': '6x6',
-//   '777': '7x7',
-//   'pyram': 'Pyraminx',
-//   'minx': 'Megaminx',
-//   'skewb': 'Skewb',
-//   'sq1': 'SQ1',
-//   'clock': 'Clock',
-// };
-
 const SolveSession = () => {
   const [isSolving, setIsSolving] = useState(false);
   const [solveCount, setSolveCount] = useState(0);
-  const [type, setType] = useState('333');
+  const [puzzleType, setPuzzleType] = useState('333');
   const [solves, setSolves] = useState([]);
   // const [currentScramble, setCurrentScramble] = useState('');
 
@@ -69,7 +55,7 @@ const SolveSession = () => {
   };
 
   const handleTypeChange = (event) => {
-    setType(event.target.value);
+    setPuzzleType(event.target.value);
   };
 
   const resetTimer = useCallback(() => {
@@ -100,7 +86,7 @@ const SolveSession = () => {
 
   return (
     <div className="solve-session">
-      <Header type={type} handleTypeChange={handleTypeChange} resetTimer={resetTimer} />
+      <Header type={puzzleType} handleTypeChange={handleTypeChange} resetTimer={resetTimer} />
       <div className="main-content">
         <div className="timer-section">
           <Timer 
@@ -111,7 +97,7 @@ const SolveSession = () => {
         </div>
         <div className="mid-section">
           <div className="left-section">
-            <Scramble key={solveCount} type={type} />
+            <Scramble key={solveCount} type={puzzleType} />
           </div>
           <div className="right-section">
             <SolveLog 
