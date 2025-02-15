@@ -3,6 +3,7 @@ import Timer from './Timer';
 import Scramble from './Scramble';
 import Header from './Header';
 import SolveLog from './SolveLog';
+import SolveHub from './SolveHub';
 import './SolveSession.css';
 
 const SolveSession = () => {
@@ -97,7 +98,15 @@ const SolveSession = () => {
         </div>
         <div className="mid-section">
           <div className="left-section">
-            <Scramble key={solveCount} type={puzzleType} />
+            <div className="scramble-wrapper">
+              <Scramble key={solveCount} type={puzzleType} />
+            </div>
+            <div className="solve-hub-wrapper">
+              <SolveHub
+                solves={solves}
+                type={puzzleType}
+              />
+            </div>
           </div>
           <div className="right-section">
             <SolveLog 

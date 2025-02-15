@@ -1,0 +1,73 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #2c323c;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #a0a0a0;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #e4e4e4;
+}
+
+.chart-container {
+  background-color: #2c323c;
+  padding: 0.75rem;
+  border-radius: 10px;
+  margin-top: 0.75rem;
+}
+
+.chart-wrapper {
+  height: 100px;
+  width: 100%;
+}
+
+.custom-tooltip {
+  background-color: #2c323c;
+  border: 1px solid #666;
+  padding: 0.4rem;
+  border-radius: 5px;
+  color: #e4e4e4;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    padding: 0.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .chart-wrapper {
+    height: 150px;
+  }
+}

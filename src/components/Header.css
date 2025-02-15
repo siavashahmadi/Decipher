@@ -14,16 +14,23 @@
 }
 
 .title {
-  font-size: 3rem;
+  font-size: 2rem;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #a9aaac;
   margin: 2px;  /* Remove default margin */
   min-width: fit-content;  /* Prevent title from shrinking */
 }
 
 .header-logo {
-  width: 41px;
-  height: 41px;
-  background-color: #fff;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff0c;
+  border-radius: 8px;
+}
+
+.header-logo:hover {
+  background-color: #ffffff98;
 }
 
 .puzzle-buttons {

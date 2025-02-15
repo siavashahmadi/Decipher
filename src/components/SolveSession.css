@@ -1,28 +1,32 @@
-/* First, ensure the body and html can scroll */
-body, html {
+/* Base reset */
+html {
   margin: 0;
   padding: 0;
   height: auto;
   overflow-y: auto;
 }
 
+/* Layout containers */
 .solve-session {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh; /* changed from height to min-height */
-  position: relative; /* added */
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .main-content {
   width: 100%;
+  max-width: 1200px; /* Add max-width to control content width */
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative; /* added */
+  box-sizing: border-box;
 }
 
+/* Timer and Scramble sections */
 .timer-section {
   text-align: center;
   margin-bottom: 20px;
@@ -34,33 +38,59 @@ body, html {
   width: 100%;
 }
 
+/* Mid section layout */
 .mid-section {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  position: relative; /* added */
+  gap: 20px; /* Add gap between sections */
+  box-sizing: border-box;
 }
 
 .left-section {
   flex: 2;
-  padding-inline: 10px;
+  width: 100%;
   box-sizing: border-box;
 }
 
 .right-section {
   flex: 1;
-  padding-inline: 25px;
+  width: 100%;
   box-sizing: border-box;
 }
 
+/* Component specific */
+.solve-hub-wrapper {
+  background-color: rgb(55, 64, 80);
+  border-radius: 20px;
+  padding: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Media queries */
 @media (max-width: 768px) {
-  .mid-section {
-    flex-direction: column;
+  .main-content {
+    padding: 15px;
   }
 
-  .left-section, .right-section {
+  .mid-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .left-section, 
+  .right-section {
     width: 100%;
-    margin-bottom: 10px;
+    padding: 0; /* Remove padding and use container padding instead */
+  }
+
+  .scramble-container,
+  .solve-hub-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
   }
 }
 
@@ -68,8 +98,12 @@ body, html {
   .main-content {
     padding: 10px;
   }
-  
-  .left-section, .right-section {
-    padding-inline: 5px;
+
+  .mid-section {
+    gap: 10px;
+  }
+
+  .solve-hub-wrapper {
+    padding: 0.75rem;
   }
 }

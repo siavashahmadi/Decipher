@@ -22,10 +22,8 @@ const Scramble = ({ type }) => {
         type === 'pyram' ? 'pyram' : 
         type === 'skewb' ? 'skewb' : '333';
 
-      console.log('Generating scramble for:', eventId);
       const scrambleObj = await randomScrambleForEvent(eventId);
       const scrambleString = scrambleObj.toString();
-      console.log('Generated scramble:', scrambleString);
       setScramble(scrambleString);
     } catch (error) {
       console.error('Error generating scramble:', error);
