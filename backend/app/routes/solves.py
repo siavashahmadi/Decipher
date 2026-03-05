@@ -24,7 +24,7 @@ def require_auth(f):
             supabase = get_supabase_client(token)
             
             # Get user info using the token
-            user = supabase.auth.get_user(token)
+            user = supabase.auth.get_user(jwt=token)
             request.user_id = user.user.id
             request.supabase = supabase
             
