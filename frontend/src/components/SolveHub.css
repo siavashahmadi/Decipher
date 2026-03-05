@@ -1,0 +1,63 @@
+.solve-hub {
+  background-color: rgb(55, 64, 80);
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background-color: #2c323c;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e4e4e4;
+}
+
+.chart-container {
+  background-color: #2c323c;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.chart-wrapper {
+  height: 150px;
+  width: 100%;
+}
+
+.custom-tooltip {
+  background-color: #2c323c;
+  border: 1px solid rgb(55, 64, 80);
+  padding: 0.5rem;
+  border-radius: 5px;
+  color: #e4e4e4;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
