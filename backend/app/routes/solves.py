@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from flask_cors import cross_origin
 from functools import wraps
 from ..db import get_supabase_client
 
@@ -30,7 +29,6 @@ def require_auth(f):
             return jsonify({"error": "Invalid authentication token"}), 401
     return decorated
 
-@cross_origin()
 @solves.route('/solves', methods=['GET'])
 @require_auth
 def get_solves():
@@ -45,7 +43,6 @@ def get_solves():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@cross_origin()
 @solves.route('/solves', methods=['POST'])
 @require_auth
 def create_solve():
@@ -62,7 +59,6 @@ def create_solve():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@cross_origin()
 @solves.route('/solves/<solve_id>', methods=['PATCH'])
 @require_auth
 def update_solve(solve_id):
@@ -78,7 +74,6 @@ def update_solve(solve_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@cross_origin()
 @solves.route('/solves/<solve_id>', methods=['DELETE'])
 @require_auth
 def delete_solve(solve_id):

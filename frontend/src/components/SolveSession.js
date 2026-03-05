@@ -80,7 +80,7 @@ const SolveSession = () => {
   };
 
   const resetTimer = useCallback(() => {
-    if (window.confirm('Sure you want to reset? All times of THIS SESSIONwill be deleted.')) {
+    if (window.confirm('Clear Session View? All times will be saved.')) {
       setSolveCount(0);
       setSolves([]);
     }
