@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Scramble.css';
 
-const Scramble = ({ type }) => {
+const Scramble = ({ type, onScrambleGenerated }) => {
   const [scramble, setScramble] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -22,20 +22,11 @@ const Scramble = ({ type }) => {
     setLoading(true);
     try {
       const { randomScrambleForEvent } = await import('https://cdn.cubing.net/v0/js/cubing/scramble');
-      const eventId = 
-        type === '222' ? '222' :
-        type === '333' ? '333' :
-        type === '444' ? '444' :
-        type === '555' ? '555' :
-        type === '666' ? '666' :
-        type === '777' ? '777' :
-        type === 'sq1' ? 'sq1' :
-        type === 'minx' ? 'minx' :
-        type === 'pyram' ? 'pyram' : 
-        type === 'skewb' ? 'skewb' : '333';
+      const eventId = type;
 
       const scrambleObj = await randomScrambleForEvent(eventId);
       const scrambleString = scrambleObj.toString();
+      onScrambleGenerated(scrambleString);
       setScramble(scrambleString);
     } catch (error) {
       console.error('Error generating scramble:', error);
@@ -43,7 +34,7 @@ const Scramble = ({ type }) => {
     } finally {
       setLoading(false);
     }
-  }, [type]);
+  }, [type, onScrambleGenerated]);
 
   useEffect(() => {
     generateScramble();

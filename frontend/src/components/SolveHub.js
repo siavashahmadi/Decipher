@@ -19,12 +19,12 @@ const SolveHub = ({ solves, type }) => {
 
     // Filter out DNF solves for calculations
     const validSolves = solves.filter(solve => !solve.dnf);
-    const times = validSolves.map(solve => solve.plus2 ? solve.time + 2 : solve.time);
+    const times = validSolves.map(solve => solve.plus_two ? solve.time + 2 : solve.time);
 
     if (times.length === 0) return null;
 
     // Calculate AO5
-    const ao5 = times.length >= 5 
+    const ao5 = times.length >= 5
       ? ((times.slice(0, 5).sort((a, b) => a - b).slice(1, 4).reduce((a, b) => a + b, 0)) / 3).toFixed(2)
       : null;
 
@@ -67,29 +67,27 @@ const SolveHub = ({ solves, type }) => {
 
       {stats.recentTimes.length > 1 && (
         <div className="chart-container">
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={150}>
-              <LineChart data={stats.recentTimes.map((time, index) => ({ solve: index + 1, time }))}>
-                <XAxis 
-                  dataKey="solve" 
-                  stroke="#e4e4e4"
-                  tick={{ fill: '#e4e4e4' }}
-                />
-                <YAxis 
-                  stroke="#e4e4e4"
-                  tick={{ fill: '#e4e4e4' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="time" 
-                  stroke="#3dc942" 
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: '#3dc942' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={150}>
+            <LineChart data={stats.recentTimes.map((time, index) => ({ solve: index + 1, time }))}>
+              <XAxis
+                dataKey="solve"
+                stroke="#e4e4e4"
+                tick={{ fill: '#e4e4e4' }}
+              />
+              <YAxis
+                stroke="#e4e4e4"
+                tick={{ fill: '#e4e4e4' }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="time"
+                stroke="#3dc942"
+                strokeWidth={2}
+                dot={{ r: 3, fill: '#3dc942' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

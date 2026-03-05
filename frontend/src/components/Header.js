@@ -1,12 +1,12 @@
 import React from 'react';
 import './Header.css';
 import logo from '../logo.svg';
-import { auth } from '../services/auth';
+// import { auth } from '../services/auth';
 
 const Header = ({ type, handleTypeChange }) => {
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      // await auth.signOut();
       // Force reload the page to return to auth screen
       window.location.reload();
     } catch (error) {

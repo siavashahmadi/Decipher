@@ -8,10 +8,10 @@ import './SolveSession.css';
 import api from '../services/api.js';
 
 const SolveSession = () => {
-  const [isSolving, setIsSolving] = useState(false);
   const [solveCount, setSolveCount] = useState(0);
   const [puzzleType, setPuzzleType] = useState('333');
   const [solves, setSolves] = useState([]);
+  const [scramble, setScramble] = useState('');
 
   useEffect(() => {
     const fetchSolves = async () => {
@@ -27,12 +27,14 @@ const SolveSession = () => {
     fetchSolves();
   }, [puzzleType]);
 
+  const handleScrambleGenerated = useCallback((scramble) => {
+    setScramble(scramble);
+  }, []);
+
   const handleSolveStart = useCallback(() => {
-    setIsSolving(true);
   }, []);
 
   const handleSolveComplete = useCallback(async (time) => {
-    setIsSolving(false);
     setSolveCount(prev => prev + 1);
 
     const newSolve = {
@@ -40,7 +42,7 @@ const SolveSession = () => {
       time: time,
       dnf: false,
       plus_two: false,
-      scramble: document.querySelector('.scramble-text')?.textContent || ''
+      scramble: scramble
     };
 
     try {
@@ -51,7 +53,7 @@ const SolveSession = () => {
     } catch (err) {
       console.error('API Error:', err);
     }
-  }, [puzzleType]);
+  }, [puzzleType, scramble]);
 
   const handleSolveUpdate = async (updatedSolve) => {
     try {
@@ -78,7 +80,7 @@ const SolveSession = () => {
   };
 
   const resetTimer = useCallback(() => {
-    if (window.confirm('Are you sure you want to reset this session? All times will be deleted.')) {
+    if (window.confirm('Sure you want to reset? All times of THIS SESSIONwill be deleted.')) {
       setSolveCount(0);
       setSolves([]);
     }
@@ -105,7 +107,6 @@ const SolveSession = () => {
           <Timer
             onSolveStart={handleSolveStart}
             onSolveComplete={handleSolveComplete}
-            isSolving={isSolving}
           />
         </div>
         <div className="mid-section">
@@ -114,6 +115,7 @@ const SolveSession = () => {
               <Scramble
                 key={`${puzzleType}-${solveCount}`}
                 type={puzzleType}
+                onScrambleGenerated={handleScrambleGenerated}
               />
             </div>
             <div className="solve-hub-wrapper">

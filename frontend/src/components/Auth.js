@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, supabase } from '../services/auth';
+import { supabase } from '../services/auth';
 import logo from '../logo.svg';
 import './Auth.css';
 
@@ -29,7 +29,7 @@ export default function Auth() {
         if (error) throw error;
         alert('Check your email for the confirmation link!');
       } else if (mode === 'reset') {
-        await auth.resetPassword(email);
+        // await auth.resetPassword(email);
         alert('Check your email for the password reset link!');
         setMode('login');
       } else if (mode === 'update') {
