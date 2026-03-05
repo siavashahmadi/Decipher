@@ -1,60 +1,41 @@
-# Ao5 - Speedcubing Timer
+# Ao5 — Speedcubing Timer
 
-A modern, minimalist speedcubing timer built with React that supports multiple WCA puzzles and provides real-time statistics.
+Full-stack speedcubing timer for WCA puzzles with WCA scrambles.
 
 ## Features
 
-- Support for all WCA puzzles (2x2-7x7, Pyraminx, Megaminx, Skewb, Square-1, Clock)
-- Real-time statistics (Ao5, Ao12, Session Mean, Best Single)
-- WCA-compliant scrambles using cubing.js
-- DNF and +2 penalty management
-- Time deletion capability
-- Mobile and desktop support
-- Spacebar timing for desktop
-- Touch timing for mobile devices
+- WCA-compliant scrambles for all major puzzles (2x2–7x7, Pyraminx, Megaminx, Skewb, & Square-1)
+- Spacebar timer, and touch support for mobile
+- DNF and +2 penalty management per solve
+- Live stats: Ao5, Ao12, session mean, best single
+- Solve history with per-solve rolling Ao5
+- Performance trend chart (last 10 solves)
+- Persistent solve history across sessions
+- User auth with email/password (Supabase Auth)
 
-## Installation
+## Tech Stack
 
-1. Clone the repository:
-```bash
-git clone https://github.com/siavashahmadi/Decipher.git
+| Layer | Technology |
+|---|---|
+| Frontend framework | React |
+| Backend framework | Flask 3 (Python) |
+| Scramble generation | cubing.js |
+| Charts | Recharts |
+| Backend auth middleware | python-jose, Supabase SDK |
+| Auth & database | Supabase (PostgreSQL + Auth) |
+| CORS | flask-cors |
+| HTTP client | Axios |
+| Testing (frontend) | React Testing Library, Jest |
+| Testing (backend) | pytest |
+
+## Project Structure
+
 ```
-
-2. Install dependencies:
-```bash
-cd Decipher
-npm install
+ao5/
+├── frontend/       # React app — see frontend/README.md
+└── backend/        # Flask API — see backend/README.md
 ```
-
-3. Start the development server:
-```bash
-npm start
-```
-
-## Usage
-
-- Press and hold spacebar to ready the timer (mobile: touch and hold)
-- Release to start the solve
-- Press spacebar to stop the timer (mobile: tap screen)
-- Use the DNF/+2 buttons to manage penalties
-- Click the × button to delete times
-- Use the puzzle type buttons to switch between different puzzles
-
-## Technologies Used
-
-- React
-- cubing.js for WCA-compliant scrambles
-- CSS for styling
-- GitHub for version control
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
 
 ## Author
 
-Siavash Ahmadi
+siavash ahmadi
