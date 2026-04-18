@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Scramble.css';
 
+const scrambleLibPromise = import('https://cdn.cubing.net/v0/js/cubing/scramble');
+
 const Scramble = ({ type, onScrambleGenerated }) => {
   const [scramble, setScramble] = useState('');
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ const Scramble = ({ type, onScrambleGenerated }) => {
   const generateScramble = useCallback(async () => {
     setLoading(true);
     try {
-      const { randomScrambleForEvent } = await import('https://cdn.cubing.net/v0/js/cubing/scramble');
+      const { randomScrambleForEvent } = await scrambleLibPromise;
       const eventId = type;
 
       const scrambleObj = await randomScrambleForEvent(eventId);
