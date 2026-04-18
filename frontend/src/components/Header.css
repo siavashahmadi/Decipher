@@ -145,8 +145,29 @@
   border-color: var(--color-border-hover);
 }
 
-/* Switch to dropdown on smaller screens */
-@media (max-width: 1024px) {
+/* Tier 2: tablet — compact horizontally-scrolling chips */
+@media (max-width: 1023px) {
+  .puzzle-buttons {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    /* Thin scrollbar visual tweak; harmless if the browser ignores it */
+    scrollbar-width: thin;
+  }
+
+  .puzzle-buttons .button {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Tier 3: mobile — dropdown <select> */
+@media (max-width: 639px) {
   .puzzle-buttons {
     display: none;
   }
@@ -155,6 +176,6 @@
     display: block;
     padding: 8px;
     border-radius: 4px;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
   }
 }
