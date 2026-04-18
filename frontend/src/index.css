@@ -38,6 +38,46 @@
   --color-focus-ring:          rgba(255, 255, 255, 0.15);
 }
 
+[data-theme="light"] {
+  /* Surfaces */
+  --color-bg:                  #f7f7f5;
+  --color-panel:               #ececea;
+  --color-surface:             #ffffff;
+  --color-surface-hover:       #e5e5e5;
+
+  /* Borders & dividers */
+  --color-border:              #d1d1d1;
+  --color-border-hover:        #b0b0b0;
+  --color-row-border:          #e0e0e0;
+
+  /* Text */
+  --color-text:                #1a1a1a;
+  --color-text-muted:          #6b6b6b;
+  --color-text-secondary:      #8a8a8a;
+  --color-text-inverse:        #ffffff;
+
+  /* States / accents (deeper shades so they read on white) */
+  --color-green:               #2ea934;
+  --color-red:                 #dc2626;
+  --color-orange:              #d48806;
+  --color-yellow:              #eab308;
+
+  /* Semantic accents */
+  --color-blue-bg:             #dbeafe;
+  --color-blue-border:         #2563eb;
+  --color-blue-text:           #1d4ed8;
+  --color-destructive-bg:      #dc2626;
+  --color-destructive-bg-hover: #b91c1c;
+
+  /* Utility */
+  --color-neutral-bg:          #9ca3af;
+  --color-row-hover-bg:        #eef2fb;
+  --color-overlay-subtle:      #0000000c;
+  --color-overlay-light:       #00000018;
+  --color-title-underline:     #9a9a9a;
+  --color-focus-ring:          rgba(0, 0, 0, 0.15);
+}
+
 html {
   margin: 0;
   padding: 0;
