@@ -18,12 +18,25 @@
   align-items: center;
 }
 
-#timer.ready {
+#timer.ready,
+#timer.armed {
+  color: var(--color-text);
+}
+
+#timer.hold-met {
   color: var(--color-green);
 }
 
 #timer.running {
   color: var(--color-red);
+}
+
+#timer.armed {
+  color: var(--color-orange);
+}
+
+#timer.armed.hold-met {
+  color: var(--color-green);
 }
 
 /* UX-1: Inspection phase */

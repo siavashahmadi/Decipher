@@ -154,14 +154,9 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   // ---------------------------------------------------------------------------
   const recentSolves = useMemo(() => recentBuffer.toArray(), [solves]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ---------------------------------------------------------------------------
-  // DSA-2: After a solve is saved, binary-search insert into sortedTimes to
-  // find the percentile rank without re-sorting the entire array.
-  // DSA-4: Also push effective time into the two-heap median tracker.
-  // UX-1: Accepts inspectionOverran flag — sets plus_two on the new solve.
-  // ---------------------------------------------------------------------------
-  const handleSolveComplete = useCallback(async (time: number, inspectionOverran = false) => {
-    const effectiveTime = inspectionOverran ? time + 2 : time;
+  const handleSolveComplete = useCallback(async (time: number, flags: { plusTwo: boolean; dnf: boolean }) => {
+    const { plusTwo, dnf } = flags;
+    const effectiveTime = plusTwo ? time + 2 : time;
     const prev = sortedTimesRef.current;
     const pos = bisectLeft(prev, effectiveTime);
 
@@ -170,8 +165,8 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         id: crypto.randomUUID(),
         puzzle_type: puzzleType,
         time,
-        dnf: false,
-        plus_two: inspectionOverran,
+        dnf,
+        plus_two: plusTwo,
         scramble: currentScramble ?? '',
         created_at: new Date().toISOString(),
       };
@@ -179,12 +174,14 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
       setSolves(prevSolves => [guestSolve, ...prevSolves]);
       recentBuffer.push(guestSolve);
 
-      if (prev.length > 0) {
-        setLastPercentile(Math.round(((prev.length - pos) / prev.length) * 100));
+      if (!dnf) {
+        if (prev.length > 0) {
+          setLastPercentile(Math.round(((prev.length - pos) / prev.length) * 100));
+        }
+        sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
+        medianTracker.push(effectiveTime);
+        setCurrentMedian(medianTracker.getMedian());
       }
-      sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
-      medianTracker.push(effectiveTime);
-      setCurrentMedian(medianTracker.getMedian());
       advanceScramble();
       return;
     }
@@ -192,8 +189,8 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
     const newSolve = {
       puzzle_type: puzzleType,
       time,
-      dnf: false,
-      plus_two: inspectionOverran,
+      dnf,
+      plus_two: plusTwo,
       scramble: currentScramble ?? '',
     };
 
@@ -203,16 +200,15 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         setSolves(prevSolves => [savedSolve, ...prevSolves]);
         recentBuffer.push(savedSolve);
 
-        if (prev.length > 0) {
-          const beaten = prev.length - pos;
-          setLastPercentile(Math.round((beaten / prev.length) * 100));
+        if (!dnf) {
+          if (prev.length > 0) {
+            const beaten = prev.length - pos;
+            setLastPercentile(Math.round((beaten / prev.length) * 100));
+          }
+          sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
+          medianTracker.push(effectiveTime);
+          setCurrentMedian(medianTracker.getMedian());
         }
-
-        sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
-
-        // DSA-4: O(log n) push into two-heap
-        medianTracker.push(effectiveTime);
-        setCurrentMedian(medianTracker.getMedian());
         advanceScramble();
       }
     } catch (err) {
