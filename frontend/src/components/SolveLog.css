@@ -9,26 +9,25 @@
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
-  background: #2c323c;  /* Light grey */
-  color: #ffffff;      /* Darker grey text */
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   align-self: center;
   margin-bottom: 1rem;
-  transition: all 0.2s ease;  /* Smooth transition for hover */
+  transition: all 0.2s ease;
 }
 
 .reset-button:hover {
-  background: #ef4444;  /* Red on hover */
+  background: var(--color-red);
   color: white;
 }
 
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Default: 4 columns on large screens */
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
   padding: 0.5rem;
-  border: 2px solid;
-  border-color: #60678dfd;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -38,17 +37,17 @@
   align-items: center;
   padding: 0.5rem;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.stat-label {
+.stat-box .stat-label {
   font-size: 0.8rem;
   padding-bottom: 2px;
-  color: #b6bccc;
+  color: var(--color-text-muted);
   text-transform: uppercase;
 }
 
-.stat-value {
+.stat-box .stat-value {
   font-size: 1.2rem;
   font-weight: bold;
   color: #ffffff;
@@ -94,12 +93,12 @@
 }
 
 .dnf-button {
-  background: #ef4444;
+  background: var(--color-red);
   color: white;
 }
 
 .plus_two-button {
-  background: #f59e0b;
+  background: var(--color-orange);
   color: white;
 }
 
@@ -125,5 +124,29 @@
 
 .delete-button:hover {
   opacity: 0.8;
-  background: #ef4444;
+  background: var(--color-red);
+}
+
+.load-more-button {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-top: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.load-more-button:hover:not(:disabled) {
+  background: #374151;
+  color: var(--color-text);
+}
+
+.load-more-button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
