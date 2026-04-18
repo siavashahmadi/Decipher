@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { randomScrambleForEvent } from 'cubing/scramble';
 import type { PuzzleType } from '../types';
 import './Scramble.css';
-
-interface CubingScrambleLib {
-  randomScrambleForEvent: (eventId: string) => Promise<{ toString(): string }>;
-}
-
-const scrambleLibPromise = import(
-  /* @vite-ignore */ 'https://cdn.cubing.net/v0/js/cubing/scramble'
-) as unknown as Promise<CubingScrambleLib>;
 
 type ScrambleSize = 'small' | 'medium' | 'large';
 
@@ -30,7 +23,6 @@ const Scramble = ({ type, onScrambleGenerated }: ScrambleProps): React.ReactElem
   const generateScramble = useCallback(async () => {
     setLoading(true);
     try {
-      const { randomScrambleForEvent } = await scrambleLibPromise;
       const scrambleObj = await randomScrambleForEvent(type);
       const scrambleString = scrambleObj.toString();
       onScrambleGenerated(scrambleString);
