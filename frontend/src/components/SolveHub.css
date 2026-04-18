@@ -1,5 +1,5 @@
 .solve-hub {
-  background-color: rgb(55, 64, 80);
+  background-color: var(--color-panel);
   border-radius: 20px;
   padding: 1.5rem;
   width: 100%;
@@ -18,42 +18,66 @@
   flex-direction: column;
   align-items: center;
   padding: 1rem;
-  background-color: #2c323c;
+  background-color: var(--color-surface);
   border-radius: 10px;
   text-align: center;
 }
 
-.stat-label {
+.stat-item .stat-label {
   font-size: 0.85rem;
-  color: #a0a0a0;
+  color: var(--color-text-muted);
   margin-bottom: 0.3rem;
 }
 
-.stat-value {
+.stat-item .stat-value {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #e4e4e4;
+  color: var(--color-text);
 }
 
 .chart-container {
-  background-color: #2c323c;
+  background-color: var(--color-surface);
   padding: 1rem;
   border-radius: 10px;
   margin-top: 1rem;
 }
 
-.chart-wrapper {
-  height: 150px;
-  width: 100%;
-}
-
 .custom-tooltip {
-  background-color: #2c323c;
-  border: 1px solid rgb(55, 64, 80);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-panel);
   padding: 0.5rem;
   border-radius: 5px;
-  color: #e4e4e4;
+  color: var(--color-text);
   font-size: 0.8rem;
+}
+
+.chart-title {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.tooltip-date {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.percentile-stat {
+  grid-column: 1 / -1;
+  background-color: var(--color-blue-bg);
+  border: 1px solid var(--color-blue-border);
+}
+
+.percentile-stat .stat-value {
+  color: var(--color-blue-text);
+}
+
+.empty-state {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 2rem;
 }
 
 @media (min-width: 768px) {
