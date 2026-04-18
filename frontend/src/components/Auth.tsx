@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/auth';
-import logo from '../logo.svg';
 import './Auth.css';
 
 type AuthMode = 'login' | 'signup' | 'reset' | 'update';
@@ -52,11 +51,7 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
 
   return (
     <div className="auth-container">
-      <img
-        src={logo}
-        alt="Ao5 Logo"
-        className="auth-logo"
-      />
+      <h1 className="auth-logo-text">Ao5</h1>
       <div className="auth-box">
         <h2>
           {mode === 'login' ? 'Login to Ao5' :

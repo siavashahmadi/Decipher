@@ -1,6 +1,5 @@
 import React from 'react';
 import { supabase } from '../services/auth';
-import logo from '../logo.svg';
 import { useTheme } from '../hooks/useTheme';
 import type { PuzzleType } from '../types';
 import './Header.css';
@@ -46,9 +45,6 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
   return (
     <header className="header">
       <div className="title-container">
-        <div className="header-logo">
-          <img src={logo} alt="Ao5 Logo" />
-        </div>
         <h1 className="title">Ao5</h1>
       </div>
       <div className="puzzle-buttons">
