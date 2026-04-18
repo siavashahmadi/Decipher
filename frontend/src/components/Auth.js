@@ -3,7 +3,7 @@ import { supabase } from '../services/auth';
 import logo from '../logo.svg';
 import './Auth.css';
 
-export default function Auth() {
+export default function Auth({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +29,6 @@ export default function Auth() {
         if (error) throw error;
         alert('Check your email for the confirmation link!');
       } else if (mode === 'reset') {
-        // await auth.resetPassword(email);
         alert('Check your email for the password reset link!');
         setMode('login');
       } else if (mode === 'update') {
@@ -108,21 +107,27 @@ export default function Auth() {
           <div className="auth-links">
             {mode === 'login' ? (
               <>
-                <button 
+                <button
                   className="auth-link-button"
                   onClick={() => setMode('signup')}
                 >
                   Don't have an account? Sign Up
                 </button>
-                <button 
+                <button
                   className="auth-link-button"
                   onClick={() => setMode('reset')}
                 >
                   Forgot your password?
                 </button>
+                <button
+                  className="auth-link-button"
+                  onClick={onBack}
+                >
+                  Back to timer
+                </button>
               </>
             ) : (
-              <button 
+              <button
                 className="auth-link-button"
                 onClick={() => setMode('login')}
               >
