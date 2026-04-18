@@ -7,7 +7,7 @@ import SolveHub from './SolveHub';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import './SolveSession.css';
-import api from '../services/api.js';
+import api from '../services/api';
 import {
   getGuestSolves,
   addGuestSolve,
