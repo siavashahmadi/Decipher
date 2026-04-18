@@ -21,7 +21,7 @@ const Scramble = ({ type, scramble, loading }: ScrambleProps): React.ReactElemen
   const text = loading || !scramble ? 'Generating scramble...' : scramble;
   return (
     <div className="scramble-container">
-      <h2 className={`scramble-text ${scrambleSize}`}>{text}</h2>
+      <div className={`scramble-text ${scrambleSize}`}>{text}</div>
     </div>
   );
 };
