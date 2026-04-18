@@ -10,4 +10,3 @@ root.render(
   </React.StrictMode>
 );
 
-// TODO: build performance metrics - COLLECT DAT DATA BOIIII
