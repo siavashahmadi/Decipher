@@ -16,19 +16,25 @@ import { useCallback, useRef } from 'react';
 //   even total → (lo.peek() + hi.peek()) / 2
 // ---------------------------------------------------------------------------
 
-class BinaryHeap {
-  // compare(a, b) returns true if a should be above b in the heap.
-  // Max-heap: compare = (a, b) => a > b
-  // Min-heap: compare = (a, b) => a < b
-  constructor(compare) {
-    this._data = [];
+type Comparator<T> = (a: T, b: T) => boolean;
+
+class BinaryHeap<T> {
+  private _data: T[] = [];
+  private _cmp: Comparator<T>;
+
+  constructor(compare: Comparator<T>) {
     this._cmp = compare;
   }
 
-  get size() { return this._data.length; }
-  peek()     { return this._data[0]; }
+  get size(): number {
+    return this._data.length;
+  }
 
-  push(val) {
+  peek(): T | undefined {
+    return this._data[0];
+  }
+
+  push(val: T): void {
     this._data.push(val);
     let i = this._data.length - 1;
     while (i > 0) {
@@ -39,16 +45,17 @@ class BinaryHeap {
     }
   }
 
-  pop() {
+  pop(): T | undefined {
     const top = this._data[0];
     const last = this._data.pop();
-    if (this._data.length > 0) {
+    if (this._data.length > 0 && last !== undefined) {
       this._data[0] = last;
       let i = 0;
       const n = this._data.length;
       while (true) {
         let best = i;
-        const l = 2 * i + 1, r = 2 * i + 2;
+        const l = 2 * i + 1;
+        const r = 2 * i + 2;
         if (l < n && this._cmp(this._data[l], this._data[best])) best = l;
         if (r < n && this._cmp(this._data[r], this._data[best])) best = r;
         if (best === i) break;
@@ -59,25 +66,36 @@ class BinaryHeap {
     return top;
   }
 
-  clear() { this._data = []; }
+  clear(): void {
+    this._data = [];
+  }
 }
 
-const useMedianTracker = () => {
-  const lo = useRef(new BinaryHeap((a, b) => a > b)); // max-heap (lower half)
-  const hi = useRef(new BinaryHeap((a, b) => a < b)); // min-heap (upper half)
+export interface MedianTracker {
+  push: (val: number) => void;
+  getMedian: () => number | null;
+  reset: () => void;
+  getSize: () => number;
+}
 
-  const rebalance = () => {
-    // Ensure lo is never smaller than hi, and the size difference is at most 1
+const useMedianTracker = (): MedianTracker => {
+  const lo = useRef(new BinaryHeap<number>((a, b) => a > b));
+  const hi = useRef(new BinaryHeap<number>((a, b) => a < b));
+
+  const rebalance = (): void => {
     if (lo.current.size < hi.current.size) {
-      lo.current.push(hi.current.pop());
+      const top = hi.current.pop();
+      if (top !== undefined) lo.current.push(top);
     }
     if (lo.current.size - hi.current.size > 1) {
-      hi.current.push(lo.current.pop());
+      const top = lo.current.pop();
+      if (top !== undefined) hi.current.push(top);
     }
   };
 
-  const push = useCallback((val) => {
-    if (lo.current.size === 0 || val <= lo.current.peek()) {
+  const push = useCallback((val: number): void => {
+    const loTop = lo.current.peek();
+    if (lo.current.size === 0 || loTop === undefined || val <= loTop) {
       lo.current.push(val);
     } else {
       hi.current.push(val);
@@ -85,18 +103,22 @@ const useMedianTracker = () => {
     rebalance();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const getMedian = useCallback(() => {
+  const getMedian = useCallback((): number | null => {
     if (lo.current.size === 0) return null;
-    if (lo.current.size > hi.current.size) return lo.current.peek();
-    return (lo.current.peek() + hi.current.peek()) / 2;
+    const loTop = lo.current.peek();
+    if (loTop === undefined) return null;
+    if (lo.current.size > hi.current.size) return loTop;
+    const hiTop = hi.current.peek();
+    if (hiTop === undefined) return loTop;
+    return (loTop + hiTop) / 2;
   }, []);
 
-  const reset = useCallback(() => {
+  const reset = useCallback((): void => {
     lo.current.clear();
     hi.current.clear();
   }, []);
 
-  const getSize = useCallback(() => lo.current.size + hi.current.size, []);
+  const getSize = useCallback((): number => lo.current.size + hi.current.size, []);
 
   return { push, getMedian, reset, getSize };
 };

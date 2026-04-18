@@ -20,18 +20,30 @@ import { useRef, useCallback } from 'react';
  *                    ^head (oldest, next write target)
  *   toArray reads from head → head+size, wrapping at capacity.
  */
-const useCircularBuffer = (capacity) => {
+
+interface CircularBufferState<T> {
+  items: (T | null)[];
+  head: number;
+  size: number;
+}
+
+export interface CircularBuffer<T> {
+  push: (item: T) => void;
+  toArray: () => T[];
+  getSize: () => number;
+  reset: () => void;
+}
+
+const useCircularBuffer = <T,>(capacity: number): CircularBuffer<T> => {
   const capacityRef = useRef(capacity);
 
-  // Use a ref so push() never triggers a re-render — callers read via toArray()
-  const state = useRef({
-    items: new Array(capacity).fill(null),
-    head: 0,   // index of the next write slot (= oldest item when full)
+  const state = useRef<CircularBufferState<T>>({
+    items: new Array<T | null>(capacity).fill(null),
+    head: 0,
     size: 0,
   });
 
-  // Push a new item; evicts the oldest when full.
-  const push = useCallback((item) => {
+  const push = useCallback((item: T): void => {
     const cap = capacityRef.current;
     const s = state.current;
     s.items[s.head] = item;
@@ -39,29 +51,27 @@ const useCircularBuffer = (capacity) => {
     if (s.size < cap) s.size += 1;
   }, []);
 
-  // Return items in insertion order (oldest → newest).
-  const toArray = useCallback(() => {
+  const toArray = useCallback((): T[] => {
     const cap = capacityRef.current;
     const { items, head, size } = state.current;
-    const result = new Array(size);
-    const start = size < cap ? 0 : head; // if not full, head is always 0
+    const result: T[] = new Array<T>(size);
+    const start = size < cap ? 0 : head;
     for (let i = 0; i < size; i++) {
-      result[i] = items[(start + i) % cap];
+      result[i] = items[(start + i) % cap] as T;
     }
     return result;
   }, []);
 
-  // Reset to empty (e.g. on puzzle type change).
-  const reset = useCallback(() => {
+  const reset = useCallback((): void => {
     const cap = capacityRef.current;
     state.current = {
-      items: new Array(cap).fill(null),
+      items: new Array<T | null>(cap).fill(null),
       head: 0,
       size: 0,
     };
   }, []);
 
-  const getSize = useCallback(() => state.current.size, []);
+  const getSize = useCallback((): number => state.current.size, []);
 
   return { push, toArray, getSize, reset };
 };
