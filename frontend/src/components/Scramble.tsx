@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { randomScrambleForEvent } from 'cubing/scramble';
+import React from 'react';
 import type { PuzzleType } from '../types';
 import './Scramble.css';
 
@@ -13,41 +12,16 @@ const getScrambleSize = (puzzleType: PuzzleType): ScrambleSize => {
 
 interface ScrambleProps {
   type: PuzzleType;
-  onScrambleGenerated: (scramble: string) => void;
+  scramble: string | null;
+  loading: boolean;
 }
 
-const Scramble = ({ type, onScrambleGenerated }: ScrambleProps): React.ReactElement => {
-  const [scramble, setScramble] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  const generateScramble = useCallback(async () => {
-    setLoading(true);
-    try {
-      const scrambleObj = await randomScrambleForEvent(type);
-      const scrambleString = scrambleObj.toString();
-      onScrambleGenerated(scrambleString);
-      setScramble(scrambleString);
-    } catch (error) {
-      console.error('Error generating scramble:', error);
-      setScramble('Error generating scramble');
-    } finally {
-      setLoading(false);
-    }
-  }, [type, onScrambleGenerated]);
-
-  useEffect(() => {
-    generateScramble();
-  }, [generateScramble]);
-
+const Scramble = ({ type, scramble, loading }: ScrambleProps): React.ReactElement => {
   const scrambleSize = getScrambleSize(type);
-
+  const text = loading || !scramble ? 'Generating scramble...' : scramble;
   return (
     <div className="scramble-container">
-      {loading ? (
-        <h2 className={`scramble-text ${scrambleSize}`}>Generating scramble...</h2>
-      ) : (
-        <h2 className={`scramble-text ${scrambleSize}`}>{scramble}</h2>
-      )}
+      <h2 className={`scramble-text ${scrambleSize}`}>{text}</h2>
     </div>
   );
 };

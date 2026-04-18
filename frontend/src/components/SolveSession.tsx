@@ -6,6 +6,7 @@ import SolveLog from './SolveLog';
 import SolveHub from './SolveHub';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
+import useScrambleQueue from '../hooks/useScrambleQueue';
 import api from '../services/api';
 import {
   getGuestSolves,
@@ -43,7 +44,7 @@ interface SolveSessionProps {
 const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElement => {
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
   const [solves, setSolves] = useState<Solve[]>([]);
-  const [scramble, setScramble] = useState('');
+  const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
 
   // SD-2: Cursor-based pagination state
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -153,10 +154,6 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   // ---------------------------------------------------------------------------
   const recentSolves = useMemo(() => recentBuffer.toArray(), [solves]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleScrambleGenerated = useCallback((s: string) => {
-    setScramble(s);
-  }, []);
-
   // ---------------------------------------------------------------------------
   // DSA-2: After a solve is saved, binary-search insert into sortedTimes to
   // find the percentile rank without re-sorting the entire array.
@@ -175,7 +172,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         time,
         dnf: false,
         plus_two: inspectionOverran,
-        scramble,
+        scramble: currentScramble ?? '',
         created_at: new Date().toISOString(),
       };
       addGuestSolve(puzzleType, guestSolve);
@@ -188,6 +185,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
       sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
       medianTracker.push(effectiveTime);
       setCurrentMedian(medianTracker.getMedian());
+      advanceScramble();
       return;
     }
 
@@ -196,7 +194,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
       time,
       dnf: false,
       plus_two: inspectionOverran,
-      scramble,
+      scramble: currentScramble ?? '',
     };
 
     try {
@@ -215,11 +213,12 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         // DSA-4: O(log n) push into two-heap
         medianTracker.push(effectiveTime);
         setCurrentMedian(medianTracker.getMedian());
+        advanceScramble();
       }
     } catch (err) {
       console.error('API Error:', err);
     }
-  }, [isGuest, puzzleType, scramble]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isGuest, puzzleType, currentScramble, advanceScramble]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---------------------------------------------------------------------------
   // SD-6: Optimistic update — update UI immediately, rollback on API failure.
@@ -315,9 +314,9 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
           <div className="left-section">
             <div className="scramble-wrapper">
               <Scramble
-                key={`${puzzleType}-${solves.length}`}
                 type={puzzleType}
-                onScrambleGenerated={handleScrambleGenerated}
+                scramble={currentScramble}
+                loading={scrambleLoading}
               />
             </div>
             <div className="solve-hub-wrapper">
