@@ -279,7 +279,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   };
 
   const resetTimer = useCallback(() => {
-    if (window.confirm('Clear Session View? All times will be saved.')) {
+    if (window.confirm('Clear the current view? Your solves stay saved.')) {
       setSolves([]);
       recentBuffer.reset();
       setLastPercentile(null);

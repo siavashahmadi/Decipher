@@ -5,21 +5,21 @@
   overflow-y: auto;
 }
 
-.reset-button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  cursor: pointer;
+.clear-view-button {
   align-self: center;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
+  margin-top: 0.75rem;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.reset-button:hover {
-  background: var(--color-red);
-  color: white;
+.clear-view-button:hover {
+  color: var(--color-text);
+  background: transparent;
 }
 
 .stats-container {

@@ -66,12 +66,6 @@ const SolveLog = ({
 
   return (
     <div className="solve-log">
-      <button
-        onClick={onReset}
-        className="reset-button"
-      >
-        Reset Session
-      </button>
       <div className="stats-container">
         <div className="stat-box">
           <span className="stat-label">Ao5</span>
@@ -140,6 +134,15 @@ const SolveLog = ({
           disabled={isLoadingMore}
         >
           {isLoadingMore ? 'Loading...' : 'Load More'}
+        </button>
+      )}
+
+      {solves.length > 0 && (
+        <button
+          onClick={onReset}
+          className="clear-view-button"
+        >
+          Clear view
         </button>
       )}
     </div>
