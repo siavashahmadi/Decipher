@@ -1,18 +1,41 @@
 :root {
-  --color-bg:          #282c34;
-  --color-panel:       rgb(55, 64, 80);
-  --color-surface:     #2c323c;
-  --color-border:      #60678d;
-  --color-text:        #e4e4e4;
-  --color-text-muted:  #a0a0a0;
-  --color-green:       #3dc942;
-  --color-red:         #ef4444;
-  --color-orange:      #f5a623;
-  --color-blue-bg:     #1e3a5f;
-  --color-blue-border: #2563eb;
-  --color-blue-text:   #60a5fa;
-  --color-yellow:      #facc15;
-  --color-text-inverse: #ffffff;
+  /* Surfaces */
+  --color-bg:                  #282c34;
+  --color-panel:               #374050;
+  --color-surface:             #2c323c;
+  --color-surface-hover:       #374151;
+
+  /* Borders & dividers */
+  --color-border:              #60678d;
+  --color-border-hover:        #7a82aa;
+  --color-row-border:          #646464;
+
+  /* Text */
+  --color-text:                #e4e4e4;
+  --color-text-muted:          #a0a0a0;
+  --color-text-secondary:      #757575;
+  --color-text-inverse:        #ffffff;
+
+  /* States / accents */
+  --color-green:               #3dc942;
+  --color-red:                 #ef4444;
+  --color-orange:              #f5a623;
+  --color-yellow:              #facc15;
+
+  /* Semantic accents */
+  --color-blue-bg:             #1e3a5f;
+  --color-blue-border:         #2563eb;
+  --color-blue-text:           #60a5fa;
+  --color-destructive-bg:      #dc2626;
+  --color-destructive-bg-hover: #b91c1c;
+
+  /* Utility */
+  --color-neutral-bg:          #6b7280;
+  --color-row-hover-bg:        #1b2a48;
+  --color-overlay-subtle:      #ffffff0c;
+  --color-overlay-light:       #ffffff98;
+  --color-title-underline:     #a9aaac;
+  --color-focus-ring:          rgba(255, 255, 255, 0.15);
 }
 
 html {
@@ -60,5 +83,5 @@ button:hover {
 
 button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
