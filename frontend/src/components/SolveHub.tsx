@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatTime } from '../utils/formatTime';
+import { useTheme } from '../hooks/useTheme';
+import { chartColors } from '../utils/themeColors';
 import type { Solve, PersonalBest } from '../types';
 import './SolveHub.css';
 
@@ -96,6 +98,9 @@ const SolveHub = ({
     }));
   }, [pbHistory]);
 
+  const { theme } = useTheme();
+  const colors = chartColors(theme);
+
   if (!stats) return (
     <div className="solve-hub empty-state">
       <p>No solves yet. Start solving to see your stats!</p>
@@ -146,15 +151,15 @@ const SolveHub = ({
         <div className="chart-container">
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={chartData}>
-              <XAxis dataKey="solve" stroke="#e4e4e4" tick={{ fill: '#e4e4e4' }} />
-              <YAxis stroke="#e4e4e4" tick={{ fill: '#e4e4e4' }} />
+              <XAxis dataKey="solve" stroke={colors.axis} tick={{ fill: colors.axis }} />
+              <YAxis stroke={colors.axis} tick={{ fill: colors.axis }} />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
                 dataKey="time"
-                stroke="#3dc942"
+                stroke={colors.recent}
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#3dc942' }}
+                dot={{ r: 3, fill: colors.recent }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -167,15 +172,15 @@ const SolveHub = ({
           <p className="chart-title">PB Progression</p>
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={pbChartData}>
-              <XAxis dataKey="solve" stroke="#e4e4e4" tick={{ fill: '#e4e4e4' }} />
-              <YAxis stroke="#e4e4e4" tick={{ fill: '#e4e4e4' }} />
+              <XAxis dataKey="solve" stroke={colors.axis} tick={{ fill: colors.axis }} />
+              <YAxis stroke={colors.axis} tick={{ fill: colors.axis }} />
               <Tooltip content={<PBTooltip />} />
               <Line
                 type="monotone"
                 dataKey="time"
-                stroke="#f5a623"
+                stroke={colors.pb}
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#f5a623' }}
+                dot={{ r: 3, fill: colors.pb }}
               />
             </LineChart>
           </ResponsiveContainer>
