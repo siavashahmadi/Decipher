@@ -21,7 +21,7 @@
 
 /* Timer and Scramble sections */
 .timer-section {
-  width: calc(100% + 3rem);
+  width: 100%;
   position: relative;
   z-index: 1;
 }
