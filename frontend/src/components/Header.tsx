@@ -1,6 +1,7 @@
 import React from 'react';
 import { supabase } from '../services/auth';
 import logo from '../logo.svg';
+import { useTheme } from '../hooks/useTheme';
 import type { PuzzleType } from '../types';
 import './Header.css';
 
@@ -31,6 +32,8 @@ interface HeaderProps {
 }
 
 const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
+  const { theme, toggle } = useTheme();
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -62,6 +65,14 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
           <option key={p.value} value={p.value}>{p.label}</option>
         ))}
       </select>
+      <button
+        className="theme-toggle"
+        onClick={toggle}
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        {theme === 'dark' ? '☀' : '☾'}
+      </button>
       {isGuest ? (
         <button className="sign-in-button" onClick={onSignIn}>
           Sign In
