@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   gap: 2rem;
-  color: #fff;
+  color: var(--color-text);
   border-bottom: 1px solid var(--color-panel);
 }
 
@@ -18,7 +18,7 @@
   font-size: 2rem;
   text-decoration-line: underline;
   text-decoration-thickness: 2px;
-  text-decoration-color: #a9aaac;
+  text-decoration-color: var(--color-title-underline);
   margin: 2px;
   min-width: fit-content;
 }
@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff0c;
+  background-color: var(--color-overlay-subtle);
   border-radius: 8px;
   padding: 4px;
 }
@@ -41,7 +41,7 @@
 }
 
 .header-logo:hover {
-  background-color: #ffffff98;
+  background-color: var(--color-overlay-light);
 }
 
 .puzzle-buttons {
@@ -51,7 +51,7 @@
 }
 
 .puzzle-select {
-  color: #fff;
+  color: var(--color-text);
   display: none;
   padding: 8px;
   font-size: 16px;
@@ -62,7 +62,7 @@
 }
 
 .puzzle-select:hover {
-  border-color: #5b5b5b;
+  border-color: var(--color-border-hover);
 }
 
 .puzzle-select:focus {
@@ -75,7 +75,7 @@
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  background-color: #dc2626;
+  background-color: var(--color-destructive-bg);
   color: white;
   font-weight: 500;
   cursor: pointer;
@@ -83,7 +83,7 @@
 }
 
 .logout-button:hover {
-  background-color: #b91c1c;
+  background-color: var(--color-destructive-bg-hover);
 }
 
 .sign-in-button {
