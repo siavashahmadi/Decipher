@@ -1,32 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import type { PuzzleType } from '../types';
 import './Scramble.css';
 
-const scrambleLibPromise = import('https://cdn.cubing.net/v0/js/cubing/scramble');
+interface CubingScrambleLib {
+  randomScrambleForEvent: (eventId: string) => Promise<{ toString(): string }>;
+}
 
-const Scramble = ({ type, onScrambleGenerated }) => {
+const scrambleLibPromise = import(
+  /* @vite-ignore */ 'https://cdn.cubing.net/v0/js/cubing/scramble'
+) as unknown as Promise<CubingScrambleLib>;
+
+type ScrambleSize = 'small' | 'medium' | 'large';
+
+const getScrambleSize = (puzzleType: PuzzleType): ScrambleSize => {
+  if (['222', 'pyram', 'skewb'].includes(puzzleType)) return 'large';
+  if (['444', '555', '666', '777'].includes(puzzleType)) return 'small';
+  return 'medium';
+};
+
+interface ScrambleProps {
+  type: PuzzleType;
+  onScrambleGenerated: (scramble: string) => void;
+}
+
+const Scramble = ({ type, onScrambleGenerated }: ScrambleProps): React.ReactElement => {
   const [scramble, setScramble] = useState('');
   const [loading, setLoading] = useState(true);
-
-  const getScrambleSize = (puzzleType) => {
-    // Larger text for simpler puzzles
-    if (['222', 'pyram', 'skewb'].includes(puzzleType)) {
-      return 'large';
-    }
-    // Smaller text for complex puzzles
-    if (['444', '555', '666', '777', 'minx'].includes(puzzleType)) {
-      return 'small';
-    }
-    // Medium (default) text for other puzzles
-    return 'medium';
-  };
 
   const generateScramble = useCallback(async () => {
     setLoading(true);
     try {
       const { randomScrambleForEvent } = await scrambleLibPromise;
-      const eventId = type;
-
-      const scrambleObj = await randomScrambleForEvent(eventId);
+      const scrambleObj = await randomScrambleForEvent(type);
       const scrambleString = scrambleObj.toString();
       onScrambleGenerated(scrambleString);
       setScramble(scrambleString);

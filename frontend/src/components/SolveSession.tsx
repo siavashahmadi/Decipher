@@ -6,7 +6,6 @@ import SolveLog from './SolveLog';
 import SolveHub from './SolveHub';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
-import './SolveSession.css';
 import api from '../services/api';
 import {
   getGuestSolves,
@@ -14,6 +13,8 @@ import {
   updateGuestSolve,
   deleteGuestSolve,
 } from '../services/guestStorage';
+import type { PuzzleType, Solve, PersonalBest } from '../types';
+import './SolveSession.css';
 
 // ---------------------------------------------------------------------------
 // DSA-2: Binary search (bisect_left)
@@ -23,8 +24,9 @@ import {
 //
 // Example: bisectLeft([5, 8, 12], 9) → 2
 // ---------------------------------------------------------------------------
-const bisectLeft = (arr, val) => {
-  let lo = 0, hi = arr.length;
+const bisectLeft = (arr: number[], val: number): number => {
+  let lo = 0;
+  let hi = arr.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
     if (arr[mid] < val) lo = mid + 1;
@@ -33,29 +35,34 @@ const bisectLeft = (arr, val) => {
   return lo;
 };
 
-const SolveSession = ({ isGuest, onSignIn }) => {
-  const [puzzleType, setPuzzleType] = useState('333');
-  const [solves, setSolves] = useState([]);
+interface SolveSessionProps {
+  isGuest: boolean;
+  onSignIn: () => void;
+}
+
+const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElement => {
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
+  const [solves, setSolves] = useState<Solve[]>([]);
   const [scramble, setScramble] = useState('');
 
   // SD-2: Cursor-based pagination state
-  const [nextCursor, setNextCursor] = useState(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const [lastPercentile, setLastPercentile] = useState(null);
+  const [lastPercentile, setLastPercentile] = useState<number | null>(null);
 
   // DSA-2: Sorted copy of valid times for O(log n) percentile lookup.
-  const sortedTimesRef = useRef([]);
+  const sortedTimesRef = useRef<number[]>([]);
 
   // SD-3: Personal best history for progression chart
-  const [pbHistory, setPbHistory] = useState([]);
+  const [pbHistory, setPbHistory] = useState<PersonalBest[]>([]);
 
   // DSA-3: Circular buffer tracks the last 12 solves for rolling stats
-  const recentBuffer = useCircularBuffer(12);
+  const recentBuffer = useCircularBuffer<Solve>(12);
 
   // DSA-4: Two-heap running median — O(log n) insert, O(1) query
   const medianTracker = useMedianTracker();
-  const [currentMedian, setCurrentMedian] = useState(null);
+  const [currentMedian, setCurrentMedian] = useState<number | null>(null);
 
   // ---------------------------------------------------------------------------
   // Initial data fetch (SD-2: paginated for auth, localStorage for guest)
@@ -63,7 +70,8 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   useEffect(() => {
     const fetchSolves = async () => {
       try {
-        let data, next_cursor;
+        let data: Solve[];
+        let next_cursor: string | null;
         if (isGuest) {
           data = getGuestSolves(puzzleType);
           next_cursor = null;
@@ -145,7 +153,7 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   // ---------------------------------------------------------------------------
   const recentSolves = useMemo(() => recentBuffer.toArray(), [solves]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleScrambleGenerated = useCallback((s) => {
+  const handleScrambleGenerated = useCallback((s: string) => {
     setScramble(s);
   }, []);
 
@@ -155,13 +163,13 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   // DSA-4: Also push effective time into the two-heap median tracker.
   // UX-1: Accepts inspectionOverran flag — sets plus_two on the new solve.
   // ---------------------------------------------------------------------------
-  const handleSolveComplete = useCallback(async (time, inspectionOverran = false) => {
+  const handleSolveComplete = useCallback(async (time: number, inspectionOverran = false) => {
     const effectiveTime = inspectionOverran ? time + 2 : time;
     const prev = sortedTimesRef.current;
     const pos = bisectLeft(prev, effectiveTime);
 
     if (isGuest) {
-      const guestSolve = {
+      const guestSolve: Solve = {
         id: crypto.randomUUID(),
         puzzle_type: puzzleType,
         time,
@@ -194,7 +202,7 @@ const SolveSession = ({ isGuest, onSignIn }) => {
     try {
       const savedSolve = await api.createSolve(newSolve);
       if (savedSolve) {
-        setSolves(prev => [savedSolve, ...prev]);
+        setSolves(prevSolves => [savedSolve, ...prevSolves]);
         recentBuffer.push(savedSolve);
 
         if (prev.length > 0) {
@@ -216,7 +224,7 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   // ---------------------------------------------------------------------------
   // SD-6: Optimistic update — update UI immediately, rollback on API failure.
   // ---------------------------------------------------------------------------
-  const handleSolveUpdate = async (updatedSolve) => {
+  const handleSolveUpdate = async (updatedSolve: Solve) => {
     const snapshot = solves;
     setSolves(prev => prev.map(s => s.id === updatedSolve.id ? updatedSolve : s));
     if (isGuest) {
@@ -235,11 +243,10 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   // SD-6: Optimistic delete — removes from UI immediately, rolls back on error.
   // DSA-4: Rebuilds the two-heap from the new sortedTimes after deletion.
   // ---------------------------------------------------------------------------
-  const handleSolveDelete = async (solveToDelete) => {
+  const handleSolveDelete = async (solveToDelete: Solve) => {
     const snapshot = solves;
     const sortedSnapshot = sortedTimesRef.current;
 
-    // Optimistic remove from UI
     setSolves(prev => prev.filter(s => s.id !== solveToDelete.id));
 
     if (!solveToDelete.dnf) {
@@ -262,7 +269,6 @@ const SolveSession = ({ isGuest, onSignIn }) => {
     try {
       await api.deleteSolve(solveToDelete.id);
     } catch (err) {
-      // Rollback everything
       setSolves(snapshot);
       sortedTimesRef.current = sortedSnapshot;
       medianTracker.reset();
@@ -272,8 +278,9 @@ const SolveSession = ({ isGuest, onSignIn }) => {
     }
   };
 
-  const handleTypeChange = (event) => {
-    setPuzzleType(event.target.value);
+  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => {
+    const value = (event.currentTarget as HTMLSelectElement | HTMLButtonElement).value as PuzzleType;
+    setPuzzleType(value);
   };
 
   const resetTimer = useCallback(() => {
@@ -285,7 +292,7 @@ const SolveSession = ({ isGuest, onSignIn }) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Space') event.preventDefault();
     };
     window.addEventListener('keydown', handleKeyDown);

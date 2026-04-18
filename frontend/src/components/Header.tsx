@@ -1,9 +1,15 @@
 import React from 'react';
-import './Header.css';
-import logo from '../logo.svg';
 import { supabase } from '../services/auth';
+import logo from '../logo.svg';
+import type { PuzzleType } from '../types';
+import './Header.css';
 
-const PUZZLES = [
+interface PuzzleOption {
+  value: PuzzleType;
+  label: string;
+}
+
+const PUZZLES: PuzzleOption[] = [
   { value: '222', label: '2x2' },
   { value: '333', label: '3x3' },
   { value: '444', label: '4x4' },
@@ -17,11 +23,17 @@ const PUZZLES = [
   { value: 'clock', label: 'Clock' },
 ];
 
-const Header = ({ type, handleTypeChange, isGuest, onSignIn }) => {
+interface HeaderProps {
+  type: PuzzleType;
+  handleTypeChange: (event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => void;
+  isGuest: boolean;
+  onSignIn: () => void;
+}
+
+const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      // Force reload the page to return to auth screen
       window.location.reload();
     } catch (error) {
       console.error('Error signing out:', error);

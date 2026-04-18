@@ -1,43 +1,48 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { formatTime } from '../utils/formatTime';
 import './Timer.css';
 
 // UX-1: WCA Inspection Timer
 // State machine: 'idle' | 'ready' | 'inspection' | 'running'
 // phaseRef drives keyboard logic (avoids stale closure); phase state drives rendering.
 
-const Timer = ({ onSolveComplete }) => {
+type Phase = 'idle' | 'ready' | 'inspection' | 'running';
+
+interface TimerProps {
+  onSolveComplete: (time: number, inspectionOverran: boolean) => void;
+}
+
+const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   const [time, setTime] = useState(0);
-  const [phase, setPhase] = useState('idle');
+  const [phase, setPhase] = useState<Phase>('idle');
   const [inspectionCount, setInspectionCount] = useState(15);
 
-  const phaseRef = useRef('idle');
+  const phaseRef = useRef<Phase>('idle');
   const timeRef = useRef(0);
-  const inspectionStartRef = useRef(null);
-  const inspectionIntervalRef = useRef(null);
-  const timerIntervalRef = useRef(null);
+  const inspectionStartRef = useRef<number | null>(null);
+  const inspectionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const formatTime = (ms) => {
-    const pad = (n, z = 2) => ('00' + n).slice(-z);
-    const seconds = Math.floor((ms / 1000) % 60);
-    const minutes = Math.floor((ms / 1000 / 60) % 60);
-    const milliseconds = Math.floor(ms % 1000);
-    return `${pad(minutes)}:${pad(seconds)}.${pad(milliseconds, 3)}`;
+  const clearIntervals = () => {
+    if (inspectionIntervalRef.current !== null) {
+      clearInterval(inspectionIntervalRef.current);
+      inspectionIntervalRef.current = null;
+    }
+    if (timerIntervalRef.current !== null) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      clearInterval(inspectionIntervalRef.current);
-      clearInterval(timerIntervalRef.current);
-    };
-  }, []);
+  useEffect(() => clearIntervals, []);
 
   const startInspection = useCallback(() => {
     inspectionStartRef.current = Date.now();
     setInspectionCount(15);
-    // Tick every 100ms — precision isn't needed for a countdown display
     inspectionIntervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - inspectionStartRef.current;
+      const start = inspectionStartRef.current;
+      if (start === null) return;
+      const elapsed = Date.now() - start;
       const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000));
       setInspectionCount(remaining);
     }, 100);
@@ -46,7 +51,10 @@ const Timer = ({ onSolveComplete }) => {
   }, []);
 
   const startRunning = useCallback(() => {
-    clearInterval(inspectionIntervalRef.current);
+    if (inspectionIntervalRef.current !== null) {
+      clearInterval(inspectionIntervalRef.current);
+      inspectionIntervalRef.current = null;
+    }
     setTime(0);
     timeRef.current = 0;
     timerIntervalRef.current = setInterval(() => {
@@ -61,7 +69,10 @@ const Timer = ({ onSolveComplete }) => {
   }, []);
 
   const finishSolve = useCallback(() => {
-    clearInterval(timerIntervalRef.current);
+    if (timerIntervalRef.current !== null) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
     const inspectionElapsed = inspectionStartRef.current
       ? Date.now() - inspectionStartRef.current
       : 0;
@@ -72,8 +83,7 @@ const Timer = ({ onSolveComplete }) => {
   }, [onSolveComplete]);
 
   const resetTimer = useCallback(() => {
-    clearInterval(inspectionIntervalRef.current);
-    clearInterval(timerIntervalRef.current);
+    clearIntervals();
     setTime(0);
     setInspectionCount(15);
     timeRef.current = 0;
@@ -82,11 +92,10 @@ const Timer = ({ onSolveComplete }) => {
     setPhase('idle');
   }, []);
 
-  // Keyboard events — read phaseRef to avoid stale closures
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Space') return;
-      if (event.repeat) return; // ignore held-key repeat
+      if (event.repeat) return;
       event.preventDefault();
       const p = phaseRef.current;
       if (p === 'idle') {
@@ -101,7 +110,7 @@ const Timer = ({ onSolveComplete }) => {
       }
     };
 
-    const handleKeyUp = (event) => {
+    const handleKeyUp = (event: KeyboardEvent) => {
       if (event.code !== 'Space') return;
       event.preventDefault();
       if (phaseRef.current === 'ready') {
@@ -117,8 +126,7 @@ const Timer = ({ onSolveComplete }) => {
     };
   }, [startInspection, startRunning, finishSolve]);
 
-  // Touch events mirror keyboard flow
-  const handleTouchStart = useCallback((e) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     const p = phaseRef.current;
     if (p === 'idle') {
@@ -133,7 +141,7 @@ const Timer = ({ onSolveComplete }) => {
     }
   }, [startRunning, finishSolve]);
 
-  const handleTouchEnd = useCallback((e) => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     if (phaseRef.current === 'ready') {
       startInspection();
@@ -157,7 +165,7 @@ const Timer = ({ onSolveComplete }) => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {phase === 'inspection' ? inspectionCount : formatTime(time)}
+        {phase === 'inspection' ? inspectionCount : formatTime(time / 1000)}
       </div>
       <button onClick={resetTimer}>Reset Timer</button>
     </div>

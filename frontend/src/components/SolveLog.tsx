@@ -1,47 +1,58 @@
 import React, { useMemo } from 'react';
+import { formatTime } from '../utils/formatTime';
+import type { Solve } from '../types';
 import './SolveLog.css';
 
-const calculateAverage = (times, size) => {
+type Average = number | 'DNF' | null;
+
+const calculateAverage = (times: Solve[], size: number): Average => {
   if (times.length < size) return null;
-  
-  // Get the most recent 'size' number of times
+
   const recentTimes = times.slice(0, size)
     .map(solve => solve.dnf ? Infinity : solve.plus_two ? solve.time + 2 : solve.time);
-  
-  // If more than half are DNF, the average is DNF
-  if (recentTimes.filter(time => time === Infinity).length > size / 2) {
+
+  if (recentTimes.filter(t => t === Infinity).length > size / 2) {
     return 'DNF';
   }
 
-  // Sort times to remove best and worst
-  let sortedTimes = [...recentTimes].sort((a, b) => a - b);
-  
-  // Remove best and worst times
-  sortedTimes = sortedTimes.slice(1, -1);
-  
-  // Calculate average
-  const sum = sortedTimes.reduce((acc, time) => acc + (time === Infinity ? 0 : time), 0);
-  const validTimes = sortedTimes.filter(time => time !== Infinity).length;
-  
-  return (sum / validTimes).toFixed(2);
+  const sortedTimes = [...recentTimes].sort((a, b) => a - b).slice(1, -1);
+  const sum = sortedTimes.reduce((acc, t) => acc + (t === Infinity ? 0 : t), 0);
+  const validCount = sortedTimes.filter(t => t !== Infinity).length;
+
+  return sum / validCount;
 };
 
-const formatTime = (time) => {
-  if (time === null) return '-';
-  if (time === 'DNF') return 'DNF';
-  return `${time}s`;
-};
+const fmt = (v: Average): string =>
+  v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
 
-const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset, onLoadMore, hasMore, isLoadingMore }) => {
+interface SolveLogProps {
+  solves: Solve[];
+  onSolveUpdate: (solve: Solve) => void;
+  onSolveDelete: (solve: Solve) => void;
+  onReset: () => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+}
+
+const SolveLog = ({
+  solves,
+  onSolveUpdate,
+  onSolveDelete,
+  onReset,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
+}: SolveLogProps): React.ReactElement => {
   const { ao5, ao12, sessionMean, bestSingle } = useMemo(() => {
     const ao5 = calculateAverage(solves, 5);
     const ao12 = calculateAverage(solves, 12);
-    const validSolves = solves.filter(solve => !solve.dnf);
-    const sessionMean = validSolves.length > 0
-      ? (validSolves.reduce((acc, solve) => acc + solve.time, 0) / validSolves.length).toFixed(2)
+    const validSolves = solves.filter(s => !s.dnf);
+    const sessionMean: number | null = validSolves.length > 0
+      ? validSolves.reduce((acc, s) => acc + s.time, 0) / validSolves.length
       : null;
-    const bestSingle = validSolves.length > 0
-      ? Math.min(...validSolves.map(solve => solve.time))
+    const bestSingle: number | null = validSolves.length > 0
+      ? Math.min(...validSolves.map(s => s.time))
       : null;
     return { ao5, ao12, sessionMean, bestSingle };
   }, [solves]);
@@ -55,28 +66,28 @@ const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset, onLoadMore, h
 
   return (
     <div className="solve-log">
-      <button 
-          onClick={onReset}
-          className="reset-button"
-        >
-          Reset Session
-        </button>
+      <button
+        onClick={onReset}
+        className="reset-button"
+      >
+        Reset Session
+      </button>
       <div className="stats-container">
         <div className="stat-box">
           <span className="stat-label">Ao5</span>
-          <span className="stat-value">{formatTime(ao5)}</span>
+          <span className="stat-value">{fmt(ao5)}</span>
         </div>
         <div className="stat-box">
           <span className="stat-label">Ao12</span>
-          <span className="stat-value">{formatTime(ao12)}</span>
+          <span className="stat-value">{fmt(ao12)}</span>
         </div>
         <div className="stat-box">
           <span className="stat-label">Mean</span>
-          <span className="stat-value">{formatTime(sessionMean)}</span>
+          <span className="stat-value">{fmt(sessionMean)}</span>
         </div>
         <div className="stat-box">
           <span className="stat-label">Best</span>
-          <span className="stat-value">{formatTime(bestSingle)}</span>
+          <span className="stat-value">{fmt(bestSingle)}</span>
         </div>
       </div>
 
@@ -86,33 +97,30 @@ const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset, onLoadMore, h
           return (
             <li key={solve.id} className="solve-log-item">
               <span className="solve-time">
-                {solve.dnf ? 'DNF' : 
-                solve.plus_two ? `${(solve.time + 2).toFixed(2)}+` : 
-                `${solve.time.toFixed(2)}s`}
+                {solve.dnf
+                  ? 'DNF'
+                  : solve.plus_two
+                    ? `${formatTime(solve.time + 2)}+`
+                    : formatTime(solve.time)}
               </span>
               <span className="solve-ao5">
-                {currentAo5 ? `(${formatTime(currentAo5)})` : ''}
+                {currentAo5 !== null ? `(${fmt(currentAo5)})` : ''}
               </span>
               <div className="solve-actions">
-                <button 
+                <button
                   onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
                   className={`dnf-button ${solve.dnf ? 'active' : ''}`}
                 >
                   DNF
                 </button>
-                <button 
-                  onClick={() => onSolveUpdate({
-                    ...solve,
-                    plus_two: !solve.plus_two
-                  })}
+                <button
+                  onClick={() => onSolveUpdate({ ...solve, plus_two: !solve.plus_two })}
                   className={`plus_two-button ${solve.plus_two ? 'active' : ''}`}
                 >
                   +2
                 </button>
-                <button 
-                  onClick={() => {
-                    onSolveDelete(solve);
-                  }}
+                <button
+                  onClick={() => onSolveDelete(solve)}
                   className="delete-button"
                   title="Delete solve"
                 >

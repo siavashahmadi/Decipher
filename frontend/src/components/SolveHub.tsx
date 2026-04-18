@@ -1,52 +1,81 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatTime } from '../utils/formatTime';
+import type { Solve, PersonalBest } from '../types';
 import './SolveHub.css';
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ value?: number; payload?: { date?: string } }>;
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps): React.ReactElement | null => {
+  if (active && payload && payload.length && typeof payload[0].value === 'number') {
     return (
       <div className="custom-tooltip">
-        <p>{`Time: ${payload[0].value.toFixed(2)}s`}</p>
+        <p>{`Time: ${formatTime(payload[0].value)}`}</p>
       </div>
     );
   }
   return null;
 };
 
-const PBTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
+const PBTooltip = ({ active, payload }: TooltipProps): React.ReactElement | null => {
+  if (active && payload && payload.length && typeof payload[0].value === 'number') {
     return (
       <div className="custom-tooltip">
-        <p>{`PB: ${payload[0].value.toFixed(2)}s`}</p>
-        <p className="tooltip-date">{payload[0].payload.date}</p>
+        <p>{`PB: ${formatTime(payload[0].value)}`}</p>
+        <p className="tooltip-date">{payload[0].payload?.date}</p>
       </div>
     );
   }
   return null;
 };
+
+interface Stats {
+  totalSolves: number;
+  validSolves: number;
+  bestTime: number;
+  averageTime: number;
+  ao5: number | null;
+}
+
+interface SolveHubProps {
+  solves: Solve[];
+  recentSolves?: Solve[];
+  pbHistory?: PersonalBest[];
+  lastPercentile?: number | null;
+  currentMedian?: number | null;
+}
 
 // DSA-3: recentSolves comes from the circular buffer in SolveSession (last 12).
 // SD-3: pbHistory is the write-time materialized personal best progression.
 // DSA-2: lastPercentile shows where this solve ranks among previous solves.
 // DSA-4: currentMedian from the two-heap tracker (O(log n) insert, O(1) query).
-const SolveHub = ({ solves, recentSolves = [], pbHistory = [], lastPercentile = null, currentMedian = null }) => {
-  const stats = useMemo(() => {
+const SolveHub = ({
+  solves,
+  recentSolves = [],
+  pbHistory = [],
+  lastPercentile = null,
+  currentMedian = null,
+}: SolveHubProps): React.ReactElement => {
+  const stats = useMemo<Stats | null>(() => {
     if (!solves?.length) return null;
 
-    const validSolves = solves.filter(solve => !solve.dnf);
-    const times = validSolves.map(solve => solve.plus_two ? solve.time + 2 : solve.time);
+    const validSolves = solves.filter(s => !s.dnf);
+    const times = validSolves.map(s => s.plus_two ? s.time + 2 : s.time);
 
     if (times.length === 0) return null;
 
     const ao5 = times.length >= 5
-      ? ((times.slice(0, 5).sort((a, b) => a - b).slice(1, 4).reduce((a, b) => a + b, 0)) / 3).toFixed(2)
+      ? times.slice(0, 5).sort((a, b) => a - b).slice(1, 4).reduce((a, b) => a + b, 0) / 3
       : null;
 
     return {
       totalSolves: solves.length,
       validSolves: validSolves.length,
-      bestTime: Math.min(...times).toFixed(2),
-      averageTime: (times.reduce((a, b) => a + b, 0) / times.length).toFixed(2),
+      bestTime: Math.min(...times),
+      averageTime: times.reduce((a, b) => a + b, 0) / times.length,
       ao5,
     };
   }, [solves]);
@@ -62,7 +91,7 @@ const SolveHub = ({ solves, recentSolves = [], pbHistory = [], lastPercentile = 
   const pbChartData = useMemo(() => {
     return pbHistory.map((pb, i) => ({
       solve: i + 1,
-      time: parseFloat(pb.time),
+      time: Number(pb.time),
       date: new Date(pb.achieved_at).toLocaleDateString(),
     }));
   }, [pbHistory]);
@@ -82,22 +111,22 @@ const SolveHub = ({ solves, recentSolves = [], pbHistory = [], lastPercentile = 
         </div>
         <div className="stat-item">
           <span className="stat-label">Best</span>
-          <span className="stat-value">{stats.bestTime}s</span>
+          <span className="stat-value">{formatTime(stats.bestTime)}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Average</span>
-          <span className="stat-value">{stats.averageTime}s</span>
+          <span className="stat-value">{formatTime(stats.averageTime)}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">AO5</span>
-          <span className="stat-value">{stats.ao5 ? `${stats.ao5}s` : '-'}</span>
+          <span className="stat-value">{stats.ao5 !== null ? formatTime(stats.ao5) : '-'}</span>
         </div>
 
         {/* DSA-4: Running median from two-heap tracker */}
         {currentMedian !== null && (
           <div className="stat-item">
             <span className="stat-label">Median</span>
-            <span className="stat-value">{currentMedian.toFixed(2)}s</span>
+            <span className="stat-value">{formatTime(currentMedian)}</span>
           </div>
         )}
 

@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './services/auth';
 import { getAllGuestSolves, clearAllGuestSolves } from './services/guestStorage';
 import api from './services/api';
 import Auth from './components/Auth';
 import SolveSession from './components/SolveSession';
+import type { Session } from '@supabase/supabase-js';
 import './App.css';
 
-function App() {
-  const [session, setSession] = useState(null);
+function App(): React.ReactElement {
+  const [session, setSession] = useState<Session | null>(null);
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {

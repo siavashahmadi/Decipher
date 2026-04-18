@@ -1,54 +1,50 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/auth';
 import logo from '../logo.svg';
 import './Auth.css';
 
-export default function Auth({ onBack }) {
+type AuthMode = 'login' | 'signup' | 'reset' | 'update';
+
+interface AuthProps {
+  onBack: () => void;
+}
+
+export default function Auth({ onBack }: AuthProps): React.ReactElement {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('login'); // 'login', 'signup', 'reset', or 'update'
+  const [mode, setMode] = useState<AuthMode>('login');
 
   useEffect(() => {
-    // Check if we're in a password reset flow
     const hash = window.location.hash;
     if (hash && hash.includes('type=recovery')) {
       setMode('update');
     }
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       setLoading(true);
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         alert('Check your email for the confirmation link!');
       } else if (mode === 'reset') {
         alert('Check your email for the password reset link!');
         setMode('login');
       } else if (mode === 'update') {
-        const { error } = await supabase.auth.updateUser({
-          password: password
-        });
+        const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
         alert('Password updated successfully!');
-        // Clear the recovery hash from URL
         window.location.hash = '';
         setMode('login');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
     } catch (error) {
-      alert(error.message);
+      alert(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -56,15 +52,15 @@ export default function Auth({ onBack }) {
 
   return (
     <div className="auth-container">
-      <img 
+      <img
         src={logo}
-        alt="Ao5 Logo" 
+        alt="Ao5 Logo"
         className="auth-logo"
       />
       <div className="auth-box">
         <h2>
-          {mode === 'login' ? 'Login to Ao5' : 
-           mode === 'signup' ? 'Sign Up for Ao5' : 
+          {mode === 'login' ? 'Login to Ao5' :
+           mode === 'signup' ? 'Sign Up for Ao5' :
            mode === 'update' ? 'Update Password' :
            'Reset Password'}
         </h2>
@@ -96,7 +92,7 @@ export default function Auth({ onBack }) {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Loading...' : 
+            {loading ? 'Loading...' :
              mode === 'login' ? 'Login' :
              mode === 'signup' ? 'Sign Up' :
              mode === 'update' ? 'Update Password' :
