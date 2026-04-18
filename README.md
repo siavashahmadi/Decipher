@@ -1,4 +1,4 @@
-# Ao5 — Speedcubing Timer
+# Decipher (Ao5)
 
 Full-stack speedcubing timer for WCA puzzles with WCA scrambles.
 
