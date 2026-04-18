@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './SolveLog.css';
 
 const calculateAverage = (times, size) => {
@@ -32,21 +32,26 @@ const formatTime = (time) => {
   return `${time}s`;
 };
 
-const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset }) => {
-  // Calculate averages
-  const ao5 = calculateAverage(solves, 5);
-  const ao12 = calculateAverage(solves, 12);
+const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset, onLoadMore, hasMore, isLoadingMore }) => {
+  const { ao5, ao12, sessionMean, bestSingle } = useMemo(() => {
+    const ao5 = calculateAverage(solves, 5);
+    const ao12 = calculateAverage(solves, 12);
+    const validSolves = solves.filter(solve => !solve.dnf);
+    const sessionMean = validSolves.length > 0
+      ? (validSolves.reduce((acc, solve) => acc + solve.time, 0) / validSolves.length).toFixed(2)
+      : null;
+    const bestSingle = validSolves.length > 0
+      ? Math.min(...validSolves.map(solve => solve.time))
+      : null;
+    return { ao5, ao12, sessionMean, bestSingle };
+  }, [solves]);
 
-  // Calculate session mean (excluding DNFs)
-  const validSolves = solves.filter(solve => !solve.dnf);
-  const sessionMean = validSolves.length > 0
-    ? (validSolves.reduce((acc, solve) => acc + solve.time, 0) / validSolves.length).toFixed(2)
-    : null;
-
-  // Find best single
-  const bestSingle = solves.length > 0
-    ? Math.min(...solves.filter(solve => !solve.dnf).map(solve => solve.time))
-    : null;
+  // DSA-1: Sliding window O(n) — each step slices exactly 5 elements (O(1)),
+  // not the entire tail (O(n-i)). Total: O(n) vs the previous O(n²).
+  const perSolveAo5 = useMemo(
+    () => solves.map((_, index) => calculateAverage(solves.slice(index, index + 5), 5)),
+    [solves]
+  );
 
   return (
     <div className="solve-log">
@@ -77,7 +82,7 @@ const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset }) => {
 
       <ul className="solves-list">
         {solves.map((solve, index) => {
-          const currentAo5 = calculateAverage(solves.slice(index), 5);
+          const currentAo5 = perSolveAo5[index];
           return (
             <li key={solve.id} className="solve-log-item">
               <span className="solve-time">
@@ -118,6 +123,17 @@ const SolveLog = ({ solves, onSolveUpdate, onSolveDelete, onReset }) => {
           );
         })}
       </ul>
+
+      {/* SD-2: Load more for cursor-based pagination */}
+      {hasMore && (
+        <button
+          className="load-more-button"
+          onClick={onLoadMore}
+          disabled={isLoadingMore}
+        >
+          {isLoadingMore ? 'Loading...' : 'Load More'}
+        </button>
+      )}
     </div>
   );
 };
