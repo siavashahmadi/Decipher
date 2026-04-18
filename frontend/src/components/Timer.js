@@ -1,10 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './Timer.css';
 
-const Timer = ({ onSolveStart, onSolveComplete }) => {
+// UX-1: WCA Inspection Timer
+// State machine: 'idle' | 'ready' | 'inspection' | 'running'
+// phaseRef drives keyboard logic (avoids stale closure); phase state drives rendering.
+
+const Timer = ({ onSolveComplete }) => {
   const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  const [phase, setPhase] = useState('idle');
+  const [inspectionCount, setInspectionCount] = useState(15);
+
+  const phaseRef = useRef('idle');
+  const timeRef = useRef(0);
+  const inspectionStartRef = useRef(null);
+  const inspectionIntervalRef = useRef(null);
+  const timerIntervalRef = useRef(null);
 
   const formatTime = (ms) => {
     const pad = (n, z = 2) => ('00' + n).slice(-z);
@@ -14,92 +24,140 @@ const Timer = ({ onSolveStart, onSolveComplete }) => {
     return `${pad(minutes)}:${pad(seconds)}.${pad(milliseconds, 3)}`;
   };
 
-  const startTimer = useCallback(() => {
-    setIsRunning(true);
-    setIsReady(false);
-    onSolveStart();
-  }, [onSolveStart]);
-
-  const stopTimer = useCallback(() => {
-    setIsRunning(false);
-    onSolveComplete(time / 1000);
-  }, [onSolveComplete, time]);
-
-  const resetTimer = useCallback(() => {
-    setTime(0);
-    setIsRunning(false);
-    setIsReady(false);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearInterval(inspectionIntervalRef.current);
+      clearInterval(timerIntervalRef.current);
+    };
   }, []);
 
-  useEffect(() => {
-    let interval;
-    if (isRunning) {
-      interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 10);
-      }, 10);
-    } else if (!isRunning) {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning]);
+  const startInspection = useCallback(() => {
+    inspectionStartRef.current = Date.now();
+    setInspectionCount(15);
+    // Tick every 100ms — precision isn't needed for a countdown display
+    inspectionIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - inspectionStartRef.current;
+      const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000));
+      setInspectionCount(remaining);
+    }, 100);
+    phaseRef.current = 'inspection';
+    setPhase('inspection');
+  }, []);
 
-  // Handle keyboard events
+  const startRunning = useCallback(() => {
+    clearInterval(inspectionIntervalRef.current);
+    setTime(0);
+    timeRef.current = 0;
+    timerIntervalRef.current = setInterval(() => {
+      setTime(prev => {
+        const next = prev + 10;
+        timeRef.current = next;
+        return next;
+      });
+    }, 10);
+    phaseRef.current = 'running';
+    setPhase('running');
+  }, []);
+
+  const finishSolve = useCallback(() => {
+    clearInterval(timerIntervalRef.current);
+    const inspectionElapsed = inspectionStartRef.current
+      ? Date.now() - inspectionStartRef.current
+      : 0;
+    const inspectionOverran = inspectionElapsed > 15000;
+    phaseRef.current = 'idle';
+    setPhase('idle');
+    onSolveComplete(timeRef.current / 1000, inspectionOverran);
+  }, [onSolveComplete]);
+
+  const resetTimer = useCallback(() => {
+    clearInterval(inspectionIntervalRef.current);
+    clearInterval(timerIntervalRef.current);
+    setTime(0);
+    setInspectionCount(15);
+    timeRef.current = 0;
+    inspectionStartRef.current = null;
+    phaseRef.current = 'idle';
+    setPhase('idle');
+  }, []);
+
+  // Keyboard events — read phaseRef to avoid stale closures
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.code === "Space" && !isRunning) {
-        event.preventDefault();
-        setIsReady(true);
+      if (event.code !== 'Space') return;
+      if (event.repeat) return; // ignore held-key repeat
+      event.preventDefault();
+      const p = phaseRef.current;
+      if (p === 'idle') {
         setTime(0);
+        timeRef.current = 0;
+        phaseRef.current = 'ready';
+        setPhase('ready');
+      } else if (p === 'inspection') {
+        startRunning();
+      } else if (p === 'running') {
+        finishSolve();
       }
     };
 
     const handleKeyUp = (event) => {
-      if (event.code === "Space") {
-        event.preventDefault();
-        if (isReady && !isRunning) {
-          startTimer();
-        } else if (isRunning) {
-          stopTimer();
-        }
+      if (event.code !== 'Space') return;
+      event.preventDefault();
+      if (phaseRef.current === 'ready') {
+        startInspection();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [isReady, isRunning, startTimer, stopTimer]);
+  }, [startInspection, startRunning, finishSolve]);
 
-  // Handle touch events
+  // Touch events mirror keyboard flow
   const handleTouchStart = useCallback((e) => {
     e.preventDefault();
-    if (!isRunning) {
-      setIsReady(true);
+    const p = phaseRef.current;
+    if (p === 'idle') {
       setTime(0);
+      timeRef.current = 0;
+      phaseRef.current = 'ready';
+      setPhase('ready');
+    } else if (p === 'inspection') {
+      startRunning();
+    } else if (p === 'running') {
+      finishSolve();
     }
-  }, [isRunning]);
+  }, [startRunning, finishSolve]);
 
   const handleTouchEnd = useCallback((e) => {
     e.preventDefault();
-    if (isReady && !isRunning) {
-      startTimer();
-    } else if (isRunning) {
-      stopTimer();
+    if (phaseRef.current === 'ready') {
+      startInspection();
     }
-  }, [isReady, isRunning, startTimer, stopTimer]);
+  }, [startInspection]);
+
+  const isWarning = phase === 'inspection' && inspectionCount <= 3;
+
+  const timerClass = [
+    phase === 'ready' ? 'ready' : '',
+    phase === 'running' ? 'running' : '',
+    phase === 'inspection' && !isWarning ? 'inspection' : '',
+    isWarning ? 'inspection-warning' : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div>
-      <div 
-        id="timer" 
-        className={isReady ? 'ready' : isRunning ? 'running' : ''}
+      <div
+        id="timer"
+        className={timerClass}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {formatTime(time)}
+        {phase === 'inspection' ? inspectionCount : formatTime(time)}
       </div>
       <button onClick={resetTimer}>Reset Timer</button>
     </div>
