@@ -47,3 +47,33 @@
 #timer.inspection-warning {
   color: var(--color-red);
 }
+
+#timer {
+  border: 2px solid transparent;
+}
+
+#timer.flash-yellow {
+  animation: yellow-flash 200ms ease-out;
+}
+
+@keyframes yellow-flash {
+  from { border-color: var(--color-yellow, #facc15); }
+  to { border-color: transparent; }
+}
+
+.inspection-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.timer-badge {
+  font-size: 0.35em;
+  font-family: sans-serif;
+  font-weight: 600;
+  padding: 0.2em 0.5em;
+  border-radius: 999px;
+  background: var(--color-red);
+  color: var(--color-text-inverse, #fff);
+  letter-spacing: 0.05em;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { formatTime } from '../utils/formatTime';
+import { beep } from '../utils/sound';
 import './Timer.css';
 
 type Phase = 'idle' | 'ready' | 'inspection' | 'armed' | 'running';
@@ -30,6 +31,10 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   const penaltyFlagsRef = useRef<PenaltyFlags>({ plusTwo: false, dnf: false });
   const inspectionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const warning7FiredRef = useRef(false);
+  const warning3FiredRef = useRef(false);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [flashYellow, setFlashYellow] = useState(false);
 
   const clearIntervals = () => {
     if (inspectionIntervalRef.current !== null) {
@@ -43,6 +48,10 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     if (holdMetTimeoutRef.current !== null) {
       clearTimeout(holdMetTimeoutRef.current);
       holdMetTimeoutRef.current = null;
+    }
+    if (flashTimeoutRef.current !== null) {
+      clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = null;
     }
   };
 
@@ -71,6 +80,13 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
 
   const startInspection = useCallback(() => {
     inspectionStartRef.current = Date.now();
+    warning7FiredRef.current = false;
+    warning3FiredRef.current = false;
+    setFlashYellow(false);
+    if (flashTimeoutRef.current !== null) {
+      clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = null;
+    }
     setInspectionCount(15);
     inspectionIntervalRef.current = setInterval(() => {
       const start = inspectionStartRef.current;
@@ -78,6 +94,17 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       const elapsed = Date.now() - start;
       const remaining = Math.ceil((15000 - elapsed) / 1000);
       setInspectionCount(remaining);
+      if (elapsed >= 8000 && !warning7FiredRef.current) {
+        warning7FiredRef.current = true;
+        beep(440, 100);
+        setFlashYellow(true);
+        if (flashTimeoutRef.current !== null) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setFlashYellow(false), 200);
+      }
+      if (elapsed >= 12000 && !warning3FiredRef.current) {
+        warning3FiredRef.current = true;
+        beep(660, 150);
+      }
     }, 100);
     phaseRef.current = 'inspection';
     setPhase('inspection');
@@ -129,6 +156,9 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     timeRef.current = 0;
     inspectionStartRef.current = null;
     penaltyFlagsRef.current = { plusTwo: false, dnf: false };
+    warning7FiredRef.current = false;
+    warning3FiredRef.current = false;
+    setFlashYellow(false);
     clearHold();
     phaseRef.current = 'idle';
     setPhase('idle');
@@ -226,6 +256,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     phase === 'running' ? 'running' : '',
     phase === 'inspection' && !isWarning ? 'inspection' : '',
     isWarning ? 'inspection-warning' : '',
+    flashYellow ? 'flash-yellow' : '',
   ].filter(Boolean).join(' ');
 
   return (
@@ -236,7 +267,22 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {phase === 'inspection' || phase === 'armed' ? inspectionCount : formatTime(time / 1000)}
+        {phase === 'inspection' || phase === 'armed' ? (
+          <span className="inspection-display">
+            <span>{inspectionCount}</span>
+            {inspectionCount <= 0 && (
+              <span className="timer-badge">
+                {(() => {
+                  const start = inspectionStartRef.current;
+                  const elapsed = start ? Date.now() - start : 0;
+                  return elapsed > 17000 ? 'DNF' : '+2';
+                })()}
+              </span>
+            )}
+          </span>
+        ) : (
+          formatTime(time / 1000)
+        )}
       </div>
       <button onClick={resetTimer}>Reset Timer</button>
     </div>
