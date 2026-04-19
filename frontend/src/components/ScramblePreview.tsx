@@ -38,6 +38,7 @@ const ScramblePreview = ({ puzzleType, scramble: _scramble }: ScramblePreviewPro
               type="button"
               className={`scramble-preview-mode-btn${mode === '3D' ? ' active' : ''}`}
               onClick={() => setMode('3D')}
+              aria-pressed={mode === '3D'}
             >
               3D
             </button>
@@ -45,6 +46,7 @@ const ScramblePreview = ({ puzzleType, scramble: _scramble }: ScramblePreviewPro
               type="button"
               className={`scramble-preview-mode-btn${mode === '2D' ? ' active' : ''}`}
               onClick={() => setMode('2D')}
+              aria-pressed={mode === '2D'}
             >
               2D
             </button>
