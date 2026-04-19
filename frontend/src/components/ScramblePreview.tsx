@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { PuzzleType } from '../types';
 import { scrambleEventToTwisty } from '../utils/puzzleIds';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
@@ -9,11 +9,42 @@ interface ScramblePreviewProps {
   scramble: string | null;
 }
 
-const ScramblePreview = ({ puzzleType, scramble: _scramble }: ScramblePreviewProps): React.ReactElement => {
+const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.ReactElement => {
   const { mode, collapsed, setMode, setCollapsed } = useScramblePreviewSettings();
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<HTMLElement | null>(null);
   const twistyPuzzle = scrambleEventToTwisty(puzzleType);
   const supported = twistyPuzzle !== null;
+
+  useEffect(() => {
+    if (!supported || !stageRef.current) return;
+    let cancelled = false;
+    const stage = stageRef.current;
+
+    (async () => {
+      const { TwistyPlayer } = await import('cubing/twisty');
+      if (cancelled) return;
+      const player = new TwistyPlayer({
+        puzzle: twistyPuzzle ?? '3x3x3',
+        alg: scramble ?? '',
+        background: 'none',
+        controlPanel: 'none',
+        visualization: mode,
+      });
+      playerRef.current = player as unknown as HTMLElement;
+      stage.appendChild(player);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (playerRef.current) {
+        playerRef.current.remove();
+        playerRef.current = null;
+      }
+    };
+    // mode and scramble are intentionally omitted: mode/scramble changes
+    // are handled by the separate effects in Task 5 without a remount.
+  }, [supported, twistyPuzzle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={`scramble-preview${collapsed ? ' collapsed' : ''}`}>
