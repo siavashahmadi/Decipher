@@ -26,6 +26,20 @@
   z-index: 1;
 }
 
+.scramble-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.scramble-text-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
 .scramble-container {
   margin-top: -20px;
   width: 100%;
@@ -80,6 +94,15 @@
   .solve-hub-wrapper {
     margin-left: 0;
     margin-right: 0;
+    width: 100%;
+  }
+
+  .scramble-wrapper {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .scramble-text-wrap {
     width: 100%;
   }
 }
