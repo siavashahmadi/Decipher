@@ -45,6 +45,7 @@ interface SolveSessionProps {
 const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElement => {
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
   const [solves, setSolves] = useState<Solve[]>([]);
+  const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
   const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
 
   // SD-2: Cursor-based pagination state
@@ -310,23 +311,42 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         <div className="mid-section">
           <div className="left-section">
             <div className="scramble-wrapper">
-              <div className="scramble-text-wrap">
-                <Scramble
-                  type={puzzleType}
-                  scramble={currentScramble}
-                  loading={scrambleLoading}
-                />
-              </div>
-              <ScramblePreview puzzleType={puzzleType} scramble={currentScramble} />
+              <Scramble
+                type={puzzleType}
+                scramble={currentScramble}
+                loading={scrambleLoading}
+              />
             </div>
             <div className="solve-hub-wrapper">
-              <SolveHub
-                solves={solves}
-                recentSolves={recentSolves}
-                pbHistory={pbHistory}
-                lastPercentile={lastPercentile}
-                currentMedian={currentMedian}
-              />
+              <div className="hub-tabs">
+                <button
+                  type="button"
+                  className={`hub-tab${hubTab === 'stats' ? ' active' : ''}`}
+                  onClick={() => setHubTab('stats')}
+                  aria-pressed={hubTab === 'stats'}
+                >
+                  Stats
+                </button>
+                <button
+                  type="button"
+                  className={`hub-tab${hubTab === 'preview' ? ' active' : ''}`}
+                  onClick={() => setHubTab('preview')}
+                  aria-pressed={hubTab === 'preview'}
+                >
+                  Preview
+                </button>
+              </div>
+              {hubTab === 'stats' ? (
+                <SolveHub
+                  solves={solves}
+                  recentSolves={recentSolves}
+                  pbHistory={pbHistory}
+                  lastPercentile={lastPercentile}
+                  currentMedian={currentMedian}
+                />
+              ) : (
+                <ScramblePreview puzzleType={puzzleType} scramble={currentScramble} />
+              )}
             </div>
           </div>
           <div className="right-section">
