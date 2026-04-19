@@ -46,6 +46,20 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.
     // are handled by the separate effects in Task 5 without a remount.
   }, [supported, twistyPuzzle]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const player = playerRef.current as unknown as { alg?: string } | null;
+    if (player && scramble !== null) {
+      player.alg = scramble;
+    }
+  }, [scramble]);
+
+  useEffect(() => {
+    const player = playerRef.current as unknown as { visualization?: string } | null;
+    if (player) {
+      player.visualization = mode;
+    }
+  }, [mode]);
+
   return (
     <div className={`scramble-preview${collapsed ? ' collapsed' : ''}`}>
       <div className="scramble-preview-stage" ref={stageRef}>
