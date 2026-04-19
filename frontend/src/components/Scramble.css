@@ -33,3 +33,28 @@
     font-size: 1rem;
   }
 }
+
+.scramble-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.scramble-text-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .scramble-wrapper {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .scramble-text-wrap {
+    width: 100%;
+  }
+}

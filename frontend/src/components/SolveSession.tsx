@@ -4,6 +4,7 @@ import Scramble from './Scramble';
 import Header from './Header';
 import SolveLog from './SolveLog';
 import SolveHub from './SolveHub';
+import ScramblePreview from './ScramblePreview';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import useScrambleQueue from '../hooks/useScrambleQueue';
@@ -309,11 +310,14 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         <div className="mid-section">
           <div className="left-section">
             <div className="scramble-wrapper">
-              <Scramble
-                type={puzzleType}
-                scramble={currentScramble}
-                loading={scrambleLoading}
-              />
+              <div className="scramble-text-wrap">
+                <Scramble
+                  type={puzzleType}
+                  scramble={currentScramble}
+                  loading={scrambleLoading}
+                />
+              </div>
+              <ScramblePreview puzzleType={puzzleType} scramble={currentScramble} />
             </div>
             <div className="solve-hub-wrapper">
               <SolveHub
