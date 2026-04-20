@@ -439,6 +439,132 @@ Controls the input to all five vizualisations. Single piece of shared state at t
 
 ---
 
+# Phase 9: OLL trainer (full 57)
+
+**Goal:** add a full OLL trainer at `/trainers/oll` covering all 57 cases, grouped by pattern in the picker. Refactor Phase 8's `PllTrainer` into a shared `TrainerSession` so OLL (this phase) and F2L (Phase 10) reuse the same shell.
+
+### Shared infrastructure refactor
+
+- Generalize `src/utils/trainerScramble.ts`:
+  - Export `generateTrainerScramble({ type: 'pll' | 'oll' | 'f2l', caseId?, algIndex?, rng? })`.
+  - Keep `generatePllScramble` as a thin shim that forwards to the dispatcher. Phase 8 tests and components keep working unchanged.
+  - OLL and PLL share the same scramble shape: `AUF + inverse(alg) + optional y-rotation`. The inverse of an OLL alg applied to a solved cube leaves F2L solved and the last layer in the target case (standard convention: OLL algs assume F2L solved).
+- Generalize `src/components/trainers/PllTrainer.tsx` into `src/components/trainers/TrainerSession.tsx`:
+  - Props: `{ type: 'pll' | 'oll' | 'f2l' }`.
+  - Internally loads the matching data file and calls the dispatcher.
+  - `PllTrainer` becomes a one-line wrapper: `<TrainerSession type="pll" />`.
+- Extend `TrainerCasePicker` to render grouped `<optgroup>` options when the data has a `group` field.
+- Add a `group?: string` field to the `PllCase` / OLL / F2L case shape. `pll.json` gets optional groups for consistency (not required for v1 PLL).
+
+### OLL data (`src/data/oll.json`)
+
+57 cases, each `{ id, name, group, algs[] }`. `id` follows the standard OLL numbering (`"1"` through `"57"`). `group` uses the canonical taxonomy:
+
+- All Edges Flipped (OCLL)  — 7 cases: #21–27
+- T Shapes                  — 2 cases: #33, #45
+- Squares                   — 2 cases: #5, #6
+- C Shapes                  — 2 cases: #34, #46
+- W Shapes                  — 2 cases: #36, #38
+- P Shapes                  — 4 cases: #31, #32, #43, #44
+- Fish Shapes               — 4 cases: #9, #10, #35, #37
+- Knight Move Shapes        — 4 cases: #13, #14, #15, #16
+- Awkward Shapes            — 4 cases: #29, #30, #41, #42
+- L Shapes                  — 6 cases: #47, #48, #49, #50, #53, #54
+- I Shapes (Line)           — 4 cases: #51, #52, #55, #56
+- Lightning Bolts           — 8 cases: #7, #8, #11, #12, #17, #18, #39, #40
+- Dot Cases (No Edges)      — 8 cases: #1, #2, #3, #4, #17–20 overlap resolved in final data
+
+One canonical alg per case; 2 algs for the heavily-variant cases (sune/antisune, common dot OLLs). Curated from algdb.net + speedsolving.com wiki cross-check.
+
+### Routing & UI
+
+- `/trainers/oll`: replace `ComingSoon` with `<TrainerSession type="oll" />`.
+- Sub-nav already exists from Phase 8.
+- Picker uses `<optgroup>` blocks. "All" still means uniform random across all 57; groups are picker-only, not a filter. A group-as-filter is a later refinement.
+
+### Scope
+
+- Add/refactor: `TrainerSession.tsx`, `TrainerCasePicker.tsx` (grouped options), `trainerScramble.ts` (dispatcher).
+- Add: `src/data/oll.json`, `src/components/trainers/OllTrainer.tsx` (one-liner wrapper).
+- Update: `src/pages/Trainers.tsx` route for OLL.
+- Update: `src/data/pll.json` to include optional `group` field (same shape as OLL).
+
+### Alg-correctness test
+
+Add a test that exercises every case across all three data files. For each `(case, alg)`:
+1. Generate the scramble using `alg` and `algIndex` for that case.
+2. Apply `alg` to the scramble.
+3. Assert the resulting cube state is solved (via `cubing/puzzles` — `cube3x3x3.defaultPuzzleSpecificSimplifyOptions` or `Alg.experimentalIsIdentical` approach; whichever is cleanest).
+
+Catches curation typos early. Runs in CI with the rest of the test suite.
+
+### Acceptance criteria
+
+- `/trainers/oll` renders a working trainer with 57 cases, grouped in the picker.
+- Alg-correctness test passes for all 57 OLL cases plus all 21 PLL cases (regression).
+- Selecting a specific OLL case produces a scramble such that only the last-layer stickers are disturbed (F2L remains solved in the 3D preview).
+- PLL trainer still works unchanged.
+- Sub-nav highlights OLL when on `/trainers/oll`.
+
+---
+
+# Phase 10: F2L trainer (full 41)
+
+**Goal:** add a full F2L trainer at `/trainers/f2l` covering all 41 standard F2L cases, grouped by pair state.
+
+### Why F2L is trickier than PLL/OLL
+
+PLL and OLL are last-layer-only: their algs affect only LL stickers, so inverse-from-solved leaves a clean case. F2L cases need exactly one slot + the U-layer disturbed. This works if (and only if) every stored alg is written in the standard **front-right slot** convention using only `<R, U, F, L>` moves that don't break other slots. All standard F2L algs meet this constraint, so the infrastructure works — we just need to be disciplined in data curation and verify via the alg-correctness test.
+
+### F2L data (`src/data/f2l.json`)
+
+41 cases, each `{ id, name, group, algs[] }`. IDs follow the standard F2L case numbering (`"1"` through `"41"`), using the J. Perm / Cubeskills taxonomy. Groups:
+
+- Easy Cases                       — pair already connected, trivial insert
+- Corner in Top, Edge in Top       — both pieces on U-layer
+- Corner in Top, Edge in Middle    — edge in slot, corner on top
+- Corner in Slot, Edge in Top      — corner in slot, edge on top
+- Corner in Slot, Edge in Slot     — both pieces wrong in slot
+
+All algs written for the **front-right slot**. One canonical alg per case; 2 algs for cases where the community splits (e.g., cases where both an RUR' and LFL' mirror are commonly taught).
+
+### Scramble generation
+
+In `trainerScramble.ts`, the `f2l` branch:
+
+1. Pick case + alg (respecting "all" / "any" semantics).
+2. Compute `inverse = Alg(alg).invert()`.
+3. Pick a random **y-rotation** from `["", "y", "y'", "y2"]` — rotates the unsolved slot from FR to one of the four slots.
+4. Pick a random **AUF** from `["", "U", "U'", "U2"]` — varies top-layer orientation.
+5. Output: `y-rot AUF inverse-alg`.
+
+The y-rotation applied before the inverse makes the final cube state have the target pair in a rotated slot (FL, BL, BR, or FR). Same mechanism as PLL/OLL but with meaningfully different effect because F2L cases are slot-specific.
+
+### Routing & UI
+
+- `/trainers/f2l`: replace `ComingSoon` with `<TrainerSession type="f2l" />`.
+- `F2lTrainer.tsx` is a one-line wrapper around `TrainerSession`.
+- Picker uses `<optgroup>` with the five group labels above.
+
+### Scope
+
+- Add: `src/data/f2l.json` (41 cases).
+- Add: `src/components/trainers/F2lTrainer.tsx` (one-liner wrapper).
+- Update: `trainerScramble.ts` to handle the `f2l` type with y-rotation semantics.
+- Update: `src/pages/Trainers.tsx` route for F2L.
+- Extend alg-correctness test to cover all 41 F2L cases.
+
+### Acceptance criteria
+
+- `/trainers/f2l` renders a working trainer with 41 cases, grouped in the picker.
+- Alg-correctness test passes for all 41 F2L cases (plus the existing PLL + OLL coverage from prior phases).
+- Selecting a specific F2L case produces a scramble where exactly one slot's pair pieces and part of the U-layer are disturbed; the other three slots remain solved in the 3D preview.
+- Over ~20 consecutive scrambles for the same case, the y-rotation distributes the unsolved slot across all four slots.
+- PLL and OLL trainers still work unchanged.
+- Sub-nav highlights F2L when on `/trainers/f2l`.
+
+---
+
 ## Deferred / out of scope (intentional)
 
 For the future spec:
