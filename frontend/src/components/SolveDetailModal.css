@@ -1,0 +1,102 @@
+.solve-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.solve-detail-modal {
+  position: relative;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.75rem;
+  min-width: min(28rem, 90vw);
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.solve-detail-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+.solve-detail-time {
+  font-size: 2.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.solve-detail-date {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+.solve-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.solve-detail-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+.solve-detail-scramble {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.solve-detail-scramble code {
+  flex: 1;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  background: var(--color-panel);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  word-break: break-word;
+}
+.solve-detail-window {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-variant-numeric: tabular-nums;
+}
+.ao5-cell {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-panel);
+  color: var(--color-text-muted);
+}
+.ao5-cell.focused {
+  background: var(--color-orange, #c87a2c);
+  color: var(--color-text);
+  font-weight: 700;
+}
+.solve-detail-ao5 {
+  font-variant-numeric: tabular-nums;
+}
+.solve-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.detail-toggle.active {
+  background: var(--color-orange, #c87a2c);
+  color: var(--color-text);
+}
+.detail-delete {
+  margin-left: auto;
+  background: var(--color-red, #b91c1c);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
