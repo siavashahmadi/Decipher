@@ -1,0 +1,43 @@
+.scramble-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.scramble-history-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+.scramble-history-date { color: var(--color-text-muted); }
+.scramble-history-time { font-variant-numeric: tabular-nums; }
+.scramble-history-text {
+  color: var(--color-text-muted);
+  font-family: ui-monospace, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scramble-history-replay {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.scramble-history-replay:hover:not(:disabled) {
+  background: var(--color-panel);
+}
+.scramble-history-replay:disabled { opacity: 0.5; cursor: not-allowed; }
+.scramble-history-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
