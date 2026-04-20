@@ -20,6 +20,7 @@ describe('useScramblePreviewSettings', () => {
     const { result } = renderHook(() => useScramblePreviewSettings());
     expect(result.current.mode).toBe('2D');
     expect(result.current.collapsed).toBe(true);
+    expect(result.current.enabled).toBe(true);
   });
 
   it('setMode persists to localStorage', () => {
