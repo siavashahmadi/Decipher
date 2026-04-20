@@ -47,14 +47,12 @@ const SettingsPanel = ({
       </div>
 
       <div className="settings-row">
-        <span className="settings-row-label" id="preview-toggle-label">
-          3D scramble preview
-        </span>
+        <span className="settings-row-label">3D scramble preview</span>
         <button
           type="button"
           role="switch"
           aria-checked={previewEnabled}
-          aria-labelledby="preview-toggle-label"
+          aria-label="3D scramble preview"
           className={`settings-switch ${previewEnabled ? 'on' : 'off'}`}
           onClick={() => setPreviewEnabled(!previewEnabled)}
         >
