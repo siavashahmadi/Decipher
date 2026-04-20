@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import AppNav from '../components/AppNav';
 import PllTrainer from '../components/trainers/PllTrainer';
+import OllTrainer from '../components/trainers/OllTrainer';
 import ComingSoon from '../components/trainers/ComingSoon';
 import './Trainers.css';
 
@@ -41,7 +42,7 @@ const TrainersPage = (): React.ReactElement => (
     <Routes>
       <Route index element={<Navigate to="pll" replace />} />
       <Route path="pll" element={<PllTrainer />} />
-      <Route path="oll" element={<ComingSoon title="OLL Trainer" />} />
+      <Route path="oll" element={<OllTrainer />} />
       <Route path="f2l" element={<ComingSoon title="F2L Trainer" />} />
       <Route path="*" element={<Navigate to="pll" replace />} />
     </Routes>
