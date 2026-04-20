@@ -1,0 +1,14 @@
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.ss-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem;
+  background: var(--color-panel);
+  border-radius: 8px;
+}
+.ss-item span { color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; }
+.ss-item b { color: var(--color-text); font-size: 1.25rem; margin-top: 0.25rem; font-weight: 600; }
