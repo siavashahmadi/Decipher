@@ -8,6 +8,7 @@ import ScramblePreview from './ScramblePreview';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import useScrambleQueue from '../hooks/useScrambleQueue';
+import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import api from '../services/api';
 import {
   getGuestSolves,
@@ -46,6 +47,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
   const [solves, setSolves] = useState<Solve[]>([]);
   const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
+  const { enabled: previewEnabled } = useScramblePreviewSettings();
   const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
 
   // SD-2: Cursor-based pagination state
@@ -327,16 +329,20 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
                 >
                   Stats
                 </button>
-                <button
-                  type="button"
-                  className={`hub-tab${hubTab === 'preview' ? ' active' : ''}`}
-                  onClick={() => setHubTab('preview')}
-                  aria-pressed={hubTab === 'preview'}
-                >
-                  Preview
-                </button>
+                {previewEnabled && (
+                  <button
+                    type="button"
+                    className={`hub-tab${hubTab === 'preview' ? ' active' : ''}`}
+                    onClick={() => setHubTab('preview')}
+                    aria-pressed={hubTab === 'preview'}
+                  >
+                    Preview
+                  </button>
+                )}
               </div>
-              {hubTab === 'stats' ? (
+              {previewEnabled && hubTab === 'preview' ? (
+                <ScramblePreview puzzleType={puzzleType} scramble={currentScramble} />
+              ) : (
                 <SolveHub
                   solves={solves}
                   recentSolves={recentSolves}
@@ -344,8 +350,6 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
                   lastPercentile={lastPercentile}
                   currentMedian={currentMedian}
                 />
-              ) : (
-                <ScramblePreview puzzleType={puzzleType} scramble={currentScramble} />
               )}
             </div>
           </div>
