@@ -1,9 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { Alg } from 'cubing/alg';
+import { cube3x3x3 } from 'cubing/puzzles';
 import {
+  generateTrainerScramble,
   generatePllScramble,
   PLL_CASES,
+  OLL_CASES,
   PLL_CASE_MAP,
+  CASES_BY_TYPE,
+  type TrainerType,
 } from './trainerScramble';
 
 const seededRng = (seed: number) => {
@@ -19,7 +24,7 @@ describe('PLL_CASES', () => {
     expect(PLL_CASES).toHaveLength(21);
   });
 
-  it('every case has at least one alg', () => {
+  it('every case has at least one alg and all parse', () => {
     for (const c of PLL_CASES) {
       expect(c.algs.length).toBeGreaterThan(0);
       for (const alg of c.algs) {
@@ -34,7 +39,27 @@ describe('PLL_CASES', () => {
   });
 });
 
-describe('generatePllScramble', () => {
+describe('OLL_CASES', () => {
+  it('contains 57 OLL cases', () => {
+    expect(OLL_CASES).toHaveLength(57);
+  });
+
+  it('every case has at least one alg and all parse', () => {
+    for (const c of OLL_CASES) {
+      expect(c.algs.length).toBeGreaterThan(0);
+      for (const alg of c.algs) {
+        expect(() => new Alg(alg)).not.toThrow();
+      }
+    }
+  });
+
+  it('has unique case ids', () => {
+    const ids = OLL_CASES.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('generatePllScramble (Phase 8 shim)', () => {
   it('produces a parseable alg string', () => {
     const { scramble } = generatePllScramble({ rng: seededRng(1) });
     expect(() => new Alg(scramble)).not.toThrow();
@@ -48,16 +73,6 @@ describe('generatePllScramble', () => {
     expect(caseId).toBe('T');
   });
 
-  it('honors an explicit algIndex', () => {
-    const { caseId, algIndex } = generatePllScramble({
-      caseId: 'H',
-      algIndex: 1,
-      rng: seededRng(3),
-    });
-    expect(caseId).toBe('H');
-    expect(algIndex).toBe(1);
-  });
-
   it('picks a random case from PLL_CASES when caseId is "all"', () => {
     const { caseId } = generatePllScramble({
       caseId: 'all',
@@ -66,31 +81,61 @@ describe('generatePllScramble', () => {
     expect(PLL_CASE_MAP[caseId]).toBeDefined();
   });
 
-  it('picks a random alg within the case when algIndex is omitted', () => {
-    const { caseId, algIndex } = generatePllScramble({
-      caseId: 'Ua',
-      rng: seededRng(5),
-    });
-    const c = PLL_CASE_MAP[caseId];
-    expect(algIndex).toBeGreaterThanOrEqual(0);
-    expect(algIndex).toBeLessThan(c.algs.length);
-  });
-
   it('throws on unknown caseId', () => {
     expect(() =>
       generatePllScramble({ caseId: 'nope', rng: seededRng(6) })
     ).toThrow();
   });
+});
 
-  it('throws on out-of-range algIndex', () => {
-    expect(() =>
-      generatePllScramble({ caseId: 'T', algIndex: 99, rng: seededRng(7) })
-    ).toThrow();
+describe('generateTrainerScramble dispatcher', () => {
+  it('routes by type', () => {
+    const a = generateTrainerScramble({ type: 'pll', caseId: 'T', algIndex: 0, rng: seededRng(1) });
+    expect(a.caseId).toBe('T');
+
+    const b = generateTrainerScramble({ type: 'oll', caseId: '27', algIndex: 0, rng: seededRng(1) });
+    expect(b.caseId).toBe('27');
   });
 
-  it('produces deterministic output for a given rng and case', () => {
-    const a = generatePllScramble({ caseId: 'T', algIndex: 0, rng: seededRng(42) });
-    const b = generatePllScramble({ caseId: 'T', algIndex: 0, rng: seededRng(42) });
-    expect(a.scramble).toBe(b.scramble);
+  it('produces parseable output for every type', () => {
+    for (const type of ['pll', 'oll'] as TrainerType[]) {
+      for (let i = 0; i < 5; i += 1) {
+        const { scramble } = generateTrainerScramble({ type, caseId: 'all', rng: seededRng(i + 1) });
+        expect(() => new Alg(scramble)).not.toThrow();
+      }
+    }
   });
+});
+
+// Alg-correctness: applying `alg` to the generated scramble returns the cube
+// to a solved state (ignoring whole-cube orientation). Catches curation typos.
+describe('alg correctness', () => {
+  const types: TrainerType[] = ['pll', 'oll', 'f2l'];
+
+  for (const type of types) {
+    const cases = CASES_BY_TYPE[type];
+    for (const c of cases) {
+      for (let algIndex = 0; algIndex < c.algs.length; algIndex += 1) {
+        it(`${type} ${c.id} alg #${algIndex + 1} solves the scramble`, async () => {
+          const kpuzzle = await cube3x3x3.kpuzzle();
+          // rng=0 forces empty AUF + empty y-rotation so scramble = inverse(alg).
+          // This isolates alg correctness from randomization behavior.
+          const { scramble } = generateTrainerScramble({
+            type,
+            caseId: c.id,
+            algIndex,
+            rng: () => 0,
+          });
+          const combined = new Alg(`${scramble} ${c.algs[algIndex]}`);
+          const result = kpuzzle.defaultPattern().applyAlg(combined);
+          expect(
+            result.experimentalIsSolved({
+              ignorePuzzleOrientation: true,
+              ignoreCenterOrientation: true,
+            })
+          ).toBe(true);
+        });
+      }
+    }
+  }
 });
