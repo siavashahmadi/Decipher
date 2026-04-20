@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 export type PreviewMode = '3D' | '2D';
 
@@ -30,7 +31,15 @@ const readInitial = (): { mode: PreviewMode; collapsed: boolean; enabled: boolea
   }
 };
 
-const useScramblePreviewSettings = (): ScramblePreviewSettings => {
+const ScramblePreviewSettingsContext = createContext<ScramblePreviewSettings | null>(null);
+
+interface ScramblePreviewSettingsProviderProps {
+  children: ReactNode;
+}
+
+export const ScramblePreviewSettingsProvider = ({
+  children,
+}: ScramblePreviewSettingsProviderProps): React.ReactElement => {
   const [state, setState] = useState(readInitial);
 
   useEffect(() => {
@@ -49,7 +58,7 @@ const useScramblePreviewSettings = (): ScramblePreviewSettings => {
     setState(prev => ({ ...prev, enabled }));
   }, []);
 
-  return {
+  const value: ScramblePreviewSettings = {
     mode: state.mode,
     collapsed: state.collapsed,
     enabled: state.enabled,
@@ -57,6 +66,22 @@ const useScramblePreviewSettings = (): ScramblePreviewSettings => {
     setCollapsed,
     setEnabled,
   };
+
+  return (
+    <ScramblePreviewSettingsContext.Provider value={value}>
+      {children}
+    </ScramblePreviewSettingsContext.Provider>
+  );
+};
+
+const useScramblePreviewSettings = (): ScramblePreviewSettings => {
+  const ctx = useContext(ScramblePreviewSettingsContext);
+  if (!ctx) {
+    throw new Error(
+      'useScramblePreviewSettings must be used within a ScramblePreviewSettingsProvider',
+    );
+  }
+  return ctx;
 };
 
 export default useScramblePreviewSettings;
