@@ -6,6 +6,8 @@ import SolveLog from './SolveLog';
 import SolveHub from './SolveHub';
 import ScramblePreview from './ScramblePreview';
 import SolveDetailModal from './SolveDetailModal';
+import HotkeyHelp from './HotkeyHelp';
+import useHotkeys from '../hooks/useHotkeys';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import useScrambleQueue from '../hooks/useScrambleQueue';
@@ -49,6 +51,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const [solves, setSolves] = useState<Solve[]>([]);
   const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { enabled: previewEnabled } = useScramblePreviewSettings();
   const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
 
@@ -300,6 +303,27 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const mostRecent = solves[0] ?? null;
+
+  useHotkeys(
+    {
+      '2': () => {
+        if (mostRecent) handleSolveUpdate({ ...mostRecent, plus_two: !mostRecent.plus_two });
+      },
+      'd': () => {
+        if (mostRecent) handleSolveUpdate({ ...mostRecent, dnf: !mostRecent.dnf });
+      },
+      'Shift+d': () => {
+        if (mostRecent && window.confirm('Delete most recent solve?')) {
+          handleSolveDelete(mostRecent);
+        }
+      },
+      '?': () => setHelpOpen(true),
+      'Shift+?': () => setHelpOpen(true),
+    },
+    selectedIndex === null && !helpOpen,
+  );
+
   const selectedSolve = selectedIndex !== null ? solves[selectedIndex] ?? null : null;
   const detailWindowStart = selectedIndex === null ? 0 : Math.max(0, selectedIndex - 2);
   const detailWindow = selectedIndex === null
@@ -376,6 +400,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
           </div>
         </div>
       </div>
+      {helpOpen && <HotkeyHelp onClose={() => setHelpOpen(false)} />}
       {selectedSolve && (
         <SolveDetailModal
           solve={selectedSolve}
