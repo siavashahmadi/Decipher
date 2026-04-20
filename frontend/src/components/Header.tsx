@@ -40,7 +40,11 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
     soundEnabled, setSoundEnabled,
     holdMs, setHoldMs,
   } = useSettings();
-  const { enabled, setEnabled, mode, setMode } = useScramblePreviewSettings();
+  const {
+    enabled, setEnabled,
+    mode, setMode,
+    showHintFacelets, setShowHintFacelets,
+  } = useScramblePreviewSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -120,6 +124,8 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
             setPreviewEnabled={setEnabled}
             previewMode={mode}
             setPreviewMode={setMode}
+            showHintFacelets={showHintFacelets}
+            setShowHintFacelets={setShowHintFacelets}
           />
         )}
       </div>

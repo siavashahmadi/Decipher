@@ -10,7 +10,7 @@ interface ScramblePreviewProps {
 }
 
 const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.ReactElement => {
-  const { mode, collapsed, setCollapsed } = useScramblePreviewSettings();
+  const { mode, collapsed, setCollapsed, showHintFacelets } = useScramblePreviewSettings();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<HTMLElement | null>(null);
   const twistyPuzzle = scrambleEventToTwisty(puzzleType);
@@ -30,6 +30,7 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.
         background: 'none',
         controlPanel: 'none',
         visualization: mode,
+        hintFacelets: showHintFacelets ? 'floating' : 'none',
       });
       playerRef.current = player as unknown as HTMLElement;
       stage.appendChild(player);
@@ -59,6 +60,13 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.
       player.visualization = mode;
     }
   }, [mode]);
+
+  useEffect(() => {
+    const player = playerRef.current as unknown as { hintFacelets?: string } | null;
+    if (player) {
+      player.hintFacelets = showHintFacelets ? 'floating' : 'none';
+    }
+  }, [showHintFacelets]);
 
   return (
     <div className={`scramble-preview${collapsed ? ' collapsed' : ''}`}>

@@ -15,6 +15,8 @@ const baseProps = {
   setPreviewEnabled: vi.fn(),
   previewMode: '3D' as const,
   setPreviewMode: vi.fn(),
+  showHintFacelets: false,
+  setShowHintFacelets: vi.fn(),
 };
 
 describe('SettingsPanel', () => {

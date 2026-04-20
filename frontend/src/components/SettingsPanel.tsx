@@ -16,6 +16,8 @@ interface SettingsPanelProps {
   setPreviewEnabled: (enabled: boolean) => void;
   previewMode: PreviewMode;
   setPreviewMode: (mode: PreviewMode) => void;
+  showHintFacelets: boolean;
+  setShowHintFacelets: (show: boolean) => void;
 }
 
 const THEMES: Theme[] = ['system', 'light', 'dark'];
@@ -28,6 +30,7 @@ const SettingsPanel = ({
   holdMs, setHoldMs,
   previewEnabled, setPreviewEnabled,
   previewMode, setPreviewMode,
+  showHintFacelets, setShowHintFacelets,
 }: SettingsPanelProps): React.ReactElement => {
   return (
     <div className="settings-panel" role="dialog" aria-label="Settings">
@@ -128,6 +131,22 @@ const SettingsPanel = ({
               2D
             </button>
           </div>
+        </div>
+      )}
+
+      {previewEnabled && previewMode === '3D' && (
+        <div className="settings-row">
+          <span className="settings-row-label">Hint facelets</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showHintFacelets}
+            aria-label="Hint facelets"
+            className={`settings-switch ${showHintFacelets ? 'on' : 'off'}`}
+            onClick={() => setShowHintFacelets(!showHintFacelets)}
+          >
+            {showHintFacelets ? 'On' : 'Off'}
+          </button>
         </div>
       )}
     </div>
