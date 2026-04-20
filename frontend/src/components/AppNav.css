@@ -1,0 +1,17 @@
+.app-nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: 1rem;
+}
+.app-nav-link {
+  padding: 0.4rem 0.75rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.app-nav-link:hover { color: var(--color-text); }
+.app-nav-link.active {
+  color: var(--color-text);
+  background: var(--color-panel);
+}

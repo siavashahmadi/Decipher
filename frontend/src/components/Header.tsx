@@ -3,6 +3,7 @@ import { supabase } from '../services/auth';
 import { useSettings } from '../hooks/useSettings';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import SettingsPanel from './SettingsPanel';
+import AppNav from './AppNav';
 import type { PuzzleType } from '../types';
 import './Header.css';
 
@@ -75,6 +76,7 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
 
   return (
     <header className="header">
+      <AppNav />
       <div className="title-container">
         <h1 className="title">Ao5</h1>
       </div>
