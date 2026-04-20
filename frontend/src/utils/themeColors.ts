@@ -1,4 +1,4 @@
-import type { Theme } from '../hooks/useTheme';
+import type { EffectiveTheme } from '../hooks/useSettings';
 
 export interface ChartColors {
   axis: string;
@@ -6,7 +6,7 @@ export interface ChartColors {
   pb: string;
 }
 
-const palette: Record<Theme, ChartColors> = {
+const palette: Record<EffectiveTheme, ChartColors> = {
   dark: {
     axis:   '#e4e4e4',
     recent: '#3dc942',
@@ -19,4 +19,4 @@ const palette: Record<Theme, ChartColors> = {
   },
 };
 
-export const chartColors = (theme: Theme): ChartColors => palette[theme];
+export const chartColors = (theme: EffectiveTheme): ChartColors => palette[theme];

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatTime } from '../utils/formatTime';
-import { useTheme } from '../hooks/useTheme';
+import { useSettings } from '../hooks/useSettings';
 import { chartColors } from '../utils/themeColors';
 import type { Solve, PersonalBest } from '../types';
 import './SolveHub.css';
@@ -98,8 +98,8 @@ const SolveHub = ({
     }));
   }, [pbHistory]);
 
-  const { theme } = useTheme();
-  const colors = chartColors(theme);
+  const { effectiveTheme } = useSettings();
+  const colors = chartColors(effectiveTheme);
 
   if (!stats) return (
     <div className="solve-hub empty-state">

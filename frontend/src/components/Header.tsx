@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/auth';
-import { useTheme } from '../hooks/useTheme';
+import { useSettings } from '../hooks/useSettings';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import SettingsPanel from './SettingsPanel';
 import type { PuzzleType } from '../types';
@@ -33,7 +33,7 @@ interface HeaderProps {
 }
 
 const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useSettings();
   const { enabled, setEnabled, mode, setMode } = useScramblePreviewSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);

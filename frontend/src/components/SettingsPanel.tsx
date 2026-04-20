@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Theme } from '../hooks/useTheme';
+import type { Theme } from '../hooks/useSettings';
 import type { PreviewMode } from '../hooks/useScramblePreviewSettings';
 import './SettingsPanel.css';
 
