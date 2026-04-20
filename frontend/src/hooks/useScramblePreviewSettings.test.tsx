@@ -42,4 +42,28 @@ describe('useScramblePreviewSettings', () => {
     expect(result.current.mode).toBe('3D');
     expect(result.current.collapsed).toBe(false);
   });
+
+  it('defaults enabled=true when storage is empty', () => {
+    const { result } = renderHook(() => useScramblePreviewSettings());
+    expect(result.current.enabled).toBe(true);
+  });
+
+  it('hydrates enabled from localStorage', () => {
+    localStorage.setItem(KEY, JSON.stringify({ mode: '3D', collapsed: false, enabled: false }));
+    const { result } = renderHook(() => useScramblePreviewSettings());
+    expect(result.current.enabled).toBe(false);
+  });
+
+  it('setEnabled persists to localStorage', () => {
+    const { result } = renderHook(() => useScramblePreviewSettings());
+    act(() => result.current.setEnabled(false));
+    expect(result.current.enabled).toBe(false);
+    expect(JSON.parse(localStorage.getItem(KEY)!).enabled).toBe(false);
+  });
+
+  it('falls back to enabled=true when the stored value is not a boolean', () => {
+    localStorage.setItem(KEY, JSON.stringify({ mode: '3D', collapsed: false, enabled: 'yes' }));
+    const { result } = renderHook(() => useScramblePreviewSettings());
+    expect(result.current.enabled).toBe(true);
+  });
 });
