@@ -5,6 +5,7 @@ import Header from './Header';
 import SolveLog from './SolveLog';
 import SolveHub from './SolveHub';
 import ScramblePreview from './ScramblePreview';
+import SolveDetailModal from './SolveDetailModal';
 import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import useScrambleQueue from '../hooks/useScrambleQueue';
@@ -47,6 +48,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
   const [solves, setSolves] = useState<Solve[]>([]);
   const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { enabled: previewEnabled } = useScramblePreviewSettings();
   const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
 
@@ -298,6 +300,13 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const selectedSolve = selectedIndex !== null ? solves[selectedIndex] ?? null : null;
+  const detailWindowStart = selectedIndex === null ? 0 : Math.max(0, selectedIndex - 2);
+  const detailWindow = selectedIndex === null
+    ? []
+    : solves.slice(detailWindowStart, Math.min(solves.length, selectedIndex + 3));
+  const detailWindowIndex = selectedIndex === null ? 0 : selectedIndex - detailWindowStart;
+
   return (
     <div className="solve-session">
       <Header
@@ -358,7 +367,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
               solves={solves}
               onSolveUpdate={handleSolveUpdate}
               onSolveDelete={handleSolveDelete}
-              onSolveClick={() => { /* wired in Task 11 */ }}
+              onSolveClick={(_, idx) => setSelectedIndex(idx)}
               onReset={resetTimer}
               onLoadMore={loadMore}
               hasMore={!!nextCursor}
@@ -367,6 +376,16 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
           </div>
         </div>
       </div>
+      {selectedSolve && (
+        <SolveDetailModal
+          solve={selectedSolve}
+          window={detailWindow}
+          index={detailWindowIndex}
+          onClose={() => setSelectedIndex(null)}
+          onUpdate={s => { handleSolveUpdate(s); setSelectedIndex(null); }}
+          onDelete={s => handleSolveDelete(s)}
+        />
+      )}
     </div>
   );
 };
