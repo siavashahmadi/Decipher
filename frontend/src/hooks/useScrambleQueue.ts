@@ -7,6 +7,7 @@ export interface UseScrambleQueueResult {
   nextScramble: string | null;
   loading: boolean;
   advance: () => void;
+  override: (scramble: string) => void;
 }
 
 const useScrambleQueue = (puzzleType: PuzzleType): UseScrambleQueueResult => {
@@ -31,11 +32,16 @@ const useScrambleQueue = (puzzleType: PuzzleType): UseScrambleQueueResult => {
     queueRef.current!.advance();
   }, []);
 
+  const override = useCallback((scramble: string) => {
+    queueRef.current!.override(scramble);
+  }, []);
+
   return {
     currentScramble: snap.currentScramble,
     nextScramble: snap.nextScramble,
     loading: snap.currentScramble === null,
     advance,
+    override,
   };
 };
 

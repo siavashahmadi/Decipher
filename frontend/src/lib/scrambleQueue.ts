@@ -36,6 +36,12 @@ export class ScrambleQueue {
     void this.fillNext(this.generationId);
   }
 
+  override(scramble: string): void {
+    this.generationId += 1;
+    this.current = scramble;
+    this.emit();
+  }
+
   snapshot(): ScrambleQueueSnapshot {
     return { currentScramble: this.current, nextScramble: this.next };
   }

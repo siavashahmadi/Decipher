@@ -87,4 +87,14 @@ describe('useScrambleQueue', () => {
     expect(result.current.currentScramble?.startsWith('444-')).toBe(true);
     expect(result.current.nextScramble?.startsWith('444-')).toBe(true);
   });
+
+  it('override() sets currentScramble without regenerating next', async () => {
+    const { result } = renderHook(() => useScrambleQueue('333'));
+    await act(async () => { await flushAll(); });
+    await waitFor(() => expect(result.current.currentScramble).not.toBeNull());
+    const originalNext = result.current.nextScramble;
+    act(() => { result.current.override("R U R' U'"); });
+    expect(result.current.currentScramble).toBe("R U R' U'");
+    expect(result.current.nextScramble).toBe(originalNext);
+  });
 });
