@@ -10,7 +10,7 @@ interface ScramblePreviewProps {
 }
 
 const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.ReactElement => {
-  const { mode, collapsed, setMode, setCollapsed } = useScramblePreviewSettings();
+  const { mode, collapsed, setCollapsed } = useScramblePreviewSettings();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<HTMLElement | null>(null);
   const twistyPuzzle = scrambleEventToTwisty(puzzleType);
@@ -77,26 +77,6 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.
         >
           {collapsed ? '\u25BE' : '\u25B4'}
         </button>
-        {supported && !collapsed && (
-          <>
-            <button
-              type="button"
-              className={`scramble-preview-mode-btn${mode === '3D' ? ' active' : ''}`}
-              onClick={() => setMode('3D')}
-              aria-pressed={mode === '3D'}
-            >
-              3D
-            </button>
-            <button
-              type="button"
-              className={`scramble-preview-mode-btn${mode === '2D' ? ' active' : ''}`}
-              onClick={() => setMode('2D')}
-              aria-pressed={mode === '2D'}
-            >
-              2D
-            </button>
-          </>
-        )}
       </div>
     </div>
   );
