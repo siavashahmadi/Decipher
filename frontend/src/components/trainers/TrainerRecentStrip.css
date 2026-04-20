@@ -1,0 +1,30 @@
+.trainer-recent-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.trainer-recent-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted, #888);
+}
+
+.trainer-recent-entry {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--color-border, #333);
+  border-radius: 4px;
+  background: var(--color-panel, transparent);
+}
+
+.trainer-recent-empty {
+  color: var(--color-text-muted, #888);
+  font-size: 0.85rem;
+  font-style: italic;
+}

@@ -1,0 +1,50 @@
+.trainer-case-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface, transparent);
+  border: 1px solid var(--color-border, #333);
+  border-radius: 6px;
+}
+
+.trainer-case-picker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #aaa);
+}
+
+.trainer-case-picker-field select {
+  background: var(--color-panel, #222);
+  color: var(--color-text);
+  border: 1px solid var(--color-border, #444);
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  min-width: 10rem;
+  max-width: 22rem;
+}
+
+.trainer-case-picker-field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trainer-skip-btn {
+  background: var(--color-panel, #222);
+  color: var(--color-text);
+  border: 1px solid var(--color-border, #444);
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.trainer-skip-btn:hover {
+  border-color: var(--color-accent, #f80);
+}
