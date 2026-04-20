@@ -3,7 +3,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import AppNav from '../components/AppNav';
 import PllTrainer from '../components/trainers/PllTrainer';
 import OllTrainer from '../components/trainers/OllTrainer';
-import ComingSoon from '../components/trainers/ComingSoon';
+import F2lTrainer from '../components/trainers/F2lTrainer';
 import './Trainers.css';
 
 const TrainerSubNav = (): React.ReactElement => (
@@ -43,7 +43,7 @@ const TrainersPage = (): React.ReactElement => (
       <Route index element={<Navigate to="pll" replace />} />
       <Route path="pll" element={<PllTrainer />} />
       <Route path="oll" element={<OllTrainer />} />
-      <Route path="f2l" element={<ComingSoon title="F2L Trainer" />} />
+      <Route path="f2l" element={<F2lTrainer />} />
       <Route path="*" element={<Navigate to="pll" replace />} />
     </Routes>
   </div>
