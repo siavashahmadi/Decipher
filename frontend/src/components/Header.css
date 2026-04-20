@@ -110,8 +110,14 @@
   background-color: var(--color-surface-hover);
 }
 
-.theme-toggle {
+.settings-wrapper {
+  position: relative;
   margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.settings-button {
   padding: 8px 10px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -123,7 +129,12 @@
   transition: background-color 0.2s, border-color 0.2s;
 }
 
-.theme-toggle:hover {
+.settings-button:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
+.settings-button[aria-expanded="true"] {
   background-color: var(--color-surface-hover);
   border-color: var(--color-border-hover);
 }

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/auth';
 import { useTheme } from '../hooks/useTheme';
+import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
+import SettingsPanel from './SettingsPanel';
 import type { PuzzleType } from '../types';
 import './Header.css';
 
@@ -31,7 +33,31 @@ interface HeaderProps {
 }
 
 const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
-  const { theme, toggle } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const { enabled, setEnabled, mode, setMode } = useScramblePreviewSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const handlePointer = (event: MouseEvent) => {
+      if (
+        settingsWrapperRef.current &&
+        !settingsWrapperRef.current.contains(event.target as Node)
+      ) {
+        setSettingsOpen(false);
+      }
+    };
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSettingsOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [settingsOpen]);
 
   const handleLogout = async () => {
     try {
@@ -61,14 +87,29 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
           <option key={p.value} value={p.value}>{p.label}</option>
         ))}
       </select>
-      <button
-        className="theme-toggle"
-        onClick={toggle}
-        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        {theme === 'dark' ? '☀' : '☾'}
-      </button>
+      <div className="settings-wrapper" ref={settingsWrapperRef}>
+        <button
+          type="button"
+          className="settings-button"
+          aria-label="Settings"
+          aria-haspopup="dialog"
+          aria-expanded={settingsOpen}
+          title="Settings"
+          onClick={() => setSettingsOpen(prev => !prev)}
+        >
+          {'\u2699'}
+        </button>
+        {settingsOpen && (
+          <SettingsPanel
+            theme={theme}
+            setTheme={setTheme}
+            previewEnabled={enabled}
+            setPreviewEnabled={setEnabled}
+            previewMode={mode}
+            setPreviewMode={setMode}
+          />
+        )}
+      </div>
       {isGuest ? (
         <button className="sign-in-button" onClick={onSignIn}>
           Sign In
