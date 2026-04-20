@@ -10,6 +10,7 @@ import ActivityHeatmap from '../components/stats/ActivityHeatmap';
 import useAllSolves from '../hooks/useAllSolves';
 import { computeSummary } from '../utils/statsBuckets';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
+import { buildCsv, downloadCsv } from '../utils/exportCsv';
 import type { PuzzleType } from '../types';
 import './Stats.css';
 
@@ -43,6 +44,12 @@ const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement =>
   const filteredSolves = useMemo(() => filterSolvesByRange(solves, bounds), [solves, bounds]);
   const summary = useMemo(() => computeSummary(filteredSolves), [filteredSolves]);
 
+  const handleExport = (): void => {
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = `decipher-${puzzleType}-${today}.csv`;
+    downloadCsv(filename, buildCsv(filteredSolves));
+  };
+
   const heatmapFrom = useMemo(() => bounds.start ?? (solves.length
     ? new Date(solves[solves.length - 1].created_at)
     : new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)), [bounds.start, solves]);
@@ -70,6 +77,15 @@ const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement =>
             onPresetChange={setPreset}
             onCustomChange={(s, e) => { setCustomStart(s); setCustomEnd(e); }}
           />
+          <button
+            type="button"
+            className="stats-export-btn"
+            onClick={handleExport}
+            disabled={filteredSolves.length === 0}
+            aria-label="Export filtered solves to CSV"
+          >
+            Export CSV
+          </button>
         </div>
 
         {loading ? (
