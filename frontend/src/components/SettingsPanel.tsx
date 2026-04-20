@@ -6,19 +6,28 @@ import './SettingsPanel.css';
 interface SettingsPanelProps {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  inspectionEnabled: boolean;
+  setInspectionEnabled: (v: boolean) => void;
+  soundEnabled: boolean;
+  setSoundEnabled: (v: boolean) => void;
+  holdMs: number;
+  setHoldMs: (ms: number) => void;
   previewEnabled: boolean;
   setPreviewEnabled: (enabled: boolean) => void;
   previewMode: PreviewMode;
   setPreviewMode: (mode: PreviewMode) => void;
 }
 
+const THEMES: Theme[] = ['system', 'light', 'dark'];
+const themeLabel = (t: Theme): string => t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark';
+
 const SettingsPanel = ({
-  theme,
-  setTheme,
-  previewEnabled,
-  setPreviewEnabled,
-  previewMode,
-  setPreviewMode,
+  theme, setTheme,
+  inspectionEnabled, setInspectionEnabled,
+  soundEnabled, setSoundEnabled,
+  holdMs, setHoldMs,
+  previewEnabled, setPreviewEnabled,
+  previewMode, setPreviewMode,
 }: SettingsPanelProps): React.ReactElement => {
   return (
     <div className="settings-panel" role="dialog" aria-label="Settings">
@@ -27,23 +36,61 @@ const SettingsPanel = ({
       <div className="settings-row">
         <span className="settings-row-label">Theme</span>
         <div className="settings-segmented">
-          <button
-            type="button"
-            className={theme === 'light' ? 'active' : ''}
-            aria-pressed={theme === 'light'}
-            onClick={() => setTheme('light')}
-          >
-            Light
-          </button>
-          <button
-            type="button"
-            className={theme === 'dark' ? 'active' : ''}
-            aria-pressed={theme === 'dark'}
-            onClick={() => setTheme('dark')}
-          >
-            Dark
-          </button>
+          {THEMES.map(t => (
+            <button
+              key={t}
+              type="button"
+              className={theme === t ? 'active' : ''}
+              aria-pressed={theme === t}
+              onClick={() => setTheme(t)}
+            >
+              {themeLabel(t)}
+            </button>
+          ))}
         </div>
+      </div>
+
+      <div className="settings-row">
+        <span className="settings-row-label">Inspection</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={inspectionEnabled}
+          aria-label="Inspection"
+          className={`settings-switch ${inspectionEnabled ? 'on' : 'off'}`}
+          onClick={() => setInspectionEnabled(!inspectionEnabled)}
+        >
+          {inspectionEnabled ? 'On' : 'Off'}
+        </button>
+      </div>
+
+      <div className="settings-row">
+        <span className="settings-row-label">Sound</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={soundEnabled}
+          aria-label="Sound"
+          className={`settings-switch ${soundEnabled ? 'on' : 'off'}`}
+          onClick={() => setSoundEnabled(!soundEnabled)}
+        >
+          {soundEnabled ? 'On' : 'Off'}
+        </button>
+      </div>
+
+      <div className="settings-row settings-row-stack">
+        <span className="settings-row-label">
+          Hold-to-start delay <span className="settings-hold-value">{holdMs} ms</span>
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={1000}
+          step={50}
+          value={holdMs}
+          aria-label="Hold-to-start delay milliseconds"
+          onChange={e => setHoldMs(Number(e.target.value))}
+        />
       </div>
 
       <div className="settings-row">

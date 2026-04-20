@@ -33,7 +33,12 @@ interface HeaderProps {
 }
 
 const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
-  const { theme, setTheme } = useSettings();
+  const {
+    theme, setTheme,
+    inspectionEnabled, setInspectionEnabled,
+    soundEnabled, setSoundEnabled,
+    holdMs, setHoldMs,
+  } = useSettings();
   const { enabled, setEnabled, mode, setMode } = useScramblePreviewSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
@@ -103,6 +108,12 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
           <SettingsPanel
             theme={theme}
             setTheme={setTheme}
+            inspectionEnabled={inspectionEnabled}
+            setInspectionEnabled={setInspectionEnabled}
+            soundEnabled={soundEnabled}
+            setSoundEnabled={setSoundEnabled}
+            holdMs={holdMs}
+            setHoldMs={setHoldMs}
             previewEnabled={enabled}
             setPreviewEnabled={setEnabled}
             previewMode={mode}

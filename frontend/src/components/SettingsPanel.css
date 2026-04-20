@@ -71,3 +71,17 @@
   color: #111;
   border-color: var(--color-orange);
 }
+
+.settings-row-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+.settings-row-stack input[type="range"] {
+  width: 100%;
+}
+.settings-hold-value {
+  margin-left: 0.5rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
