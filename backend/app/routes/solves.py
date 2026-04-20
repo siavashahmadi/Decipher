@@ -50,7 +50,8 @@ def get_solves():
     try:
         query = (request.supabase.table('solves')
                  .select('*')
-                 .eq('user_id', request.user_id))
+                 .eq('user_id', request.user_id)
+                 .is_('deleted_at', None))
         if puzzle_type:
             query = query.eq('puzzle_type', puzzle_type)
         if cursor:
@@ -160,9 +161,10 @@ def update_solve(solve_id):
 def delete_solve(solve_id):
     try:
         result = (request.supabase.table('solves')
-                  .delete()
+                  .update({'deleted_at': 'now()'})
                   .eq('id', solve_id)
                   .eq('user_id', request.user_id)
+                  .is_('deleted_at', None)
                   .execute())
         if not result.data:
             return jsonify({"error": "Solve not found"}), 404
