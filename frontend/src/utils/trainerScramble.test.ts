@@ -6,6 +6,7 @@ import {
   generatePllScramble,
   PLL_CASES,
   OLL_CASES,
+  F2L_CASES,
   PLL_CASE_MAP,
   CASES_BY_TYPE,
   type TrainerType,
@@ -55,6 +56,26 @@ describe('OLL_CASES', () => {
 
   it('has unique case ids', () => {
     const ids = OLL_CASES.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('F2L_CASES', () => {
+  it('contains 41 F2L cases', () => {
+    expect(F2L_CASES).toHaveLength(41);
+  });
+
+  it('every case has at least one alg and all parse', () => {
+    for (const c of F2L_CASES) {
+      expect(c.algs.length).toBeGreaterThan(0);
+      for (const alg of c.algs) {
+        expect(() => new Alg(alg)).not.toThrow();
+      }
+    }
+  });
+
+  it('has unique case ids', () => {
+    const ids = F2L_CASES.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
