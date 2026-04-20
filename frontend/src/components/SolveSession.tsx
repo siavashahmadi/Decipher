@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Timer from './Timer';
 import Scramble from './Scramble';
 import Header from './Header';
@@ -53,7 +54,34 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const { enabled: previewEnabled } = useScramblePreviewSettings();
-  const { currentScramble, loading: scrambleLoading, advance: advanceScramble } = useScrambleQueue(puzzleType);
+  const { currentScramble, loading: scrambleLoading, advance: advanceScramble, override: overrideScramble } = useScrambleQueue(puzzleType);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Apply a replayed scramble passed via router location state (e.g. from solve
+  // history "retry" action). After applying we clear the state so a page
+  // refresh does not re-apply the same scramble.
+  //
+  // Note on sequencing when puzzleType changes: setPuzzleType triggers a queue
+  // refill (async). We schedule overrideScramble in a microtask so it runs
+  // after the synchronous state flush but before the refill's generation-id
+  // check can complete. override() bumps the generation id, so the in-flight
+  // refill result is discarded. The `next` slot stays null until after the
+  // first solve completes and advance() fires fillNext. This is acceptable:
+  // the user runs the replayed scramble, saves, and a random next scramble
+  // generates normally.
+  useEffect(() => {
+    const state = location.state as { replayScramble?: string; replayPuzzle?: PuzzleType } | null;
+    if (!state?.replayScramble) return;
+    if (state.replayPuzzle && state.replayPuzzle !== puzzleType) {
+      setPuzzleType(state.replayPuzzle);
+      queueMicrotask(() => overrideScramble(state.replayScramble!));
+    } else {
+      overrideScramble(state.replayScramble);
+    }
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate, overrideScramble, puzzleType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // SD-2: Cursor-based pagination state
   const [nextCursor, setNextCursor] = useState<string | null>(null);
