@@ -1,11 +1,12 @@
-import React from 'react';
-import { PLL_CASES, PLL_CASE_MAP } from '../../utils/trainerScramble';
+import React, { useMemo } from 'react';
+import type { TrainerCase } from '../../utils/trainerScramble';
 import './TrainerCasePicker.css';
 
 export type CaseChoice = 'all' | string;
 export type AlgChoice = 'any' | number;
 
 interface TrainerCasePickerProps {
+  cases: TrainerCase[];
   caseChoice: CaseChoice;
   algChoice: AlgChoice;
   onCaseChange: (next: CaseChoice) => void;
@@ -13,14 +14,39 @@ interface TrainerCasePickerProps {
   onSkip: () => void;
 }
 
+interface Grouped {
+  label: string;
+  cases: TrainerCase[];
+}
+
+const groupCases = (cases: TrainerCase[]): Grouped[] | null => {
+  const hasGroups = cases.some((c) => c.group);
+  if (!hasGroups) return null;
+
+  const order: string[] = [];
+  const byGroup = new Map<string, TrainerCase[]>();
+  for (const c of cases) {
+    const label = c.group ?? 'Other';
+    if (!byGroup.has(label)) {
+      byGroup.set(label, []);
+      order.push(label);
+    }
+    byGroup.get(label)!.push(c);
+  }
+  return order.map((label) => ({ label, cases: byGroup.get(label)! }));
+};
+
 const TrainerCasePicker = ({
+  cases,
   caseChoice,
   algChoice,
   onCaseChange,
   onAlgChange,
   onSkip,
 }: TrainerCasePickerProps): React.ReactElement => {
-  const selectedCase = caseChoice === 'all' ? null : PLL_CASE_MAP[caseChoice];
+  const grouped = useMemo(() => groupCases(cases), [cases]);
+  const selectedCase =
+    caseChoice === 'all' ? null : cases.find((c) => c.id === caseChoice) ?? null;
   const algs = selectedCase?.algs ?? [];
 
   return (
@@ -32,11 +58,21 @@ const TrainerCasePicker = ({
           onChange={(e) => onCaseChange(e.target.value as CaseChoice)}
         >
           <option value="all">All</option>
-          {PLL_CASES.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
+          {grouped
+            ? grouped.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.cases.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            : cases.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
         </select>
       </label>
 
