@@ -150,3 +150,21 @@
   opacity: 0.5;
   cursor: default;
 }
+
+.solve-row-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.solve-row-button:hover {
+  color: var(--color-text);
+}

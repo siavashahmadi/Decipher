@@ -29,6 +29,7 @@ interface SolveLogProps {
   solves: Solve[];
   onSolveUpdate: (solve: Solve) => void;
   onSolveDelete: (solve: Solve) => void;
+  onSolveClick: (solve: Solve, index: number) => void;
   onReset: () => void;
   onLoadMore: () => void;
   hasMore: boolean;
@@ -39,6 +40,7 @@ const SolveLog = ({
   solves,
   onSolveUpdate,
   onSolveDelete,
+  onSolveClick,
   onReset,
   onLoadMore,
   hasMore,
@@ -90,17 +92,24 @@ const SolveLog = ({
           const currentAo5 = perSolveAo5[index];
           return (
             <li key={solve.id} className="solve-log-item">
-              <span className="solve-time">
-                {solve.dnf
-                  ? 'DNF'
-                  : solve.plus_two
-                    ? `${formatTime(solve.time + 2)}+`
-                    : formatTime(solve.time)}
-              </span>
-              <span className="solve-ao5">
-                {currentAo5 !== null ? `(${fmt(currentAo5)})` : ''}
-              </span>
-              <div className="solve-actions">
+              <button
+                type="button"
+                className="solve-row-button"
+                onClick={() => onSolveClick(solve, index)}
+                aria-label={`Solve ${index + 1} details`}
+              >
+                <span className="solve-time">
+                  {solve.dnf
+                    ? 'DNF'
+                    : solve.plus_two
+                      ? `${formatTime(solve.time + 2)}+`
+                      : formatTime(solve.time)}
+                </span>
+                <span className="solve-ao5">
+                  {currentAo5 !== null ? `(${fmt(currentAo5)})` : ''}
+                </span>
+              </button>
+              <div className="solve-actions" onClick={e => e.stopPropagation()}>
                 <button
                   onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
                   className={`dnf-button ${solve.dnf ? 'active' : ''}`}

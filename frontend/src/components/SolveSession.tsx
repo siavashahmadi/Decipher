@@ -358,6 +358,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
               solves={solves}
               onSolveUpdate={handleSolveUpdate}
               onSolveDelete={handleSolveDelete}
+              onSolveClick={() => { /* wired in Task 11 */ }}
               onReset={resetTimer}
               onLoadMore={loadMore}
               hasMore={!!nextCursor}
