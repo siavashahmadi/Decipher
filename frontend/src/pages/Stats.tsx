@@ -7,6 +7,7 @@ import DotPlot from '../components/stats/DotPlot';
 import Histogram from '../components/stats/Histogram';
 import PBProgression from '../components/stats/PBProgression';
 import ActivityHeatmap from '../components/stats/ActivityHeatmap';
+import ScrambleHistory from '../components/stats/ScrambleHistory';
 import useAllSolves from '../hooks/useAllSolves';
 import { computeSummary } from '../utils/statsBuckets';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
@@ -97,6 +98,10 @@ const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement =>
             <section className="stats-card"><h2>Distribution</h2><Histogram solves={filteredSolves} /></section>
             <section className="stats-card"><h2>PB progression</h2><PBProgression puzzleType={puzzleType} isGuest={isGuest} /></section>
             <section className="stats-card"><h2>Activity</h2><ActivityHeatmap solves={filteredSolves} from={heatmapFrom} to={heatmapTo} /></section>
+            <section className="stats-card stats-card-wide">
+              <h2>Scramble history</h2>
+              <ScrambleHistory solves={filteredSolves} />
+            </section>
           </div>
         )}
       </div>

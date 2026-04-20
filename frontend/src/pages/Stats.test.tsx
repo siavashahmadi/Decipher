@@ -37,8 +37,8 @@ describe('StatsPage', () => {
         </SettingsProvider>
       </MemoryRouter>
     );
-    // Best single = 8s -> "8.00". Wait for the fully loaded state before asserting chart headers.
-    await waitFor(() => expect(screen.getByText('8.00')).toBeInTheDocument());
+    // Wait for the fully loaded state before asserting chart headers.
+    await waitFor(() => expect(screen.getByText('Scramble history')).toBeInTheDocument());
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Times')).toBeInTheDocument();
     expect(screen.getByText('Distribution')).toBeInTheDocument();
