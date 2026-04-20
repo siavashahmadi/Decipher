@@ -22,3 +22,11 @@ Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: mockMatchMedia,
 });
+
+// Polyfill ResizeObserver for jsdom (recharts ResponsiveContainer requires it)
+class ResizeObserverPolyfill {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+(globalThis as unknown as { ResizeObserver: typeof ResizeObserverPolyfill }).ResizeObserver = ResizeObserverPolyfill;
