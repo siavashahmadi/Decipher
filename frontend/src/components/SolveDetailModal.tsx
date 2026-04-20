@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatTime } from '../utils/formatTime';
 import type { Solve } from '../types';
 import './SolveDetailModal.css';
@@ -33,6 +34,15 @@ const SolveDetailModal = ({
 }: SolveDetailModalProps): React.ReactElement => {
   const [copied, setCopied] = useState(false);
   const ao5 = computeAo5(solveWindow);
+  const navigate = useNavigate();
+
+  const useThisScramble = (): void => {
+    if (!solve.scramble) return;
+    navigate('/', {
+      state: { replayScramble: solve.scramble, replayPuzzle: solve.puzzle_type },
+    });
+    onClose();
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -93,6 +103,14 @@ const SolveDetailModal = ({
               aria-label="Copy scramble"
             >
               {copied ? 'Copied' : 'Copy scramble'}
+            </button>
+            <button
+              type="button"
+              onClick={useThisScramble}
+              disabled={!solve.scramble}
+              aria-label="Use this scramble in the timer"
+            >
+              Use this scramble
             </button>
           </div>
         </div>

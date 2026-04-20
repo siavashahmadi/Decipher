@@ -1,7 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useNavigate } from 'react-router-dom';
 import SolveDetailModal from './SolveDetailModal';
 import type { Solve } from '../types';
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: vi.fn(() => vi.fn()),
+}));
 
 const mkSolve = (overrides: Partial<Solve> = {}): Solve => ({
   id: 'id-x',
@@ -79,5 +84,18 @@ describe('SolveDetailModal', () => {
       onClose={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /copy scramble/i }));
     expect(writeText).toHaveBeenCalledWith("R U R' U' F2");
+  });
+
+  it('navigates to / with replay state and closes modal when "Use this scramble" clicked', () => {
+    const navigate = vi.fn();
+    vi.mocked(useNavigate).mockReturnValue(navigate);
+    const onClose = vi.fn();
+    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+      onClose={onClose} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /use this scramble/i }));
+    expect(navigate).toHaveBeenCalledWith('/', {
+      state: { replayScramble: "R U R' U' F2", replayPuzzle: '333' },
+    });
+    expect(onClose).toHaveBeenCalled();
   });
 });
