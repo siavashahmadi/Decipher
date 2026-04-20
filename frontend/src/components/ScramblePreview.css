@@ -34,8 +34,7 @@
   font-size: 0.8rem;
 }
 
-.scramble-preview-collapse-btn,
-.scramble-preview-mode-btn {
+.scramble-preview-collapse-btn {
   background: transparent;
   border: 1px solid var(--color-border, #444);
   color: var(--color-text);
@@ -44,12 +43,6 @@
   cursor: pointer;
   font-family: inherit;
   font-size: inherit;
-}
-
-.scramble-preview-mode-btn.active {
-  background: var(--color-orange);
-  color: #111;
-  border-color: var(--color-orange);
 }
 
 .scramble-preview.collapsed .scramble-preview-stage {
