@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { formatTime } from '../utils/formatTime';
 import { beep } from '../utils/sound';
+import { useSettings } from '../hooks/useSettings';
 import './Timer.css';
 
 type Phase = 'idle' | 'ready' | 'inspection' | 'armed' | 'running';
-
-const HOLD_MS = 550;
 
 interface PenaltyFlags {
   plusTwo: boolean;
@@ -21,6 +20,12 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   const [phase, setPhase] = useState<Phase>('idle');
   const [inspectionCount, setInspectionCount] = useState(15);
   const [holdMet, setHoldMet] = useState(false);
+
+  const { holdMs, inspectionEnabled } = useSettings();
+  const holdMsRef = useRef(holdMs);
+  const inspectionEnabledRef = useRef(inspectionEnabled);
+  useEffect(() => { holdMsRef.current = holdMs; }, [holdMs]);
+  useEffect(() => { inspectionEnabledRef.current = inspectionEnabled; }, [inspectionEnabled]);
 
   const phaseRef = useRef<Phase>('idle');
   const timeRef = useRef(0);
@@ -62,10 +67,16 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     holdMetRef.current = false;
     setHoldMet(false);
     if (holdMetTimeoutRef.current !== null) clearTimeout(holdMetTimeoutRef.current);
-    holdMetTimeoutRef.current = setTimeout(() => {
+    const delay = holdMsRef.current;
+    if (delay === 0) {
       holdMetRef.current = true;
       setHoldMet(true);
-    }, HOLD_MS);
+    } else {
+      holdMetTimeoutRef.current = setTimeout(() => {
+        holdMetRef.current = true;
+        setHoldMet(true);
+      }, delay);
+    }
   }, []);
 
   const clearHold = useCallback(() => {
@@ -190,10 +201,26 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     if (p === 'ready') {
       const met = holdMetRef.current;
       clearHold();
-      if (met) startInspection();
-      else {
+      if (!met) {
         phaseRef.current = 'idle';
         setPhase('idle');
+        return;
+      }
+      if (inspectionEnabledRef.current) {
+        startInspection();
+      } else {
+        penaltyFlagsRef.current = { plusTwo: false, dnf: false };
+        setTime(0);
+        timeRef.current = 0;
+        timerIntervalRef.current = setInterval(() => {
+          setTime(prev => {
+            const next = prev + 10;
+            timeRef.current = next;
+            return next;
+          });
+        }, 10);
+        phaseRef.current = 'running';
+        setPhase('running');
       }
     } else if (p === 'armed') {
       const met = holdMetRef.current;
