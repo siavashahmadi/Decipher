@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom/vitest';
+
 // Polyfill matchMedia for jsdom environment
 const mockMatchMedia = (query: string) => ({
   matches: false,

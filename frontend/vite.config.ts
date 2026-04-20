@@ -7,5 +7,5 @@ export default defineConfig({
   server: { port: 5173 },
   build: { outDir: 'build', sourcemap: true },
   worker: { format: 'es' },
-  test: { environment: 'jsdom', setupFiles: ['vitest.setup.ts'] },
+  test: { environment: 'jsdom', globals: true, setupFiles: ['vitest.setup.ts'] },
 });

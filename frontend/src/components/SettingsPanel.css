@@ -1,0 +1,73 @@
+.settings-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 100;
+  min-width: 260px;
+  padding: 0.75rem 1rem 1rem;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  font-size: 0.9rem;
+}
+
+.settings-panel-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+}
+
+.settings-row-label {
+  color: var(--color-text-muted);
+}
+
+.settings-segmented {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.settings-segmented button {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.settings-segmented button.active {
+  background: var(--color-orange);
+  color: #111;
+  border-color: var(--color-orange);
+}
+
+.settings-switch {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  min-width: 56px;
+}
+
+.settings-switch.on {
+  background: var(--color-orange);
+  color: #111;
+  border-color: var(--color-orange);
+}
