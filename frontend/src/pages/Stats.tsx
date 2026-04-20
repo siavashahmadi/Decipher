@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import DateRangeFilter from '../components/stats/DateRangeFilter';
@@ -10,20 +10,19 @@ import ActivityHeatmap from '../components/stats/ActivityHeatmap';
 import useAllSolves from '../hooks/useAllSolves';
 import { computeSummary } from '../utils/statsBuckets';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
-import { supabase } from '../services/auth';
 import type { PuzzleType } from '../types';
 import './Stats.css';
 
 const DEFAULT_PUZZLE: PuzzleType = '333';
 
-const StatsPage = (): React.ReactElement => {
+interface StatsPageProps {
+  isGuest: boolean;
+  onSignIn: () => void;
+}
+
+const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
   const puzzleType = (searchParams.get('puzzle') as PuzzleType | null) ?? DEFAULT_PUZZLE;
-
-  const [isGuest, setIsGuest] = useState(true);
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setIsGuest(!session));
-  }, []);
 
   const [preset, setPreset] = useState<DateRangePreset>('all');
   const [customStart, setCustomStart] = useState<string | null>(null);
@@ -60,7 +59,7 @@ const StatsPage = (): React.ReactElement => {
         type={puzzleType}
         handleTypeChange={handlePuzzleChange}
         isGuest={isGuest}
-        onSignIn={() => {}}
+        onSignIn={onSignIn}
       />
       <div className="stats-body">
         <div className="stats-toolbar">

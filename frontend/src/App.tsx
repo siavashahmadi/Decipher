@@ -43,7 +43,7 @@ function App(): React.ReactElement {
       <div className="app-wrapper">
         <Routes>
           <Route path="/" element={<TimerPage isGuest={isGuest} onSignIn={() => setShowAuth(true)} />} />
-          <Route path="/stats" element={<StatsPage />} />
+          <Route path="/stats" element={<StatsPage isGuest={isGuest} onSignIn={() => setShowAuth(true)} />} />
           <Route path="/trainers/*" element={<TrainersPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

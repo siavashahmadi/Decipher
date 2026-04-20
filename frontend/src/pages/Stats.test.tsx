@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import StatsPage from './Stats';
 import api from '../services/api';
-import { supabase } from '../services/auth';
 import { SettingsProvider } from '../hooks/useSettings';
 import { ScramblePreviewSettingsProvider } from '../hooks/useScramblePreviewSettings';
 import type { Solve } from '../types';
@@ -23,8 +22,6 @@ const solves: Solve[] = [
 describe('StatsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (supabase.auth.getSession as unknown as ReturnType<typeof vi.fn>)
-      .mockResolvedValue({ data: { session: { access_token: 'x' } } });
     (api.getSolves as unknown as ReturnType<typeof vi.fn>)
       .mockResolvedValue({ solves, next_cursor: null });
     (api.getPersonalBests as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -35,7 +32,7 @@ describe('StatsPage', () => {
       <MemoryRouter initialEntries={['/stats']}>
         <SettingsProvider>
           <ScramblePreviewSettingsProvider>
-            <StatsPage />
+            <StatsPage isGuest={false} onSignIn={() => {}} />
           </ScramblePreviewSettingsProvider>
         </SettingsProvider>
       </MemoryRouter>

@@ -32,10 +32,14 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
         }
         const all: Solve[] = [];
         let cursor: string | null = null;
+        const MAX_PAGES = 200;
+        let pages = 0;
         do {
           const page = await api.getSolves(puzzleType, cursor);
           all.push(...page.solves);
           cursor = page.next_cursor;
+          pages += 1;
+          if (pages >= MAX_PAGES) break;
         } while (cursor);
         if (!cancelled) setSolves(all);
       } catch (e) {

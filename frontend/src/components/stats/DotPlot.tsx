@@ -18,8 +18,8 @@ const DotPlot = ({ solves }: { solves: Solve[] }): React.ReactElement => {
     const valid = chronological.filter(s => !s.dnf);
     if (!valid.length) return [];
     const times = valid.map(effective);
-    const pb = Math.min(...times);
-    const worst = Math.max(...times);
+    let pb = times[0], worst = times[0];
+    for (const t of times) { if (t < pb) pb = t; if (t > worst) worst = t; }
     return valid.map((s, i) => {
       const t = effective(s);
       return { index: i + 1, time: t, isPb: t === pb, isWorst: t === worst, created_at: s.created_at };
@@ -63,7 +63,7 @@ const DotPlot = ({ solves }: { solves: Solve[] }): React.ReactElement => {
           shape={(props: { cx?: number; cy?: number; payload?: Point }) => {
             const { cx, cy, payload } = props;
             if (cx === undefined || cy === undefined || !payload) return <g />;
-            const fill = payload.isPb ? colors.pb : payload.isWorst ? '#ef4444' : colors.recent;
+            const fill = payload.isPb ? colors.pb : payload.isWorst ? colors.heatmap.worst : colors.recent;
             return <circle cx={cx} cy={cy} r={3} fill={fill} />;
           }}
         />

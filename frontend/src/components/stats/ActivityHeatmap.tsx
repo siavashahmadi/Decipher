@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ResponsiveCalendar } from '@nivo/calendar';
 import { buildHeatmapData } from '../../utils/statsBuckets';
 import { useSettings } from '../../hooks/useSettings';
+import { chartColors } from '../../utils/themeColors';
 import type { Solve } from '../../types';
 
 interface Props {
@@ -16,16 +17,15 @@ interface Props {
 const ActivityHeatmap = ({ solves, from, to }: Props): React.ReactElement => {
   const data = useMemo(() => buildHeatmapData(solves), [solves]);
   const { effectiveTheme } = useSettings();
+  const colors = chartColors(effectiveTheme);
 
   const values = data.map(d => d.value).sort((a, b) => a - b);
   const maxValue = values.length ? values[values.length - 1] : 1;
 
-  const isoFrom = from.toISOString().slice(0, 10);
-  const isoTo = to.toISOString().slice(0, 10);
-
-  const colors = effectiveTheme === 'light'
-    ? ['#e6f4ea', '#a8d5b0', '#68b97a', '#2f9e44', '#1b6a2d']
-    : ['#1c2a20', '#254d36', '#2f7d4f', '#3bb26a', '#5ad48a'];
+  const safeFrom = Number.isFinite(from.getTime()) ? from : new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+  const safeTo = Number.isFinite(to.getTime()) ? to : new Date();
+  const isoFrom = safeFrom.toISOString().slice(0, 10);
+  const isoTo = safeTo.toISOString().slice(0, 10);
 
   return (
     <div style={{ height: 200 }}>
@@ -33,21 +33,21 @@ const ActivityHeatmap = ({ solves, from, to }: Props): React.ReactElement => {
         data={data}
         from={isoFrom}
         to={isoTo}
-        emptyColor={effectiveTheme === 'light' ? '#ececea' : '#2a2a2a'}
+        emptyColor={colors.heatmap.empty}
         minValue={0}
         maxValue={Math.max(1, maxValue)}
-        colors={colors}
+        colors={colors.heatmap.scale}
         margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
         yearSpacing={30}
         monthBorderColor="transparent"
         dayBorderWidth={1}
-        dayBorderColor={effectiveTheme === 'light' ? '#ffffff' : '#121212'}
+        dayBorderColor={colors.heatmap.border}
         theme={{
-          text: { fill: effectiveTheme === 'light' ? '#1a1a1a' : '#e5e5e5' },
+          text: { fill: colors.heatmap.text },
           tooltip: {
             container: {
-              background: effectiveTheme === 'light' ? '#ffffff' : '#1e1e1e',
-              color: effectiveTheme === 'light' ? '#1a1a1a' : '#e5e5e5',
+              background: colors.heatmap.tooltipBg,
+              color: colors.heatmap.text,
             },
           },
         }}

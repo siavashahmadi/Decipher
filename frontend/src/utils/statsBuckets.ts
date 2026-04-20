@@ -12,8 +12,8 @@ const effective = (s: Solve): number => (s.plus_two ? s.time + 2 : s.time);
 
 export function buildHistogram(times: number[], binCount: number): HistogramBin[] {
   if (!times.length || binCount <= 0) return [];
-  const min = Math.min(...times);
-  const max = Math.max(...times);
+  let min = times[0], max = times[0];
+  for (const t of times) { if (t < min) min = t; if (t > max) max = t; }
   if (min === max) {
     return [{ min, max, count: times.length, label: min.toFixed(2) }];
   }
@@ -85,7 +85,11 @@ export function computeSummary(solves: Solve[]): StatsSummary {
     totalSolves: solves.length,
     validSolves: valid.length,
     totalSolveTimeSeconds: times.reduce((s, v) => s + v, 0),
-    bestSingle: times.length ? Math.min(...times) : null,
+    bestSingle: times.length ? (() => {
+      let min = times[0];
+      for (const t of times) { if (t < min) min = t; }
+      return min;
+    })() : null,
     bestAo5: bestWindow(chronological, 5),
     bestAo12: bestWindow(chronological, 12),
     currentAo100: chronological.length >= 100
