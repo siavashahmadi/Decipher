@@ -1,60 +1,89 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import SettingsPanel from './SettingsPanel';
 
-const baseProps = {
-  theme: 'dark' as const,
-  setTheme: vi.fn(),
+const setTheme = vi.fn();
+const setInspectionEnabled = vi.fn();
+const setSoundEnabled = vi.fn();
+const setHoldMs = vi.fn();
+const setEnabled = vi.fn();
+const setMode = vi.fn();
+const setShowHintFacelets = vi.fn();
+
+let settingsState = {
+  theme: 'dark' as 'dark' | 'light' | 'system',
   inspectionEnabled: true,
-  setInspectionEnabled: vi.fn(),
   soundEnabled: false,
-  setSoundEnabled: vi.fn(),
   holdMs: 550,
-  setHoldMs: vi.fn(),
-  previewEnabled: true,
-  setPreviewEnabled: vi.fn(),
-  previewMode: '3D' as const,
-  setPreviewMode: vi.fn(),
-  showHintFacelets: false,
-  setShowHintFacelets: vi.fn(),
 };
 
+let previewState = {
+  enabled: true,
+  mode: '3D' as '3D' | '2D',
+  showHintFacelets: false,
+};
+
+vi.mock('../hooks/useSettings', () => ({
+  useSettings: () => ({
+    ...settingsState,
+    setTheme,
+    setInspectionEnabled,
+    setSoundEnabled,
+    setHoldMs,
+  }),
+}));
+
+vi.mock('../hooks/useScramblePreviewSettings', () => ({
+  default: () => ({
+    ...previewState,
+    setEnabled,
+    setMode,
+    setShowHintFacelets,
+  }),
+}));
+
 describe('SettingsPanel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    settingsState = { theme: 'dark', inspectionEnabled: true, soundEnabled: false, holdMs: 550 };
+    previewState = { enabled: true, mode: '3D', showHintFacelets: false };
+  });
+
   it('renders the three settings rows when preview is enabled', () => {
-    render(<SettingsPanel {...baseProps} />);
+    render(<SettingsPanel />);
     expect(screen.getByText(/theme/i)).toBeInTheDocument();
     expect(screen.getByText(/3d scramble preview/i)).toBeInTheDocument();
     expect(screen.getByText(/view mode/i)).toBeInTheDocument();
   });
 
   it('hides the view mode row when preview is disabled', () => {
-    render(<SettingsPanel {...baseProps} previewEnabled={false} />);
+    previewState.enabled = false;
+    render(<SettingsPanel />);
     expect(screen.queryByText(/view mode/i)).not.toBeInTheDocument();
   });
 
   it('calls setTheme when a theme option is clicked', () => {
-    const setTheme = vi.fn();
-    render(<SettingsPanel {...baseProps} setTheme={setTheme} />);
+    render(<SettingsPanel />);
     fireEvent.click(screen.getByRole('button', { name: 'Light' }));
     expect(setTheme).toHaveBeenCalledWith('light');
   });
 
   it('toggles preview enabled when the switch is clicked', () => {
-    const setPreviewEnabled = vi.fn();
-    render(<SettingsPanel {...baseProps} setPreviewEnabled={setPreviewEnabled} />);
+    render(<SettingsPanel />);
     fireEvent.click(screen.getByRole('switch', { name: /3d scramble preview/i }));
-    expect(setPreviewEnabled).toHaveBeenCalledWith(false);
+    expect(setEnabled).toHaveBeenCalledWith(false);
   });
 
   it('calls setPreviewMode when a mode button is clicked', () => {
-    const setPreviewMode = vi.fn();
-    render(<SettingsPanel {...baseProps} setPreviewMode={setPreviewMode} />);
+    render(<SettingsPanel />);
     fireEvent.click(screen.getByRole('button', { name: '2D' }));
-    expect(setPreviewMode).toHaveBeenCalledWith('2D');
+    expect(setMode).toHaveBeenCalledWith('2D');
   });
 
   it('marks the active theme and mode buttons with aria-pressed', () => {
-    render(<SettingsPanel {...baseProps} theme="light" previewMode="2D" />);
+    settingsState.theme = 'light';
+    previewState.mode = '2D';
+    render(<SettingsPanel />);
     expect(screen.getByRole('button', { name: 'Light' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: '2D' })).toHaveAttribute('aria-pressed', 'true');
@@ -62,23 +91,20 @@ describe('SettingsPanel', () => {
   });
 
   it('toggles inspection switch', () => {
-    const setInspectionEnabled = vi.fn();
-    render(<SettingsPanel {...baseProps} setInspectionEnabled={setInspectionEnabled} />);
+    render(<SettingsPanel />);
     fireEvent.click(screen.getByRole('switch', { name: 'Inspection' }));
     expect(setInspectionEnabled).toHaveBeenCalledWith(false);
   });
 
   it('moves the hold-to-start slider', () => {
-    const setHoldMs = vi.fn();
-    render(<SettingsPanel {...baseProps} setHoldMs={setHoldMs} />);
+    render(<SettingsPanel />);
     const slider = screen.getByLabelText('Hold-to-start delay milliseconds');
     fireEvent.change(slider, { target: { value: '0' } });
     expect(setHoldMs).toHaveBeenCalledWith(0);
   });
 
   it('selects System theme', () => {
-    const setTheme = vi.fn();
-    render(<SettingsPanel {...baseProps} setTheme={setTheme} />);
+    render(<SettingsPanel />);
     fireEvent.click(screen.getByRole('button', { name: 'System' }));
     expect(setTheme).toHaveBeenCalledWith('system');
   });
