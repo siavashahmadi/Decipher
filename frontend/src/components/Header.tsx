@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/auth';
-import { useSettings } from '../hooks/useSettings';
-import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
+import { useAuth } from '../contexts/AuthContext';
 import SettingsPanel from './SettingsPanel';
 import AppNav from './AppNav';
 import type { PuzzleType } from '../types';
@@ -29,22 +28,10 @@ const PUZZLES: PuzzleOption[] = [
 interface HeaderProps {
   type: PuzzleType;
   handleTypeChange: (event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => void;
-  isGuest: boolean;
-  onSignIn: () => void;
 }
 
-const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): React.ReactElement => {
-  const {
-    theme, setTheme,
-    inspectionEnabled, setInspectionEnabled,
-    soundEnabled, setSoundEnabled,
-    holdMs, setHoldMs,
-  } = useSettings();
-  const {
-    enabled, setEnabled,
-    mode, setMode,
-    showHintFacelets, setShowHintFacelets,
-  } = useScramblePreviewSettings();
+const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => {
+  const { isGuest, showSignIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -110,27 +97,10 @@ const Header = ({ type, handleTypeChange, isGuest, onSignIn }: HeaderProps): Rea
         >
           {'\u2699'}
         </button>
-        {settingsOpen && (
-          <SettingsPanel
-            theme={theme}
-            setTheme={setTheme}
-            inspectionEnabled={inspectionEnabled}
-            setInspectionEnabled={setInspectionEnabled}
-            soundEnabled={soundEnabled}
-            setSoundEnabled={setSoundEnabled}
-            holdMs={holdMs}
-            setHoldMs={setHoldMs}
-            previewEnabled={enabled}
-            setPreviewEnabled={setEnabled}
-            previewMode={mode}
-            setPreviewMode={setMode}
-            showHintFacelets={showHintFacelets}
-            setShowHintFacelets={setShowHintFacelets}
-          />
-        )}
+        {settingsOpen && <SettingsPanel />}
       </div>
       {isGuest ? (
-        <button className="sign-in-button" onClick={onSignIn}>
+        <button className="sign-in-button" onClick={showSignIn}>
           Sign In
         </button>
       ) : (
