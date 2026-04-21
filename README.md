@@ -4,7 +4,7 @@ Full-stack speedcubing timer for WCA puzzles with WCA scrambles.
 
 ## Features
 
-- WCA-compliant scrambles for all major puzzles (2x2–7x7, Pyraminx, Megaminx, Skewb, & Square-1)
+- WCA-compliant scrambles for all major puzzles (2x2–7x7, Pyraminx, Megaminx, Skewb, Square-1, Clock; 3D preview not available for Clock)
 - Spacebar timer, and touch support for mobile
 - DNF and +2 penalty management per solve
 - Live stats: Ao5, Ao12, session mean, best single
