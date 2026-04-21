@@ -9,17 +9,12 @@ import ScramblePreview from './ScramblePreview';
 import SolveDetailModal from './SolveDetailModal';
 import HotkeyHelp from './HotkeyHelp';
 import useHotkeys from '../hooks/useHotkeys';
-import useCircularBuffer from '../hooks/useCircularBuffer';
 import useMedianTracker from '../hooks/useMedianTracker';
 import useScrambleQueue from '../hooks/useScrambleQueue';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
+import useSolveStore from '../hooks/useSolveStore';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import {
-  getGuestSolves,
-  addGuestSolve,
-  updateGuestSolve,
-  deleteGuestSolve,
-} from '../services/guestStorage';
 import type { PuzzleType, Solve, PersonalBest } from '../types';
 import './SolveSession.css';
 
@@ -42,13 +37,10 @@ const bisectLeft = (arr: number[], val: number): number => {
   return lo;
 };
 
-interface SolveSessionProps {
-  isGuest: boolean;
-  onSignIn: () => void;
-}
-
-const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElement => {
+const SolveSession = (): React.ReactElement => {
+  const { isGuest } = useAuth();
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
+  const store = useSolveStore(isGuest);
   const [solves, setSolves] = useState<Solve[]>([]);
   const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -95,9 +87,6 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   // SD-3: Personal best history for progression chart
   const [pbHistory, setPbHistory] = useState<PersonalBest[]>([]);
 
-  // DSA-3: Circular buffer tracks the last 12 solves for rolling stats
-  const recentBuffer = useCircularBuffer<Solve>(12);
-
   // DSA-4: Two-heap running median — O(log n) insert, O(1) query
   const medianTracker = useMedianTracker();
   const [currentMedian, setCurrentMedian] = useState<number | null>(null);
@@ -108,14 +97,7 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   useEffect(() => {
     const fetchSolves = async () => {
       try {
-        let data: Solve[];
-        let next_cursor: string | null;
-        if (isGuest) {
-          data = getGuestSolves(puzzleType);
-          next_cursor = null;
-        } else {
-          ({ solves: data, next_cursor } = await api.getSolves(puzzleType));
-        }
+        const { solves: data, next_cursor } = await store.fetchPage(puzzleType);
         setSolves(data);
         setNextCursor(next_cursor);
         setLastPercentile(null);
@@ -131,16 +113,12 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         medianTracker.reset();
         times.forEach(t => medianTracker.push(t));
         setCurrentMedian(medianTracker.getMedian());
-
-        // Seed circular buffer with the 12 most recent solves (DSA-3)
-        recentBuffer.reset();
-        [...data].reverse().forEach(s => recentBuffer.push(s));
       } catch (err) {
         console.error('Error fetching solves:', err);
       }
     };
     fetchSolves();
-  }, [puzzleType, isGuest]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [puzzleType, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // SD-3: Fetch PB history when puzzle type changes (guests skip — no server backing)
   useEffect(() => {
@@ -166,30 +144,31 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
     if (!nextCursor || isLoadingMore) return;
     setIsLoadingMore(true);
     try {
-      const { solves: moreData, next_cursor } = await api.getSolves(puzzleType, nextCursor);
+      const { solves: moreData, next_cursor } = await store.fetchPage(puzzleType, nextCursor);
       setSolves(prev => [...prev, ...moreData]);
       setNextCursor(next_cursor);
 
-      // Merge new times into sorted array (DSA-2) + push to median tracker (DSA-4)
-      const merged = [...sortedTimesRef.current];
-      moreData.filter(s => !s.dnf).forEach(s => {
-        const t = s.plus_two ? s.time + 2 : s.time;
-        merged.splice(bisectLeft(merged, t), 0, t);
-        medianTracker.push(t);
-      });
-      sortedTimesRef.current = merged;
+      // Merge: collect new non-DNF times, then one O((n+k) log(n+k)) sort.
+      // Previously this did per-item splice inside bisect → O(n·k) total.
+      const newTimes = moreData
+        .filter(s => !s.dnf)
+        .map(s => (s.plus_two ? s.time + 2 : s.time));
+      newTimes.forEach(t => medianTracker.push(t));
+      sortedTimesRef.current = [...sortedTimesRef.current, ...newTimes]
+        .sort((a, b) => a - b);
       setCurrentMedian(medianTracker.getMedian());
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoadingMore(false);
     }
-  }, [nextCursor, isLoadingMore, puzzleType]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [nextCursor, isLoadingMore, puzzleType, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---------------------------------------------------------------------------
-  // Derived: last 12 solves from circular buffer for SolveHub chart (DSA-3)
+  // Derived: last 12 solves for SolveHub chart, oldest → newest.
+  // `solves` is kept newest-first, so we take the first 12 and reverse.
   // ---------------------------------------------------------------------------
-  const recentSolves = useMemo(() => recentBuffer.toArray(), [solves]); // eslint-disable-line react-hooks/exhaustive-deps
+  const recentSolves = useMemo(() => solves.slice(0, 12).reverse(), [solves]);
 
   const handleSolveComplete = useCallback(async (time: number, flags: { plusTwo: boolean; dnf: boolean }) => {
     const { plusTwo, dnf } = flags;
@@ -197,19 +176,18 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
     const prev = sortedTimesRef.current;
     const pos = bisectLeft(prev, effectiveTime);
 
-    if (isGuest) {
-      const guestSolve: Solve = {
-        id: crypto.randomUUID(),
-        puzzle_type: puzzleType,
-        time,
-        dnf,
-        plus_two: plusTwo,
-        scramble: currentScramble ?? '',
-        created_at: new Date().toISOString(),
-      };
-      addGuestSolve(puzzleType, guestSolve);
-      setSolves(prevSolves => [guestSolve, ...prevSolves]);
-      recentBuffer.push(guestSolve);
+    const payload = {
+      puzzle_type: puzzleType,
+      time,
+      dnf,
+      plus_two: plusTwo,
+      scramble: currentScramble ?? '',
+    };
+
+    try {
+      const savedSolve = await store.create(puzzleType, payload);
+      if (!savedSolve) return;
+      setSolves(prevSolves => [savedSolve, ...prevSolves]);
 
       if (!dnf) {
         if (prev.length > 0) {
@@ -220,38 +198,13 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
         setCurrentMedian(medianTracker.getMedian());
       }
       advanceScramble();
-      return;
-    }
-
-    const newSolve = {
-      puzzle_type: puzzleType,
-      time,
-      dnf,
-      plus_two: plusTwo,
-      scramble: currentScramble ?? '',
-    };
-
-    try {
-      const savedSolve = await api.createSolve(newSolve);
-      if (savedSolve) {
-        setSolves(prevSolves => [savedSolve, ...prevSolves]);
-        recentBuffer.push(savedSolve);
-
-        if (!dnf) {
-          if (prev.length > 0) {
-            const beaten = prev.length - pos;
-            setLastPercentile(Math.round((beaten / prev.length) * 100));
-          }
-          sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
-          medianTracker.push(effectiveTime);
-          setCurrentMedian(medianTracker.getMedian());
-        }
-        advanceScramble();
-      }
     } catch (err) {
-      console.error('API Error:', err);
+      console.error('Error creating solve:', err);
+      if (err instanceof Error && err.name === 'GuestStorageQuotaError') {
+        window.alert('Local storage is full — your recent solve was not saved. Sign in to keep your history.');
+      }
     }
-  }, [isGuest, puzzleType, currentScramble, advanceScramble]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [puzzleType, currentScramble, advanceScramble, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---------------------------------------------------------------------------
   // SD-6: Optimistic update — update UI immediately, rollback on API failure.
@@ -259,12 +212,8 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const handleSolveUpdate = async (updatedSolve: Solve) => {
     const snapshot = solves;
     setSolves(prev => prev.map(s => s.id === updatedSolve.id ? updatedSolve : s));
-    if (isGuest) {
-      updateGuestSolve(puzzleType, updatedSolve);
-      return;
-    }
     try {
-      await api.updateSolve(updatedSolve.id, updatedSolve);
+      await store.update(puzzleType, updatedSolve);
     } catch (err) {
       setSolves(snapshot); // rollback
       console.error(err);
@@ -293,13 +242,8 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
       setCurrentMedian(medianTracker.getMedian());
     }
 
-    if (isGuest) {
-      deleteGuestSolve(puzzleType, solveToDelete.id);
-      return;
-    }
-
     try {
-      await api.deleteSolve(solveToDelete.id);
+      await store.remove(puzzleType, solveToDelete.id);
     } catch (err) {
       setSolves(snapshot);
       sortedTimesRef.current = sortedSnapshot;
@@ -318,10 +262,9 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
   const resetTimer = useCallback(() => {
     if (window.confirm('Clear the current view? Your solves stay saved.')) {
       setSolves([]);
-      recentBuffer.reset();
       setLastPercentile(null);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -364,8 +307,6 @@ const SolveSession = ({ isGuest, onSignIn }: SolveSessionProps): React.ReactElem
       <Header
         type={puzzleType}
         handleTypeChange={handleTypeChange}
-        isGuest={isGuest}
-        onSignIn={onSignIn}
       />
       <div className="main-content">
         <div className="timer-section">
