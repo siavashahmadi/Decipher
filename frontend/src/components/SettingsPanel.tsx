@@ -1,37 +1,24 @@
 import React from 'react';
-import type { Theme } from '../hooks/useSettings';
-import type { PreviewMode } from '../hooks/useScramblePreviewSettings';
+import { useSettings, type Theme } from '../hooks/useSettings';
+import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import './SettingsPanel.css';
-
-interface SettingsPanelProps {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  inspectionEnabled: boolean;
-  setInspectionEnabled: (v: boolean) => void;
-  soundEnabled: boolean;
-  setSoundEnabled: (v: boolean) => void;
-  holdMs: number;
-  setHoldMs: (ms: number) => void;
-  previewEnabled: boolean;
-  setPreviewEnabled: (enabled: boolean) => void;
-  previewMode: PreviewMode;
-  setPreviewMode: (mode: PreviewMode) => void;
-  showHintFacelets: boolean;
-  setShowHintFacelets: (show: boolean) => void;
-}
 
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 const themeLabel = (t: Theme): string => t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark';
 
-const SettingsPanel = ({
-  theme, setTheme,
-  inspectionEnabled, setInspectionEnabled,
-  soundEnabled, setSoundEnabled,
-  holdMs, setHoldMs,
-  previewEnabled, setPreviewEnabled,
-  previewMode, setPreviewMode,
-  showHintFacelets, setShowHintFacelets,
-}: SettingsPanelProps): React.ReactElement => {
+const SettingsPanel = (): React.ReactElement => {
+  const {
+    theme, setTheme,
+    inspectionEnabled, setInspectionEnabled,
+    soundEnabled, setSoundEnabled,
+    holdMs, setHoldMs,
+  } = useSettings();
+  const {
+    enabled: previewEnabled, setEnabled: setPreviewEnabled,
+    mode: previewMode, setMode: setPreviewMode,
+    showHintFacelets, setShowHintFacelets,
+  } = useScramblePreviewSettings();
+
   return (
     <div className="settings-panel" role="dialog" aria-label="Settings">
       <h2 className="settings-panel-title">Settings</h2>
