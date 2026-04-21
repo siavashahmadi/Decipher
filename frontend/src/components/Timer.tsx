@@ -35,7 +35,8 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   const holdMetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const penaltyFlagsRef = useRef<PenaltyFlags>({ plusTwo: false, dnf: false });
   const inspectionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRafRef = useRef<number | null>(null);
+  const timerStartRef = useRef<number>(0);
   const warning7FiredRef = useRef(false);
   const warning3FiredRef = useRef(false);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,9 +47,9 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       clearInterval(inspectionIntervalRef.current);
       inspectionIntervalRef.current = null;
     }
-    if (timerIntervalRef.current !== null) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
+    if (timerRafRef.current !== null) {
+      cancelAnimationFrame(timerRafRef.current);
+      timerRafRef.current = null;
     }
     if (holdMetTimeoutRef.current !== null) {
       clearTimeout(holdMetTimeoutRef.current);
@@ -138,22 +139,28 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     }
     setTime(0);
     timeRef.current = 0;
-    timerIntervalRef.current = setInterval(() => {
-      setTime(prev => {
-        const next = prev + 10;
-        timeRef.current = next;
-        return next;
-      });
-    }, 10);
+    timerStartRef.current = performance.now();
+    const tick = () => {
+      const elapsed = performance.now() - timerStartRef.current;
+      const rounded = Math.floor(elapsed / 10) * 10;
+      timeRef.current = rounded;
+      setTime(rounded);
+      timerRafRef.current = requestAnimationFrame(tick);
+    };
+    timerRafRef.current = requestAnimationFrame(tick);
     phaseRef.current = 'running';
     setPhase('running');
   }, []);
 
   const finishSolve = useCallback(() => {
-    if (timerIntervalRef.current !== null) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
+    if (timerRafRef.current !== null) {
+      cancelAnimationFrame(timerRafRef.current);
+      timerRafRef.current = null;
     }
+    // Snap to the exact elapsed time at stop, rather than the last rAF sample.
+    const finalMs = performance.now() - timerStartRef.current;
+    timeRef.current = finalMs;
+    setTime(finalMs);
     phaseRef.current = 'idle';
     setPhase('idle');
     onSolveComplete(timeRef.current / 1000, penaltyFlagsRef.current);
@@ -209,18 +216,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       if (inspectionEnabledRef.current) {
         startInspection();
       } else {
-        penaltyFlagsRef.current = { plusTwo: false, dnf: false };
-        setTime(0);
-        timeRef.current = 0;
-        timerIntervalRef.current = setInterval(() => {
-          setTime(prev => {
-            const next = prev + 10;
-            timeRef.current = next;
-            return next;
-          });
-        }, 10);
-        phaseRef.current = 'running';
-        setPhase('running');
+        startRunning();
       }
     } else if (p === 'armed') {
       const met = holdMetRef.current;
