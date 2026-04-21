@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
 from ..db import get_supabase_client
 from ..validators import validate_create_solve, validate_update_solve
@@ -11,21 +12,43 @@ solves.strict_slashes = False
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
+        auth_header = request.headers.get('Authorization', '')
 
-        if not auth_header or not auth_header.startswith('Bearer '):
+        if not auth_header.startswith('Bearer '):
+            return jsonify({"error": "No authorization token provided"}), 401
+
+        token = auth_header[len('Bearer '):].strip()
+        if not token:
             return jsonify({"error": "No authorization token provided"}), 401
 
         try:
-            token = auth_header.split(' ')[1]
             supabase = get_supabase_client(token)
             user = supabase.auth.get_user(jwt=token)
-            request.user_id = user.user.id
-            request.supabase = supabase
-            return f(*args, **kwargs)
         except Exception:
+            # Auth provider unreachable or rejecting; don't leak which.
+            current_app.logger.exception("Supabase auth lookup failed")
+            return jsonify({"error": "Auth service unavailable"}), 503
+
+        if not user or not getattr(user, 'user', None):
             return jsonify({"error": "Invalid authentication token"}), 401
+
+        request.user_id = user.user.id
+        request.supabase = supabase
+        return f(*args, **kwargs)
     return decorated
+
+
+def _parse_positive_int(value, default, maximum):
+    """Parse a query-param int, clamp to [1, maximum], fall back to default."""
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid integer: {value!r}")
+    if parsed < 1:
+        return 1
+    return min(parsed, maximum)
 
 
 # ---------------------------------------------------------------------------
@@ -44,7 +67,10 @@ def require_auth(f):
 @limiter.limit("60 per minute")
 def get_solves():
     puzzle_type = request.args.get('puzzle_type')
-    limit = min(int(request.args.get('limit', 50)), 100)
+    try:
+        limit = _parse_positive_int(request.args.get('limit'), default=50, maximum=100)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     cursor = request.args.get('cursor')  # ISO 8601 created_at of last seen row
 
     try:
@@ -64,6 +90,7 @@ def get_solves():
         next_cursor = data[-1]['created_at'] if len(data) == limit else None
         return jsonify({"solves": data, "next_cursor": next_cursor})
     except Exception:
+        current_app.logger.exception("get_solves failed")
         return jsonify({"error": "Internal server error"}), 500
 
 
@@ -100,14 +127,15 @@ def create_solve():
 
         return jsonify(saved_solve)
     except Exception:
+        current_app.logger.exception("create_solve failed")
         return jsonify({"error": "Internal server error"}), 500
 
 
 def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solve_id):
     """
     Insert into personal_bests if new_time beats the current recorded PB.
-    Runs best-effort — exceptions are swallowed so the main create_solve
-    response is never affected by PB tracking failures.
+    Runs best-effort — the create_solve response is not affected by PB
+    tracking failures, but we log them so they aren't invisible.
     """
     try:
         pb_result = (supabase.table('personal_bests')
@@ -129,7 +157,7 @@ def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solv
                 'solve_id': solve_id,
             }).execute()
     except Exception:
-        pass
+        current_app.logger.exception("PB materialization failed (non-fatal)")
 
 
 @solves.route('/solves/<solve_id>', methods=['PATCH'])
@@ -153,6 +181,7 @@ def update_solve(solve_id):
             return jsonify({"error": "Solve not found"}), 404
         return jsonify(result.data[0])
     except Exception:
+        current_app.logger.exception("update_solve failed")
         return jsonify({"error": "Internal server error"}), 500
 
 
@@ -160,8 +189,11 @@ def update_solve(solve_id):
 @require_auth
 def delete_solve(solve_id):
     try:
+        # Use an ISO UTC timestamp — the Supabase Python client sends JSON to
+        # PostgREST, which does not interpret the literal string 'now()'.
+        deleted_at = datetime.now(timezone.utc).isoformat()
         result = (request.supabase.table('solves')
-                  .update({'deleted_at': 'now()'})
+                  .update({'deleted_at': deleted_at})
                   .eq('id', solve_id)
                   .eq('user_id', request.user_id)
                   .is_('deleted_at', None)
@@ -170,6 +202,7 @@ def delete_solve(solve_id):
             return jsonify({"error": "Solve not found"}), 404
         return jsonify(result.data[0])
     except Exception:
+        current_app.logger.exception("delete_solve failed")
         return jsonify({"error": "Internal server error"}), 500
 
 
@@ -192,4 +225,5 @@ def get_personal_bests():
         result = query.execute()
         return jsonify(result.data)
     except Exception:
+        current_app.logger.exception("get_personal_bests failed")
         return jsonify({"error": "Internal server error"}), 500
