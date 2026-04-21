@@ -5,11 +5,23 @@ import StatsPage from './Stats';
 import api from '../services/api';
 import { SettingsProvider } from '../hooks/useSettings';
 import { ScramblePreviewSettingsProvider } from '../hooks/useScramblePreviewSettings';
+import { AuthProvider } from '../contexts/AuthContext';
 import type { Solve } from '../types';
 
 vi.mock('../services/api');
-vi.mock('../services/auth', () => ({ supabase: { auth: { getSession: vi.fn() } } }));
-vi.mock('../services/guestStorage', () => ({ getGuestSolves: vi.fn(() => []) }));
+vi.mock('../services/auth', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+    },
+  },
+}));
+vi.mock('../services/guestStorage', () => ({
+  getGuestSolves: vi.fn(() => []),
+  getAllGuestSolves: vi.fn(() => []),
+  clearAllGuestSolves: vi.fn(),
+}));
 
 const solves: Solve[] = [
   { id: '1', puzzle_type: '333', time: 10, dnf: false, plus_two: false, scramble: '', created_at: '2026-04-19T00:00:00Z' },
@@ -30,11 +42,13 @@ describe('StatsPage', () => {
   it('renders summary, charts, and heatmap with fetched solves', async () => {
     render(
       <MemoryRouter initialEntries={['/stats']}>
-        <SettingsProvider>
-          <ScramblePreviewSettingsProvider>
-            <StatsPage isGuest={false} onSignIn={() => {}} />
-          </ScramblePreviewSettingsProvider>
-        </SettingsProvider>
+        <AuthProvider>
+          <SettingsProvider>
+            <ScramblePreviewSettingsProvider>
+              <StatsPage />
+            </ScramblePreviewSettingsProvider>
+          </SettingsProvider>
+        </AuthProvider>
       </MemoryRouter>
     );
     // Wait for the fully loaded state before asserting chart headers.
