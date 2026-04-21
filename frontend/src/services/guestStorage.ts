@@ -30,13 +30,21 @@ export function getGuestSolves(puzzleType: PuzzleType): Solve[] {
   }
 }
 
+export class GuestStorageQuotaError extends Error {
+  constructor() {
+    super('ao5: localStorage quota exceeded, solve not persisted');
+    this.name = 'GuestStorageQuotaError';
+  }
+}
+
 export function saveGuestSolves(puzzleType: PuzzleType, solves: Solve[]): void {
   try {
     localStorage.setItem(SOLVES_KEY(puzzleType), JSON.stringify(solves));
   } catch (e) {
     if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-      console.warn('ao5: localStorage quota exceeded, solve not persisted');
+      throw new GuestStorageQuotaError();
     }
+    throw e;
   }
 }
 
