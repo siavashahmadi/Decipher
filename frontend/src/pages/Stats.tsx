@@ -9,6 +9,7 @@ import PBProgression from '../components/stats/PBProgression';
 import ActivityHeatmap from '../components/stats/ActivityHeatmap';
 import ScrambleHistory from '../components/stats/ScrambleHistory';
 import useAllSolves from '../hooks/useAllSolves';
+import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
@@ -17,12 +18,8 @@ import './Stats.css';
 
 const DEFAULT_PUZZLE: PuzzleType = '333';
 
-interface StatsPageProps {
-  isGuest: boolean;
-  onSignIn: () => void;
-}
-
-const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement => {
+const StatsPage = (): React.ReactElement => {
+  const { isGuest } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const puzzleType = (searchParams.get('puzzle') as PuzzleType | null) ?? DEFAULT_PUZZLE;
 
@@ -66,8 +63,6 @@ const StatsPage = ({ isGuest, onSignIn }: StatsPageProps): React.ReactElement =>
       <Header
         type={puzzleType}
         handleTypeChange={handlePuzzleChange}
-        isGuest={isGuest}
-        onSignIn={onSignIn}
       />
       <div className="stats-body">
         <div className="stats-toolbar">
