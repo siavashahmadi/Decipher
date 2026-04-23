@@ -190,3 +190,24 @@ def test_create_solve_rejects_tiny_time(fake_supabase_factory, client, auth_head
     assert r.status_code == 422
     body = r.get_json()
     assert "time" in body.get("fields", {})
+
+def test_patch_solve_404_when_missing(fake_supabase_factory, client, auth_headers):
+    fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    r = client.patch(
+        "/api/solves/nope",
+        headers=auth_headers,
+        json={"dnf": True},
+    )
+    assert r.status_code == 404
+
+
+def test_patch_solve_422_on_invalid_type(fake_supabase_factory, client, auth_headers):
+    fake_supabase_factory()
+    r = client.patch(
+        "/api/solves/abc",
+        headers=auth_headers,
+        json={"dnf": "yes"},
+    )
+    assert r.status_code == 422
+    body = r.get_json()
+    assert "dnf" in body.get("fields", {})
