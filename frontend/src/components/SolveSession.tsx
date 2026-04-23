@@ -184,6 +184,8 @@ const SolveSession = (): React.ReactElement => {
       scramble: currentScramble ?? '',
     };
 
+    advanceScramble();
+
     try {
       const savedSolve = await store.create(puzzleType, payload);
       if (!savedSolve) return;
@@ -197,7 +199,6 @@ const SolveSession = (): React.ReactElement => {
         medianTracker.push(effectiveTime);
         setCurrentMedian(medianTracker.getMedian());
       }
-      advanceScramble();
     } catch (err) {
       console.error('Error creating solve:', err);
       if (err instanceof Error && err.name === 'GuestStorageQuotaError') {
