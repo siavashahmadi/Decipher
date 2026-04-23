@@ -200,6 +200,17 @@ def delete_solve(solve_id):
                   .execute())
         if not result.data:
             return jsonify({"error": "Solve not found"}), 404
+        # Remove the matching PB row if this solve was a recorded PB. If this
+        # was the current best, the next time the user beats their remaining
+        # fastest a new PB will be inserted naturally.
+        try:
+            (request.supabase.table('personal_bests')
+             .delete()
+             .eq('user_id', request.user_id)
+             .eq('solve_id', solve_id)
+             .execute())
+        except Exception:
+            current_app.logger.exception("PB cleanup on delete failed (non-fatal)")
         return jsonify(result.data[0])
     except Exception:
         current_app.logger.exception("delete_solve failed")

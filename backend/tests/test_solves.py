@@ -154,6 +154,24 @@ def test_delete_solve_404_when_missing(fake_supabase_factory, client, auth_heade
     assert r.status_code == 404
 
 
+def test_delete_solve_removes_matching_pb(fake_supabase_factory, client, auth_headers):
+    fake = fake_supabase_factory(scripts={
+        "solves": [{"data": [{"id": "abc"}]}],
+        "personal_bests": [{"data": [{"id": "pb-1"}]}],
+    })
+    r = client.delete("/api/solves/abc", headers=auth_headers)
+    assert r.status_code == 200
+
+    pb_queries = [q for q in fake.queries if q.table_name == "personal_bests"]
+    assert len(pb_queries) == 1
+    ops = [c[0] for c in pb_queries[0].calls]
+    assert "delete" in ops
+    eq_calls = [c for c in pb_queries[0].calls if c[0] == "eq"]
+    eq_args = {c[1][0]: c[1][1] for c in eq_calls}
+    assert eq_args.get("user_id") == "user-123"
+    assert eq_args.get("solve_id") == "abc"
+
+
 def test_personal_bests_endpoint(fake_supabase_factory, client, auth_headers):
     rows = [{"id": "pb1", "time": 9.0}]
     fake_supabase_factory(scripts={"personal_bests": [{"data": rows}]})
