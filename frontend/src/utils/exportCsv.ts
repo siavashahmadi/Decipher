@@ -2,7 +2,11 @@ import type { Solve } from '../types';
 
 const HEADER = ['Time', 'Comment', 'Scramble', 'Date', 'P.1', 'P.2'];
 
-const quote = (v: string): string => `"${v.replace(/"/g, '""')}"`;
+const DANGEROUS_PREFIXES = /^[=+\-@\t\r]/;
+const quote = (v: string): string => {
+  const safe = DANGEROUS_PREFIXES.test(v) ? `'${v}` : v;
+  return `"${safe.replace(/"/g, '""')}"`;
+};
 
 const timeField = (s: Solve): string => {
   const ms = Math.round(s.time * 1000);

@@ -44,4 +44,22 @@ describe('buildCsv', () => {
     expect(lines[1]).toContain('[0, 1000]');
     expect(lines[2]).toContain('[0, 2000]');
   });
+
+  it.each([
+    ['=HYPERLINK("http://x")', '"\'=HYPERLINK(""http://x"")"'],
+    ['+cmd', '"\'+cmd"'],
+    ['-cmd', '"\'-cmd"'],
+    ['@evil', '"\'@evil"'],
+    ['\tlead-tab', '"\'\tlead-tab"'],
+    ['\rlead-cr', '"\'\rlead-cr"'],
+  ])('defangs dangerous prefix %j', (scramble, expectedCell) => {
+    const csv = buildCsv([mk({ scramble })]);
+    expect(csv).toContain(expectedCell);
+  });
+
+  it('leaves safe scrambles untouched', () => {
+    const csv = buildCsv([mk({ scramble: "R U R'" })]);
+    expect(csv).toContain(`"R U R'"`);
+    expect(csv).not.toContain(`"'R U R'"`);
+  });
 });
