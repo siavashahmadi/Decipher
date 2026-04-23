@@ -60,15 +60,20 @@ const api = {
 
 	// Migrate guest solves to server after signup. Sequential to stay within
 	// the 30/min rate limit and preserve PB materialization order.
-	migrateSolves: async (allGuestSolves: Solve[]): Promise<void> => {
+	migrateSolves: async (allGuestSolves: Solve[]): Promise<{ migrated: Solve[]; failed: Solve[] }> => {
+		const migrated: Solve[] = [];
+		const failed: Solve[] = [];
 		for (const solve of allGuestSolves) {
 			const { id: _localId, user_id: _uid, created_at: _createdAt, ...payload } = solve;
 			try {
 				await api.createSolve(payload);
+				migrated.push(solve);
 			} catch (err) {
+				failed.push(solve);
 				console.error('Failed to migrate guest solve:', solve.id, err);
 			}
 		}
+		return { migrated, failed };
 	},
 };
 
