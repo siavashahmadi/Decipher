@@ -178,3 +178,15 @@ def test_personal_bests_endpoint(fake_supabase_factory, client, auth_headers):
     r = client.get("/api/personal-bests?puzzle_type=333", headers=auth_headers)
     assert r.status_code == 200
     assert r.get_json() == rows
+
+
+def test_create_solve_rejects_tiny_time(fake_supabase_factory, client, auth_headers):
+    fake_supabase_factory()
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 0.05},
+    )
+    assert r.status_code == 422
+    body = r.get_json()
+    assert "time" in body.get("fields", {})

@@ -21,8 +21,8 @@ def validate_create_solve(data):
         errors['time'] = "Required"
     elif isinstance(time, bool) or not isinstance(time, (int, float)):
         errors['time'] = "Must be a number"
-    elif time <= 0 or time > 3600:
-        errors['time'] = "Must be between 0 and 3600 seconds"
+    elif time < 0.1 or time > 3600:
+        errors['time'] = "Must be between 0.1 and 3600 seconds"
 
     dnf = data.get('dnf', False)
     if not isinstance(dnf, bool):
