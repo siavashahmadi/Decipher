@@ -116,7 +116,7 @@ const SolveDetailModal = ({
         </div>
 
         <div className="solve-detail-section">
-          <div className="solve-detail-label">\u00b12 ao5 context</div>
+          <div className="solve-detail-label">±2 ao5 context</div>
           <div className="solve-detail-window">
             {solveWindow.map((s, i) => (
               <span
