@@ -79,3 +79,25 @@ export function clearAllGuestSolves(): void {
   manifest.forEach((pt) => localStorage.removeItem(SOLVES_KEY(pt)));
   localStorage.removeItem(MANIFEST_KEY);
 }
+
+export function removeGuestSolves(solves: Solve[]): void {
+  if (solves.length === 0) return;
+  const idsToRemove = new Set(solves.map((s) => s.id));
+  const manifest = getManifest();
+  const remaining: PuzzleType[] = [];
+  for (const pt of manifest) {
+    const current = getGuestSolves(pt);
+    const filtered = current.filter((s) => !idsToRemove.has(s.id));
+    if (filtered.length === 0) {
+      localStorage.removeItem(SOLVES_KEY(pt));
+    } else {
+      saveGuestSolves(pt, filtered);
+      remaining.push(pt);
+    }
+  }
+  try {
+    localStorage.setItem(MANIFEST_KEY, JSON.stringify(remaining));
+  } catch {
+    console.warn('ao5: could not update guest puzzle type manifest');
+  }
+}
