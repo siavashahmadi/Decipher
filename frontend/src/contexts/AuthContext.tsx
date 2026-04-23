@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/auth';
-import { getAllGuestSolves, clearAllGuestSolves } from '../services/guestStorage';
+import { getAllGuestSolves, removeGuestSolves } from '../services/guestStorage';
 import api from '../services/api';
 
 interface AuthContextValue {
@@ -17,15 +17,24 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [session, setSession] = useState<Session | null>(null);
   const [signInVisible, setSignInVisible] = useState(false);
+  const migratingRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, next) => {
-      if (event === 'SIGNED_IN') {
-        const guestSolves = getAllGuestSolves();
-        if (guestSolves.length > 0) {
-          await api.migrateSolves(guestSolves);
-          clearAllGuestSolves();
+      if (event === 'SIGNED_IN' && !migratingRef.current) {
+        migratingRef.current = true;
+        try {
+          const guestSolves = getAllGuestSolves();
+          if (guestSolves.length > 0) {
+            const { migrated, failed } = await api.migrateSolves(guestSolves);
+            removeGuestSolves(migrated);
+            if (failed.length > 0) {
+              window.alert(`${failed.length} solve(s) could not be synced and remain in local storage.`);
+            }
+          }
+        } finally {
+          migratingRef.current = false;
         }
       }
       setSession(next);
