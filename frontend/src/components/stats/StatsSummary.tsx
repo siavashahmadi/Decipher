@@ -1,11 +1,11 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { formatTime } from '../../utils/formatTime';
 import type { StatsSummary as Summary } from '../../utils/statsBuckets';
 import './StatsSummary.css';
 
 const fmt = (v: number | null): string => v === null ? '-' : formatTime(v);
 
-const StatsSummary = ({ summary }: { summary: Summary }): React.ReactElement => (
+const StatsSummary = ({ summary }: { summary: Summary }): ReactElement => (
   <div className="stats-summary">
     <div className="ss-item"><span>Solves</span><b>{summary.validSolves}/{summary.totalSolves}</b></div>
     <div className="ss-item"><span>Total time</span><b>{formatTime(summary.totalSolveTimeSeconds)}</b></div>

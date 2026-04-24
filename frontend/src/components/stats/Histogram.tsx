@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatTime } from '../../utils/formatTime';
 import { buildHistogram } from '../../utils/statsBuckets';
@@ -8,7 +8,7 @@ import type { Solve } from '../../types';
 
 const effective = (s: Solve): number => s.plus_two ? s.time + 2 : s.time;
 
-const Histogram = ({ solves, bins = 20 }: { solves: Solve[]; bins?: number }): React.ReactElement => {
+const Histogram = ({ solves, bins = 20 }: { solves: Solve[]; bins?: number }): ReactElement => {
   const { effectiveTheme } = useSettings();
   const colors = chartColors(effectiveTheme);
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { Scatter, XAxis, YAxis, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 import { formatTime } from '../../utils/formatTime';
 import { trimmedMeanNumbers } from '../../utils/averages';
@@ -11,7 +11,7 @@ interface Point { index: number; time: number; isPb: boolean; isWorst: boolean; 
 
 const effective = (s: Solve): number => s.plus_two ? s.time + 2 : s.time;
 
-const DotPlot = ({ solves }: { solves: Solve[] }): React.ReactElement => {
+const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
   // Chronological order (API returns newest first).
   const chronological = useMemo(() => [...solves].reverse(), [solves]);
 

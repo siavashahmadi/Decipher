@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatTime } from '../../utils/formatTime';
 import type { Solve } from '../../types';
@@ -17,7 +17,7 @@ const truncate = (s: string): string =>
 const label = (s: Solve): string =>
   s.dnf ? 'DNF' : formatTime(s.plus_two ? s.time + 2 : s.time);
 
-const ScrambleHistory = ({ solves }: ScrambleHistoryProps): React.ReactElement => {
+const ScrambleHistory = ({ solves }: ScrambleHistoryProps): ReactElement => {
   const navigate = useNavigate();
   const rows = solves.slice(0, MAX_ROWS);
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { ResponsiveCalendar } from '@nivo/calendar';
 import { buildHeatmapData } from '../../utils/statsBuckets';
 import { useSettings } from '../../hooks/useSettings';
@@ -14,7 +14,7 @@ interface Props {
 // Quantile-based color scale keeps one busy day from flattening the rest.
 // Nivo accepts an explicit `colors` array + min/max; we compute thresholds
 // from the data quantiles so intensity matches distribution shape.
-const ActivityHeatmap = ({ solves, from, to }: Props): React.ReactElement => {
+const ActivityHeatmap = ({ solves, from, to }: Props): ReactElement => {
   const data = useMemo(() => buildHeatmapData(solves), [solves]);
   const { effectiveTheme } = useSettings();
   const colors = chartColors(effectiveTheme);

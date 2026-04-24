@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import type { DateRangePreset } from '../../utils/dateRanges';
 import './DateRangeFilter.css';
 
@@ -17,7 +17,7 @@ const PRESETS: { value: DateRangePreset; label: string }[] = [
   { value: 'custom', label: 'Custom' },
 ];
 
-const DateRangeFilter = ({ preset, customStart, customEnd, onPresetChange, onCustomChange }: Props): React.ReactElement => (
+const DateRangeFilter = ({ preset, customStart, customEnd, onPresetChange, onCustomChange }: Props): ReactElement => (
   <div className="date-range-filter">
     <div className="drf-presets" role="group" aria-label="Date range">
       {PRESETS.map(p => (

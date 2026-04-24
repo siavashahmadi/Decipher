@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
 import { formatTime } from '../../utils/formatTime';
@@ -8,7 +8,7 @@ import type { PuzzleType, PersonalBest } from '../../types';
 
 // Date-axis PB progression. Guests have no server-backed PBs, so the chart is
 // empty for them. The spec says PB chart shows only when history exists.
-const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGuest: boolean }): React.ReactElement => {
+const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGuest: boolean }): ReactElement => {
   const [pbs, setPbs] = useState<PersonalBest[]>([]);
   const { effectiveTheme } = useSettings();
   const colors = chartColors(effectiveTheme);
