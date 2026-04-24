@@ -77,3 +77,11 @@
   color: var(--color-text-inverse, #fff);
   letter-spacing: 0.05em;
 }
+
+.timer-badge.plus-two {
+  background: var(--color-orange, #f97316);
+}
+
+.timer-badge.dnf {
+  background: var(--color-red);
+}
