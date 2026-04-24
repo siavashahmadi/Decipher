@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scrambleEventToTwisty, twistyToScrambleEvent } from './puzzleIds';
+import { scrambleEventToTwisty } from './puzzleIds';
 
 describe('scrambleEventToTwisty', () => {
   it('maps NxN cubes to TwistyPlayer ids', () => {
@@ -20,17 +20,5 @@ describe('scrambleEventToTwisty', () => {
 
   it('returns null for clock (unsupported in v1)', () => {
     expect(scrambleEventToTwisty('clock')).toBeNull();
-  });
-});
-
-describe('twistyToScrambleEvent', () => {
-  it('is the inverse of scrambleEventToTwisty for supported puzzles', () => {
-    expect(twistyToScrambleEvent('3x3x3')).toBe('333');
-    expect(twistyToScrambleEvent('pyraminx')).toBe('pyram');
-    expect(twistyToScrambleEvent('square1')).toBe('sq1');
-  });
-
-  it('returns null for unknown inputs', () => {
-    expect(twistyToScrambleEvent('unknown')).toBeNull();
   });
 });

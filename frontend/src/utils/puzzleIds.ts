@@ -26,17 +26,6 @@ const EVENT_TO_TWISTY: Record<PuzzleType, TwistyPuzzleId | null> = {
   clock: null,
 };
 
-const TWISTY_TO_EVENT: Record<string, PuzzleType> = Object.entries(EVENT_TO_TWISTY)
-  .filter((entry): entry is [PuzzleType, TwistyPuzzleId] => entry[1] !== null)
-  .reduce<Record<string, PuzzleType>>((acc, [event, twisty]) => {
-    acc[twisty] = event;
-    return acc;
-  }, {});
-
 export const scrambleEventToTwisty = (event: PuzzleType): TwistyPuzzleId | null => {
   return EVENT_TO_TWISTY[event];
-};
-
-export const twistyToScrambleEvent = (twisty: string): PuzzleType | null => {
-  return TWISTY_TO_EVENT[twisty] ?? null;
 };
