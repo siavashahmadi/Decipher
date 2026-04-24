@@ -12,9 +12,30 @@ export interface TrainerCase {
   algs: string[];
 }
 
-export const PLL_CASES: TrainerCase[] = pllData as TrainerCase[];
-export const OLL_CASES: TrainerCase[] = ollData as TrainerCase[];
-export const F2L_CASES: TrainerCase[] = f2lData as TrainerCase[];
+export const validateTrainerCases = (cases: unknown, label: string): TrainerCase[] => {
+  if (!Array.isArray(cases)) throw new Error(`${label}: not an array`);
+  for (const c of cases) {
+    if (!c || typeof c !== 'object') throw new Error(`${label}: non-object entry`);
+    const tc = c as Partial<TrainerCase>;
+    if (typeof tc.id !== 'string') throw new Error(`${label}: missing id`);
+    if (typeof tc.name !== 'string') {
+      throw new Error(`${label}: missing name on ${tc.id ?? '<unknown>'}`);
+    }
+    if (!Array.isArray(tc.algs) || tc.algs.length === 0) {
+      throw new Error(`${label}: empty algs on ${tc.id}`);
+    }
+    for (const alg of tc.algs) {
+      if (typeof alg !== 'string' || alg.length === 0) {
+        throw new Error(`${label}: non-string or empty alg on ${tc.id}`);
+      }
+    }
+  }
+  return cases as TrainerCase[];
+};
+
+export const PLL_CASES: TrainerCase[] = validateTrainerCases(pllData, 'pll.json');
+export const OLL_CASES: TrainerCase[] = validateTrainerCases(ollData, 'oll.json');
+export const F2L_CASES: TrainerCase[] = validateTrainerCases(f2lData, 'f2l.json');
 
 const caseMap = (cases: TrainerCase[]): Record<string, TrainerCase> =>
   Object.fromEntries(cases.map((c) => [c.id, c]));

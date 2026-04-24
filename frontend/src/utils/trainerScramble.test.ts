@@ -4,6 +4,7 @@ import { cube3x3x3 } from 'cubing/puzzles';
 import {
   generateTrainerScramble,
   generatePllScramble,
+  validateTrainerCases,
   PLL_CASES,
   OLL_CASES,
   F2L_CASES,
@@ -159,4 +160,30 @@ describe('alg correctness', () => {
       }
     }
   }
+});
+
+describe('validateTrainerCases', () => {
+  it('throws on non-array input', () => {
+    expect(() => validateTrainerCases({}, 'test')).toThrow('not an array');
+  });
+
+  it('throws on missing algs array', () => {
+    expect(() => validateTrainerCases([{ id: 'x', name: 'X' }], 'test'))
+      .toThrow('empty algs');
+  });
+
+  it('throws on empty string alg', () => {
+    expect(() => validateTrainerCases([{ id: 'x', name: 'X', algs: [''] }], 'test'))
+      .toThrow('non-string or empty alg');
+  });
+
+  it('throws on missing id', () => {
+    expect(() => validateTrainerCases([{ name: 'X', algs: ['R U'] }], 'test'))
+      .toThrow('missing id');
+  });
+
+  it('accepts a well-formed case array', () => {
+    const cases = [{ id: 'a', name: 'A', algs: ['R U R\''] }];
+    expect(validateTrainerCases(cases, 'test')).toBe(cases);
+  });
 });
