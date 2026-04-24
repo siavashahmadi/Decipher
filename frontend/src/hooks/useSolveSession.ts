@@ -48,7 +48,7 @@ const bisectLeft = (arr: number[], val: number): number => {
 export default function useSolveSession(): UseSolveSessionResult {
   const { isGuest } = useAuth();
   const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
-  const store = useSolveStore(isGuest);
+  const store = useSolveStore(isGuest, puzzleType);
   const [solves, setSolves] = useState<Solve[]>([]);
   const {
     currentScramble,
@@ -94,7 +94,7 @@ export default function useSolveSession(): UseSolveSessionResult {
   useEffect(() => {
     const fetchSolves = async () => {
       try {
-        const { solves: data, next_cursor } = await store.fetchPage(puzzleType);
+        const { solves: data, next_cursor } = await store.fetchPage();
         setSolves(data);
         setNextCursor(next_cursor);
         setLastPercentile(null);
@@ -135,7 +135,7 @@ export default function useSolveSession(): UseSolveSessionResult {
     if (!nextCursor || isLoadingMore) return;
     setIsLoadingMore(true);
     try {
-      const { solves: moreData, next_cursor } = await store.fetchPage(puzzleType, nextCursor);
+      const { solves: moreData, next_cursor } = await store.fetchPage(nextCursor);
       setSolves(prev => [...prev, ...moreData]);
       setNextCursor(next_cursor);
 
@@ -173,7 +173,7 @@ export default function useSolveSession(): UseSolveSessionResult {
       advanceScramble();
 
       try {
-        const savedSolve = await store.create(puzzleType, payload);
+        const savedSolve = await store.create(payload);
         if (!savedSolve) return;
         setSolves(prevSolves => [savedSolve, ...prevSolves]);
 
@@ -201,7 +201,7 @@ export default function useSolveSession(): UseSolveSessionResult {
     const snapshot = solves;
     setSolves(prev => prev.map(s => (s.id === updatedSolve.id ? updatedSolve : s)));
     try {
-      await store.update(puzzleType, updatedSolve);
+      await store.update(updatedSolve);
     } catch (err) {
       setSolves(snapshot);
       console.error(err);
@@ -226,7 +226,7 @@ export default function useSolveSession(): UseSolveSessionResult {
     }
 
     try {
-      await store.remove(puzzleType, solveToDelete.id);
+      await store.remove(solveToDelete.id);
     } catch (err) {
       setSolves(snapshot);
       sortedTimesRef.current = sortedSnapshot;

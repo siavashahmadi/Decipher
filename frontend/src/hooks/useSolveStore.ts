@@ -10,25 +10,23 @@ import type { PuzzleType, Solve } from '../types';
 
 /**
  * Unifies the guest (localStorage) and authenticated (API) solve IO paths so
- * SolveSession can call a single method regardless of auth state. Without
- * this, every mutation had parallel if/else branches at four call sites.
- *
- * The guest side is synchronous under the hood but presents the same
- * Promise-returning surface as the API so callers don't branch on timing.
+ * consumers can call a single method regardless of auth state. Binding
+ * puzzleType into the store at construction keeps the API/guest split from
+ * leaking through per-call parameters.
  */
 export interface SolveStore {
-  fetchPage: (puzzleType: PuzzleType, cursor?: string | null) => Promise<SolvesPage>;
-  create: (puzzleType: PuzzleType, payload: SolvePayload) => Promise<Solve>;
-  update: (puzzleType: PuzzleType, solve: Solve) => Promise<void>;
-  remove: (puzzleType: PuzzleType, solveId: string) => Promise<void>;
+  fetchPage: (cursor?: string | null) => Promise<SolvesPage>;
+  create: (payload: SolvePayload) => Promise<Solve>;
+  update: (solve: Solve) => Promise<void>;
+  remove: (solveId: string) => Promise<void>;
 }
 
-const makeGuestStore = (): SolveStore => ({
-  fetchPage: async (puzzleType) => ({
+const makeGuestStore = (puzzleType: PuzzleType): SolveStore => ({
+  fetchPage: async () => ({
     solves: getGuestSolves(puzzleType),
     next_cursor: null,
   }),
-  create: async (puzzleType, payload) => {
+  create: async (payload) => {
     const solve: Solve = {
       id: crypto.randomUUID(),
       created_at: new Date().toISOString(),
@@ -37,27 +35,30 @@ const makeGuestStore = (): SolveStore => ({
     addGuestSolve(puzzleType, solve);
     return solve;
   },
-  update: async (puzzleType, solve) => {
+  update: async (solve) => {
     updateGuestSolve(puzzleType, solve);
   },
-  remove: async (puzzleType, solveId) => {
+  remove: async (solveId) => {
     deleteGuestSolve(puzzleType, solveId);
   },
 });
 
-const makeApiStore = (): SolveStore => ({
-  fetchPage: (puzzleType, cursor = null) => api.getSolves(puzzleType, cursor),
-  create: async (_puzzleType, payload) => api.createSolve(payload),
-  update: async (_puzzleType, solve) => {
+const makeApiStore = (puzzleType: PuzzleType): SolveStore => ({
+  fetchPage: (cursor = null) => api.getSolves(puzzleType, cursor),
+  create: async (payload) => api.createSolve(payload),
+  update: async (solve) => {
     await api.updateSolve(solve.id, solve);
   },
-  remove: async (_puzzleType, solveId) => {
+  remove: async (solveId) => {
     await api.deleteSolve(solveId);
   },
 });
 
-const useSolveStore = (isGuest: boolean): SolveStore => {
-  return useMemo(() => (isGuest ? makeGuestStore() : makeApiStore()), [isGuest]);
+const useSolveStore = (isGuest: boolean, puzzleType: PuzzleType): SolveStore => {
+  return useMemo(
+    () => (isGuest ? makeGuestStore(puzzleType) : makeApiStore(puzzleType)),
+    [isGuest, puzzleType],
+  );
 };
 
 export default useSolveStore;
