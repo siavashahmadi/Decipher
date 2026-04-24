@@ -35,7 +35,6 @@
 
 .puzzle-select {
   color: var(--color-text);
-  display: none;
   padding: 8px;
   font-size: 16px;
   border-radius: 4px;
@@ -160,14 +159,11 @@
   }
 }
 
-/* Tier 3: mobile — dropdown <select> */
+/* Tier 3: mobile dropdown select is mounted in place of the button row by
+   the matchMedia check in Header.tsx. Only one of .puzzle-buttons or
+   .puzzle-select exists in the DOM at any time. */
 @media (max-width: 639px) {
-  .puzzle-buttons {
-    display: none;
-  }
-
   .puzzle-select {
-    display: block;
     padding: 8px;
     border-radius: 4px;
     margin-left: 0.5rem;

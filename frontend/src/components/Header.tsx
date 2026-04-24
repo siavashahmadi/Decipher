@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
+import useMatchMedia from '../hooks/useMatchMedia';
 import SettingsPanel from './SettingsPanel';
 import AppNav from './AppNav';
 import type { PuzzleType } from '../types';
@@ -35,6 +36,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
   const { isGuest, showSignIn } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMatchMedia('(max-width: 639px)');
 
   useEffect(() => {
     if (!settingsOpen) return;
@@ -73,20 +75,23 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
       <div className="title-container">
         <h1 className="title">Ao5</h1>
       </div>
-      <div className="puzzle-buttons">
-        {PUZZLES.map(p => (
-          <button key={p.value} className={`button ${type === p.value ? 'active' : ''}`} value={p.value} onClick={handleTypeChange}>{p.label}</button>
-        ))}
-      </div>
-      <select
-        className="puzzle-select"
-        value={type}
-        onChange={handleTypeChange}
-      >
-        {PUZZLES.map(p => (
-          <option key={p.value} value={p.value}>{p.label}</option>
-        ))}
-      </select>
+      {isMobile ? (
+        <select
+          className="puzzle-select"
+          value={type}
+          onChange={handleTypeChange}
+        >
+          {PUZZLES.map(p => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
+        </select>
+      ) : (
+        <div className="puzzle-buttons">
+          {PUZZLES.map(p => (
+            <button key={p.value} className={`button ${type === p.value ? 'active' : ''}`} value={p.value} onClick={handleTypeChange}>{p.label}</button>
+          ))}
+        </div>
+      )}
       <div className="settings-wrapper" ref={settingsWrapperRef}>
         <button
           type="button"
