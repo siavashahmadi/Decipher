@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import type { TrainerCase } from '../../utils/trainerScramble';
 import './TrainerCasePicker.css';
 
@@ -43,7 +43,7 @@ const TrainerCasePicker = ({
   onCaseChange,
   onAlgChange,
   onSkip,
-}: TrainerCasePickerProps): React.ReactElement => {
+}: TrainerCasePickerProps): ReactElement => {
   const grouped = useMemo(() => groupCases(cases), [cases]);
   const selectedCase =
     caseChoice === 'all' ? null : cases.find((c) => c.id === caseChoice) ?? null;

@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { formatTime } from '../../utils/formatTime';
 import './TrainerRecentStrip.css';
 
@@ -21,7 +21,7 @@ const renderEntry = (entry: RecentEntry): string => {
 
 const TrainerRecentStrip = ({
   entries,
-}: TrainerRecentStripProps): React.ReactElement => (
+}: TrainerRecentStripProps): ReactElement => (
   <div className="trainer-recent-strip">
     <span className="trainer-recent-label">Recent</span>
     {entries.length === 0 ? (

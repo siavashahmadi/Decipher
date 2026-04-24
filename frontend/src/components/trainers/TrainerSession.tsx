@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import Timer from '../Timer';
 import Scramble from '../Scramble';
 import ScramblePreview from '../ScramblePreview';
@@ -32,7 +32,7 @@ const buildScramble = (
   return scramble;
 };
 
-const TrainerSession = ({ type }: TrainerSessionProps): React.ReactElement => {
+const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
   const [caseChoice, setCaseChoice] = useState<CaseChoice>('all');
   const [algChoice, setAlgChoice] = useState<AlgChoice>('any');
   const [scramble, setScramble] = useState<string>(() =>
