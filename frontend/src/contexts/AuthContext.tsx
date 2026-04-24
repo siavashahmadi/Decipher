@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import { getAllGuestSolves, removeGuestSolves } from '../services/guestStorage';
 import api from '../services/api';
@@ -30,7 +31,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }): React
             const { migrated, failed } = await api.migrateSolves(guestSolves);
             removeGuestSolves(migrated);
             if (failed.length > 0) {
-              window.alert(`${failed.length} solve(s) could not be synced and remain in local storage.`);
+              toast.error(
+                `${failed.length} solve(s) could not be synced and remain in local storage.`,
+                { duration: 8000 },
+              );
             }
           }
         } finally {

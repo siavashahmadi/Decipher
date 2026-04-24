@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import useMedianTracker from './useMedianTracker';
 import useScrambleQueue from './useScrambleQueue';
 import useSolveStore from './useSolveStore';
@@ -109,6 +110,7 @@ export default function useSolveSession(): UseSolveSessionResult {
         setCurrentMedian(medianTracker.getMedian());
       } catch (err) {
         console.error('Error fetching solves:', err);
+        toast.error('Could not load solves.');
       }
     };
     fetchSolves();
@@ -125,6 +127,7 @@ export default function useSolveSession(): UseSolveSessionResult {
         setPbHistory(data);
       } catch (err) {
         console.error('Error fetching personal bests:', err);
+        toast.error('Could not load personal bests.');
       }
     };
     fetchPBs();
@@ -147,6 +150,7 @@ export default function useSolveSession(): UseSolveSessionResult {
       setCurrentMedian(medianTracker.getMedian());
     } catch (err) {
       console.error(err);
+      toast.error('Could not load more solves.');
     } finally {
       setIsLoadingMore(false);
     }
@@ -187,9 +191,12 @@ export default function useSolveSession(): UseSolveSessionResult {
       } catch (err) {
         console.error('Error creating solve:', err);
         if (err instanceof Error && err.name === 'GuestStorageQuotaError') {
-          window.alert(
+          toast.error(
             'Local storage is full. Your recent solve was not saved. Sign in to keep your history.',
+            { duration: 8000 },
           );
+        } else {
+          toast.error('Could not save solve.');
         }
       }
     },
@@ -204,6 +211,7 @@ export default function useSolveSession(): UseSolveSessionResult {
     } catch (err) {
       setSolves(snapshot);
       console.error(err);
+      toast.error('Could not update solve.');
     }
   };
 
@@ -233,6 +241,7 @@ export default function useSolveSession(): UseSolveSessionResult {
       sortedSnapshot.forEach(v => medianTracker.push(v));
       setCurrentMedian(medianTracker.getMedian());
       console.error(err);
+      toast.error('Could not delete solve.');
     }
   };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 import SettingsPanel from './SettingsPanel';
@@ -62,6 +63,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
       window.location.reload();
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error('Could not sign out.');
     }
   };
 
