@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { formatTime } from '../utils/formatTime';
 import { ao5, ao12, type AverageResult } from '../utils/averages';
 import type { Solve } from '../types';
@@ -27,7 +27,7 @@ const SolveLog = ({
   onLoadMore,
   hasMore,
   isLoadingMore,
-}: SolveLogProps): React.ReactElement => {
+}: SolveLogProps): ReactElement => {
   const { currentAo5, currentAo12, sessionMean, bestSingle } = useMemo(() => {
     const currentAo5 = ao5(solves);
     const currentAo12 = ao12(solves);
