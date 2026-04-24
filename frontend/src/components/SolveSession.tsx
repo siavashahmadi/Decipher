@@ -15,6 +15,7 @@ import './SolveSession.css';
 const SolveSession = (): React.ReactElement => {
   const {
     puzzleType,
+    setPuzzleType,
     solves,
     mostRecent,
     recentSolves,
@@ -32,6 +33,22 @@ const SolveSession = (): React.ReactElement => {
     loadMore,
     clearView,
   } = useSolveSession();
+
+  // Alt+digit puzzle shortcuts. Order mirrors Header.PUZZLES:
+  // 1..9 cover 2x2 through Skewb, 0 selects SQ-1. Clock is the 11th
+  // puzzle and stays mouse-only (no sensible digit key left).
+  const PUZZLE_HOTKEYS: Record<string, typeof puzzleType> = {
+    'Alt+1': '222',
+    'Alt+2': '333',
+    'Alt+3': '444',
+    'Alt+4': '555',
+    'Alt+5': '666',
+    'Alt+6': '777',
+    'Alt+7': 'pyram',
+    'Alt+8': 'mega',
+    'Alt+9': 'skewb',
+    'Alt+0': 'sq1',
+  };
 
   const { enabled: previewEnabled } = useScramblePreviewSettings();
   const [hubTab, setHubTab] = useState<'stats' | 'preview'>('stats');
@@ -53,6 +70,12 @@ const SolveSession = (): React.ReactElement => {
       },
       '?': () => setHelpOpen(true),
       'Shift+?': () => setHelpOpen(true),
+      ...Object.fromEntries(
+        Object.entries(PUZZLE_HOTKEYS).map(([combo, puzzle]) => [
+          combo,
+          () => setPuzzleType(puzzle),
+        ]),
+      ),
     },
     selectedIndex === null && !helpOpen,
   );

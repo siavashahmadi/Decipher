@@ -11,6 +11,8 @@ const ENTRIES: Array<[string, string]> = [
   ['2', 'Toggle +2 on most recent solve'],
   ['d', 'Toggle DNF on most recent solve'],
   ['Shift+D', 'Delete most recent solve (with confirm)'],
+  ['Alt+1 .. Alt+9', 'Switch puzzle (2x2 through Skewb)'],
+  ['Alt+0', 'Switch to SQ-1'],
   ['?', 'Show this help'],
 ];
 
