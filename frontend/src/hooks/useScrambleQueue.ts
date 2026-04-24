@@ -10,10 +10,17 @@ export interface UseScrambleQueueResult {
   override: (scramble: string) => void;
 }
 
-const useScrambleQueue = (puzzleType: PuzzleType): UseScrambleQueueResult => {
+export interface UseScrambleQueueOptions {
+  initialScramble?: string;
+}
+
+const useScrambleQueue = (
+  puzzleType: PuzzleType,
+  options?: UseScrambleQueueOptions,
+): UseScrambleQueueResult => {
   const queueRef = useRef<ScrambleQueue | null>(null);
   if (queueRef.current === null) {
-    queueRef.current = new ScrambleQueue(puzzleType);
+    queueRef.current = new ScrambleQueue(puzzleType, options?.initialScramble);
   }
 
   const [snap, setSnap] = useState<ScrambleQueueSnapshot>(() => queueRef.current!.snapshot());

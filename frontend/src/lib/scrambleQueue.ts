@@ -15,18 +15,35 @@ export class ScrambleQueue {
   private listeners = new Set<Listener>();
   private puzzleType: PuzzleType;
 
-  constructor(puzzleType: PuzzleType) {
+  constructor(puzzleType: PuzzleType, initialScramble?: string) {
     this.puzzleType = puzzleType;
-    this.refill();
+    if (initialScramble) {
+      this.current = initialScramble;
+      this.generationId += 1;
+      void this.fillNext(this.generationId);
+    } else {
+      this.refill();
+    }
   }
 
-  setPuzzleType(puzzleType: PuzzleType): void {
-    if (puzzleType === this.puzzleType) return;
+  setPuzzleType(puzzleType: PuzzleType, initialScramble?: string): void {
+    if (puzzleType === this.puzzleType) {
+      if (initialScramble) this.override(initialScramble);
+      return;
+    }
     this.puzzleType = puzzleType;
-    this.current = null;
-    this.next = null;
-    this.emit();
-    this.refill();
+    if (initialScramble) {
+      this.generationId += 1;
+      this.current = initialScramble;
+      this.next = null;
+      this.emit();
+      void this.fillNext(this.generationId);
+    } else {
+      this.current = null;
+      this.next = null;
+      this.emit();
+      this.refill();
+    }
   }
 
   advance(): void {

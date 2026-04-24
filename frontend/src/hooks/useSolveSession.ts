@@ -47,41 +47,40 @@ const bisectLeft = (arr: number[], val: number): number => {
 
 export default function useSolveSession(): UseSolveSessionResult {
   const { isGuest } = useAuth();
-  const [puzzleType, setPuzzleType] = useState<PuzzleType>('333');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Read any replay payload carried in router state at mount time, so the
+  // scramble queue can be seeded directly with the replayed scramble and we
+  // do not need a post-mount override hop.
+  const [initialReplay] = useState(() => {
+    const state = location.state as
+      | { replayScramble?: string; replayPuzzle?: PuzzleType }
+      | null;
+    return {
+      scramble: state?.replayScramble,
+      puzzle: state?.replayPuzzle,
+    };
+  });
+
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>(
+    initialReplay.puzzle ?? '333',
+  );
   const store = useSolveStore(isGuest, puzzleType);
   const [solves, setSolves] = useState<Solve[]>([]);
   const {
     currentScramble,
     loading: scrambleLoading,
     advance: advanceScramble,
-    override: overrideScramble,
-  } = useScrambleQueue(puzzleType);
+  } = useScrambleQueue(puzzleType, { initialScramble: initialReplay.scramble });
 
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Apply a replayed scramble passed via router location state (e.g. from
-  // solve history "retry" action). Clears the state after applying so a
-  // page refresh does not re-apply it.
-  //
-  // The microtask hack on puzzle change goes away in spec 5.3 when
-  // useScrambleQueue accepts { initialScramble }. Until then this effect
-  // depends on a moving target (overrideScramble identity) so the
-  // exhaustive-deps rule is muted for just this one.
+  // Clear the router state once after mount so a page refresh does not
+  // re-apply a stale replay.
   useEffect(() => {
-    const state = location.state as
-      | { replayScramble?: string; replayPuzzle?: PuzzleType }
-      | null;
-    if (!state?.replayScramble) return;
-    if (state.replayPuzzle && state.replayPuzzle !== puzzleType) {
-      setPuzzleType(state.replayPuzzle);
-      queueMicrotask(() => overrideScramble(state.replayScramble!));
-    } else {
-      overrideScramble(state.replayScramble);
+    if (location.state) {
+      navigate(location.pathname, { replace: true, state: null });
     }
-    navigate(location.pathname, { replace: true, state: null });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- see 5.3
-  }, [location.state, location.pathname, navigate, overrideScramble, puzzleType]);
+  }, [location.state, location.pathname, navigate]);
 
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
