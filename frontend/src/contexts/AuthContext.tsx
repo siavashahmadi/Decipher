@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
@@ -15,7 +15,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
+export const AuthProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [session, setSession] = useState<Session | null>(null);
   const [signInVisible, setSignInVisible] = useState(false);
   const migratingRef = useRef(false);
