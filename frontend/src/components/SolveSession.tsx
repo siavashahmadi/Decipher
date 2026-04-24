@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import Timer from './Timer';
 import Scramble from './Scramble';
 import Header from './Header';
@@ -12,7 +12,7 @@ import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import useSolveSession from '../hooks/useSolveSession';
 import './SolveSession.css';
 
-const SolveSession = (): React.ReactElement => {
+const SolveSession = (): ReactElement => {
   const {
     puzzleType,
     setPuzzleType,
