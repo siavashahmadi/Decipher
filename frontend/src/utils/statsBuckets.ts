@@ -35,7 +35,7 @@ export function buildHistogram(times: number[], binCount: number): HistogramBin[
 }
 
 export interface HeatmapCell {
-  day: string; // YYYY-MM-DD (UTC)
+  day: string; // YYYY-MM-DD in the viewer's local timezone
   value: number;
 }
 
@@ -43,8 +43,12 @@ export function buildHeatmapData(solves: Solve[]): HeatmapCell[] {
   const counts = new Map<string, number>();
   for (const s of solves) {
     if (s.dnf) continue;
-    const day = s.created_at.slice(0, 10); // ISO-8601 prefix is UTC date
-    counts.set(day, (counts.get(day) ?? 0) + 1);
+    const d = new Date(s.created_at);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const key = `${year}-${month}-${day}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return [...counts.entries()].map(([day, value]) => ({ day, value }));
 }

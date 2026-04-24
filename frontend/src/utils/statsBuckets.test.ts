@@ -21,21 +21,43 @@ describe('buildHistogram', () => {
 });
 
 describe('buildHeatmapData', () => {
-  it('groups solves by UTC date', () => {
+  const localKey = (d: Date): string => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  it('groups solves by local date', () => {
+    // Build three local-time instants so the assertion is independent of the
+    // test runner's timezone.
+    const eveningA = new Date(2026, 3, 20, 23, 30); // Apr 20 local
+    const morningA = new Date(2026, 3, 20, 1, 0);   // Apr 20 local
+    const dayBefore = new Date(2026, 3, 19, 12, 0); // Apr 19 local
     const solves = [
-      mk({ created_at: '2026-04-20T01:00:00Z' }),
-      mk({ created_at: '2026-04-20T23:00:00Z' }),
-      mk({ created_at: '2026-04-19T12:00:00Z' }),
+      mk({ created_at: eveningA.toISOString() }),
+      mk({ created_at: morningA.toISOString() }),
+      mk({ created_at: dayBefore.toISOString() }),
     ];
     const data = buildHeatmapData(solves);
     const byDay = Object.fromEntries(data.map(d => [d.day, d.value]));
-    expect(byDay['2026-04-20']).toBe(2);
-    expect(byDay['2026-04-19']).toBe(1);
+    expect(byDay[localKey(eveningA)]).toBe(2);
+    expect(byDay[localKey(dayBefore)]).toBe(1);
   });
+
+  it('attributes a late-evening solve to the local day, not UTC', () => {
+    // 23:30 local time — in any tz west of UTC this ISO string's UTC date
+    // is the NEXT day; we want the cell on the LOCAL day.
+    const lateLocal = new Date(2026, 3, 20, 23, 30);
+    const data = buildHeatmapData([mk({ created_at: lateLocal.toISOString() })]);
+    expect(data[0].day).toBe(localKey(lateLocal));
+  });
+
   it('excludes dnf solves from the count', () => {
+    const t = new Date(2026, 3, 20, 1, 0);
     const solves = [
-      mk({ created_at: '2026-04-20T00:00:00Z', dnf: true }),
-      mk({ created_at: '2026-04-20T01:00:00Z' }),
+      mk({ created_at: t.toISOString(), dnf: true }),
+      mk({ created_at: new Date(2026, 3, 20, 2, 0).toISOString() }),
     ];
     expect(buildHeatmapData(solves)[0].value).toBe(1);
   });
