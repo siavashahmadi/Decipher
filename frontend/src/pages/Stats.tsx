@@ -27,7 +27,7 @@ const StatsPage = (): React.ReactElement => {
   const [customStart, setCustomStart] = useState<string | null>(null);
   const [customEnd, setCustomEnd] = useState<string | null>(null);
 
-  const { solves, loading } = useAllSolves(puzzleType, isGuest);
+  const { solves, loading, truncated } = useAllSolves(puzzleType, isGuest);
 
   const bounds = useMemo(() => {
     if (preset === 'custom') {
@@ -88,6 +88,11 @@ const StatsPage = (): React.ReactElement => {
           <p className="stats-loading">Loading solves...</p>
         ) : (
           <div className="stats-grid">
+            {truncated && (
+              <p className="stats-truncation-notice">
+                Showing your most recent 10,000 solves. Use the date range filter to see older ranges.
+              </p>
+            )}
             <section className="stats-card"><h2>Summary</h2><StatsSummary summary={summary} /></section>
             <section className="stats-card"><h2>Times</h2><DotPlot solves={filteredSolves} /></section>
             <section className="stats-card"><h2>Distribution</h2><Histogram solves={filteredSolves} /></section>

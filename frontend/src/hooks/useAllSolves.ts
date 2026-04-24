@@ -7,6 +7,7 @@ interface UseAllSolvesResult {
   solves: Solve[];
   loading: boolean;
   error: unknown;
+  truncated: boolean;
   refetch: () => void;
 }
 
@@ -16,6 +17,7 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
   const [solves, setSolves] = useState<Solve[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
+  const [truncated, setTruncated] = useState(false);
   const [tick, setTick] = useState(0);
 
   const refetch = useCallback(() => setTick(t => t + 1), []);
@@ -25,6 +27,7 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
     const run = async () => {
       setLoading(true);
       setError(null);
+      setTruncated(false);
       try {
         if (isGuest) {
           if (!cancelled) setSolves(getGuestSolves(puzzleType));
@@ -34,14 +37,21 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
         let cursor: string | null = null;
         const MAX_PAGES = 200;
         let pages = 0;
+        let didTruncate = false;
         do {
           const page = await api.getSolves(puzzleType, cursor);
           all.push(...page.solves);
           cursor = page.next_cursor;
           pages += 1;
-          if (pages >= MAX_PAGES) break;
+          if (pages >= MAX_PAGES) {
+            if (cursor) didTruncate = true;
+            break;
+          }
         } while (cursor);
-        if (!cancelled) setSolves(all);
+        if (!cancelled) {
+          setSolves(all);
+          setTruncated(didTruncate);
+        }
       } catch (e) {
         if (!cancelled) setError(e);
       } finally {
@@ -52,5 +62,5 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
     return () => { cancelled = true; };
   }, [puzzleType, isGuest, tick]);
 
-  return { solves, loading, error, refetch };
+  return { solves, loading, error, truncated, refetch };
 }
