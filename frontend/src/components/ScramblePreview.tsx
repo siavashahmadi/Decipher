@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import type { PuzzleType } from '../types';
 import { scrambleEventToTwisty } from '../utils/puzzleIds';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
@@ -9,7 +9,7 @@ interface ScramblePreviewProps {
   scramble: string | null;
 }
 
-const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): React.ReactElement => {
+const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): ReactElement => {
   const { mode, collapsed, setCollapsed, showHintFacelets } = useScramblePreviewSettings();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<HTMLElement | null>(null);
