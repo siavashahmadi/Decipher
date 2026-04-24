@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatTime } from '../utils/formatTime';
 import { ao5 } from '../utils/averages';
@@ -12,7 +12,7 @@ interface TooltipProps {
   payload?: Array<{ value?: number; payload?: { date?: string } }>;
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps): React.ReactElement | null => {
+const CustomTooltip = ({ active, payload }: TooltipProps): ReactElement | null => {
   if (active && payload && payload.length && typeof payload[0].value === 'number') {
     return (
       <div className="custom-tooltip">
@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps): React.ReactElement | 
   return null;
 };
 
-const PBTooltip = ({ active, payload }: TooltipProps): React.ReactElement | null => {
+const PBTooltip = ({ active, payload }: TooltipProps): ReactElement | null => {
   if (active && payload && payload.length && typeof payload[0].value === 'number') {
     return (
       <div className="custom-tooltip">
@@ -61,7 +61,7 @@ const SolveHub = ({
   pbHistory = [],
   lastPercentile = null,
   currentMedian = null,
-}: SolveHubProps): React.ReactElement => {
+}: SolveHubProps): ReactElement => {
   const stats = useMemo<Stats | null>(() => {
     if (!solves?.length) return null;
 
