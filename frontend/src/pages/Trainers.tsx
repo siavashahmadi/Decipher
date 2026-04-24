@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import AppNav from '../components/AppNav';
 import PllTrainer from '../components/trainers/PllTrainer';
@@ -6,7 +6,7 @@ import OllTrainer from '../components/trainers/OllTrainer';
 import F2lTrainer from '../components/trainers/F2lTrainer';
 import './Trainers.css';
 
-const TrainerSubNav = (): React.ReactElement => (
+const TrainerSubNav = (): ReactElement => (
   <nav className="trainer-sub-nav" aria-label="Trainers">
     <NavLink
       to="/trainers/pll"
@@ -35,7 +35,7 @@ const TrainerSubNav = (): React.ReactElement => (
   </nav>
 );
 
-const TrainersPage = (): React.ReactElement => (
+const TrainersPage = (): ReactElement => (
   <div className="trainers-page">
     <AppNav />
     <TrainerSubNav />
