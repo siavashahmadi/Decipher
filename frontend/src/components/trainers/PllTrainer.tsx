@@ -1,6 +1,6 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import TrainerSession from './TrainerSession';
 
-const PllTrainer = (): React.ReactElement => <TrainerSession type="pll" />;
+const PllTrainer = (): ReactElement => <TrainerSession type="pll" />;
 
 export default PllTrainer;
