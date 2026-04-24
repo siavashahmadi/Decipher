@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatTime } from '../utils/formatTime';
 import { ao5 } from '../utils/averages';
@@ -19,7 +19,7 @@ const formatLabel = (s: Solve): string =>
 
 const SolveDetailModal = ({
   solve, window: solveWindow, index, onClose, onUpdate, onDelete,
-}: SolveDetailModalProps): React.ReactElement => {
+}: SolveDetailModalProps): ReactElement => {
   const [copied, setCopied] = useState(false);
   const windowAo5 = ao5(solveWindow);
   const navigate = useNavigate();
