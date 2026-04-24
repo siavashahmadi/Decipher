@@ -81,6 +81,14 @@ const SolveHub = ({
     };
   }, [solves]);
 
+  // Lifetime best single derived from materialized PB rows. Empty for guests
+  // (pbHistory is server-only) so the row hides rather than showing a fake
+  // value.
+  const lifetimeBest = useMemo<number | null>(() => {
+    if (!pbHistory.length) return null;
+    return Math.min(...pbHistory.map(pb => Number(pb.time)));
+  }, [pbHistory]);
+
   // DSA-3: Chart data from circular buffer (last 12 solves, oldest → newest)
   const chartData = useMemo(() => {
     return recentSolves
@@ -114,9 +122,15 @@ const SolveHub = ({
           <span className="stat-value">{stats.validSolves}/{stats.totalSolves}</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">Best</span>
+          <span className="stat-label">Best (session)</span>
           <span className="stat-value">{formatTime(stats.bestTime)}</span>
         </div>
+        {lifetimeBest !== null && (
+          <div className="stat-item">
+            <span className="stat-label">Best (all-time)</span>
+            <span className="stat-value">{formatTime(lifetimeBest)}</span>
+          </div>
+        )}
         <div className="stat-item">
           <span className="stat-label">Average</span>
           <span className="stat-value">{formatTime(stats.averageTime)}</span>
