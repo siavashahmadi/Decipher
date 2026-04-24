@@ -1,8 +1,8 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { Toaster } from 'sonner';
 import { useSettings } from '../hooks/useSettings';
 
-const ThemedToaster = (): React.ReactElement => {
+const ThemedToaster = (): ReactElement => {
   const { effectiveTheme } = useSettings();
   return (
     <Toaster
