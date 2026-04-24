@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import './HotkeyHelp.css';
 
 interface HotkeyHelpProps {
@@ -16,7 +16,7 @@ const ENTRIES: Array<[string, string]> = [
   ['?', 'Show this help'],
 ];
 
-const HotkeyHelp = ({ onClose }: HotkeyHelpProps): React.ReactElement => {
+const HotkeyHelp = ({ onClose }: HotkeyHelpProps): ReactElement => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose();
