@@ -1,3 +1,9 @@
+// Inspection warning tones. First beep at 8s (7s remaining); second at 12s (3s remaining).
+export const INSPECTION_8S_WARNING_HZ = 440;
+export const INSPECTION_8S_WARNING_MS = 100;
+export const INSPECTION_12S_WARNING_HZ = 660;
+export const INSPECTION_12S_WARNING_MS = 150;
+
 let audioCtx: AudioContext | null = null;
 let soundEnabled = false;
 
