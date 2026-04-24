@@ -13,10 +13,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
-import type { PuzzleType } from '../types';
+import type { PuzzleType, Solve } from '../types';
 import './Stats.css';
 
 const DEFAULT_PUZZLE: PuzzleType = '333';
+
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+// The heatmap's start date prefers the active filter bound, then falls back
+// to the oldest fetched solve, and finally to "one year ago" so an empty
+// account still renders a sensibly-sized grid.
+const computeHeatmapFrom = (boundsStart: Date | null, solves: Solve[]): Date => {
+  if (boundsStart) return boundsStart;
+  if (solves.length > 0) return new Date(solves[solves.length - 1].created_at);
+  return new Date(Date.now() - ONE_YEAR_MS);
+};
 
 const StatsPage = (): React.ReactElement => {
   const { isGuest } = useAuth();
@@ -48,9 +59,10 @@ const StatsPage = (): React.ReactElement => {
     downloadCsv(filename, buildCsv(filteredSolves));
   };
 
-  const heatmapFrom = useMemo(() => bounds.start ?? (solves.length
-    ? new Date(solves[solves.length - 1].created_at)
-    : new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)), [bounds.start, solves]);
+  const heatmapFrom = useMemo(
+    () => computeHeatmapFrom(bounds.start, solves),
+    [bounds.start, solves],
+  );
   const heatmapTo = bounds.end ?? new Date();
 
   const handlePuzzleChange = (e: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => {
