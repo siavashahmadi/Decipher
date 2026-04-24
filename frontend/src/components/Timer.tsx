@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { formatTime } from '../utils/formatTime';
-import { beep } from '../utils/sound';
+import {
+  beep,
+  INSPECTION_8S_WARNING_HZ,
+  INSPECTION_8S_WARNING_MS,
+  INSPECTION_12S_WARNING_HZ,
+  INSPECTION_12S_WARNING_MS,
+} from '../utils/sound';
 import { useSettings } from '../hooks/useSettings';
 import './Timer.css';
 
@@ -19,6 +25,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   const [time, setTime] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
   const [inspectionCount, setInspectionCount] = useState(15);
+  const [inspectionBadge, setInspectionBadge] = useState<'+2' | 'DNF' | null>(null);
   const [holdMet, setHoldMet] = useState(false);
 
   const { holdMs, inspectionEnabled } = useSettings();
@@ -100,27 +107,52 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       flashTimeoutRef.current = null;
     }
     setInspectionCount(15);
+    setInspectionBadge(null);
     inspectionIntervalRef.current = setInterval(() => {
       const start = inspectionStartRef.current;
       if (start === null) return;
       const elapsed = Date.now() - start;
       const remaining = Math.ceil((15000 - elapsed) / 1000);
       setInspectionCount(remaining);
+      if (elapsed > 17000) {
+        if (inspectionIntervalRef.current !== null) {
+          clearInterval(inspectionIntervalRef.current);
+          inspectionIntervalRef.current = null;
+        }
+        if (flashTimeoutRef.current !== null) {
+          clearTimeout(flashTimeoutRef.current);
+          flashTimeoutRef.current = null;
+        }
+        penaltyFlagsRef.current = { plusTwo: false, dnf: true };
+        inspectionStartRef.current = null;
+        warning7FiredRef.current = false;
+        warning3FiredRef.current = false;
+        setFlashYellow(false);
+        setInspectionBadge(null);
+        setInspectionCount(15);
+        phaseRef.current = 'idle';
+        setPhase('idle');
+        onSolveComplete(0, { plusTwo: false, dnf: true });
+        penaltyFlagsRef.current = { plusTwo: false, dnf: false };
+        return;
+      }
+      if (elapsed > 15000) setInspectionBadge('+2');
+      else setInspectionBadge(null);
       if (elapsed >= 8000 && !warning7FiredRef.current) {
         warning7FiredRef.current = true;
-        beep(440, 100);
+        beep(INSPECTION_8S_WARNING_HZ, INSPECTION_8S_WARNING_MS);
         setFlashYellow(true);
         if (flashTimeoutRef.current !== null) clearTimeout(flashTimeoutRef.current);
         flashTimeoutRef.current = setTimeout(() => setFlashYellow(false), 200);
       }
       if (elapsed >= 12000 && !warning3FiredRef.current) {
         warning3FiredRef.current = true;
-        beep(660, 150);
+        beep(INSPECTION_12S_WARNING_HZ, INSPECTION_12S_WARNING_MS);
       }
     }, 100);
     phaseRef.current = 'inspection';
     setPhase('inspection');
-  }, []);
+  }, [onSolveComplete]);
 
   const startRunning = useCallback(() => {
     if (inspectionIntervalRef.current !== null) {
@@ -157,13 +189,13 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       cancelAnimationFrame(timerRafRef.current);
       timerRafRef.current = null;
     }
-    // Snap to the exact elapsed time at stop, rather than the last rAF sample.
     const finalMs = performance.now() - timerStartRef.current;
-    timeRef.current = finalMs;
-    setTime(finalMs);
+    const rounded = Math.floor(finalMs / 10) * 10;
+    timeRef.current = rounded;
+    setTime(rounded);
     phaseRef.current = 'idle';
     setPhase('idle');
-    onSolveComplete(timeRef.current / 1000, penaltyFlagsRef.current);
+    onSolveComplete(rounded / 1000, penaltyFlagsRef.current);
     penaltyFlagsRef.current = { plusTwo: false, dnf: false };
   }, [onSolveComplete]);
 
@@ -171,6 +203,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     clearIntervals();
     setTime(0);
     setInspectionCount(15);
+    setInspectionBadge(null);
     timeRef.current = 0;
     inspectionStartRef.current = null;
     penaltyFlagsRef.current = { plusTwo: false, dnf: false };
@@ -233,7 +266,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Escape') {
         const p = phaseRef.current;
-        if (p === 'ready' || p === 'inspection' || p === 'armed') {
+        if (p === 'ready' || p === 'inspection' || p === 'armed' || p === 'running') {
           event.preventDefault();
           cancelToIdle();
         }
@@ -293,14 +326,8 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
         {phase === 'inspection' || phase === 'armed' ? (
           <span className="inspection-display">
             <span>{inspectionCount}</span>
-            {inspectionCount <= 0 && (
-              <span className="timer-badge">
-                {(() => {
-                  const start = inspectionStartRef.current;
-                  const elapsed = start ? Date.now() - start : 0;
-                  return elapsed > 17000 ? 'DNF' : '+2';
-                })()}
-              </span>
+            {inspectionBadge && (
+              <span className="timer-badge">{inspectionBadge}</span>
             )}
           </span>
         ) : (
