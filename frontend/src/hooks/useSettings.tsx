@@ -1,7 +1,7 @@
-import React, {
+import {
   createContext, useCallback, useContext, useEffect, useMemo, useState,
+  type ReactElement, type ReactNode,
 } from 'react';
-import type { ReactNode } from 'react';
 import { setSoundEnabled as applySoundEnabled } from '../utils/sound';
 
 export type Theme = 'system' | 'dark' | 'light';
@@ -57,7 +57,7 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 interface ProviderProps { children: ReactNode }
 
-export const SettingsProvider = ({ children }: ProviderProps): React.ReactElement => {
+export const SettingsProvider = ({ children }: ProviderProps): ReactElement => {
   const [state, setState] = useState<SettingsState>(readInitial);
   const [systemPrefersLight, setSystemPrefersLight] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;

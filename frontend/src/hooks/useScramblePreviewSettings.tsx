@@ -1,5 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
 
 export type PreviewMode = '3D' | '2D';
 
@@ -54,7 +53,7 @@ interface ScramblePreviewSettingsProviderProps {
 
 export const ScramblePreviewSettingsProvider = ({
   children,
-}: ScramblePreviewSettingsProviderProps): React.ReactElement => {
+}: ScramblePreviewSettingsProviderProps): ReactElement => {
   const [state, setState] = useState(readInitial);
 
   useEffect(() => {
