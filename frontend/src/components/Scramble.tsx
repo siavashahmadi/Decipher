@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import type { PuzzleType } from '../types';
 import './Scramble.css';
 
@@ -16,7 +16,7 @@ interface ScrambleProps {
   loading: boolean;
 }
 
-const Scramble = ({ type, scramble, loading }: ScrambleProps): React.ReactElement => {
+const Scramble = ({ type, scramble, loading }: ScrambleProps): ReactElement => {
   const scrambleSize = getScrambleSize(type);
   const text = loading || !scramble ? 'Generating scramble...' : scramble;
   return (
