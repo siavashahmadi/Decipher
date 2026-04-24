@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -39,7 +39,7 @@ vi.mock('./useScrambleQueue', () => ({
   }),
 }));
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
+const wrapper = ({ children }: { children: ReactNode }) => (
   <MemoryRouter>{children}</MemoryRouter>
 );
 
