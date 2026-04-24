@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { useSettings, type Theme } from '../hooks/useSettings';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import './SettingsPanel.css';
@@ -6,7 +6,7 @@ import './SettingsPanel.css';
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 const themeLabel = (t: Theme): string => t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark';
 
-const SettingsPanel = (): React.ReactElement => {
+const SettingsPanel = (): ReactElement => {
   const {
     theme, setTheme,
     inspectionEnabled, setInspectionEnabled,
