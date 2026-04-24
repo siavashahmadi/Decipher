@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { formatTime } from '../utils/formatTime';
 import {
   beep,
+  INSPECTION_START_HZ,
+  INSPECTION_START_MS,
   INSPECTION_8S_WARNING_HZ,
   INSPECTION_8S_WARNING_MS,
   INSPECTION_12S_WARNING_HZ,
@@ -98,6 +100,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
   }, []);
 
   const startInspection = useCallback(() => {
+    beep(INSPECTION_START_HZ, INSPECTION_START_MS);
     inspectionStartRef.current = Date.now();
     warning7FiredRef.current = false;
     warning3FiredRef.current = false;

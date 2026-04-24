@@ -1,4 +1,7 @@
-// Inspection warning tones. First beep at 8s (7s remaining); second at 12s (3s remaining).
+// Inspection tones. Start beep marks inspection entry; first warning at 8s
+// (7s remaining); second warning at 12s (3s remaining).
+export const INSPECTION_START_HZ = 880;
+export const INSPECTION_START_MS = 80;
 export const INSPECTION_8S_WARNING_HZ = 440;
 export const INSPECTION_8S_WARNING_MS = 100;
 export const INSPECTION_12S_WARNING_HZ = 660;
