@@ -1,28 +1,10 @@
 import React, { useMemo } from 'react';
 import { formatTime } from '../utils/formatTime';
+import { ao5, ao12, type AverageResult } from '../utils/averages';
 import type { Solve } from '../types';
 import './SolveLog.css';
 
-type Average = number | 'DNF' | null;
-
-const calculateAverage = (times: Solve[], size: number): Average => {
-  if (times.length < size) return null;
-
-  const recentTimes = times.slice(0, size)
-    .map(solve => solve.dnf ? Infinity : solve.plus_two ? solve.time + 2 : solve.time);
-
-  if (recentTimes.filter(t => t === Infinity).length > size / 2) {
-    return 'DNF';
-  }
-
-  const sortedTimes = [...recentTimes].sort((a, b) => a - b).slice(1, -1);
-  const sum = sortedTimes.reduce((acc, t) => acc + (t === Infinity ? 0 : t), 0);
-  const validCount = sortedTimes.filter(t => t !== Infinity).length;
-
-  return sum / validCount;
-};
-
-const fmt = (v: Average): string =>
+const fmt = (v: AverageResult): string =>
   v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
 
 interface SolveLogProps {
@@ -46,9 +28,9 @@ const SolveLog = ({
   hasMore,
   isLoadingMore,
 }: SolveLogProps): React.ReactElement => {
-  const { ao5, ao12, sessionMean, bestSingle } = useMemo(() => {
-    const ao5 = calculateAverage(solves, 5);
-    const ao12 = calculateAverage(solves, 12);
+  const { currentAo5, currentAo12, sessionMean, bestSingle } = useMemo(() => {
+    const currentAo5 = ao5(solves);
+    const currentAo12 = ao12(solves);
     const validSolves = solves.filter(s => !s.dnf);
     const sessionMean: number | null = validSolves.length > 0
       ? validSolves.reduce((acc, s) => acc + s.time, 0) / validSolves.length
@@ -56,13 +38,13 @@ const SolveLog = ({
     const bestSingle: number | null = validSolves.length > 0
       ? Math.min(...validSolves.map(s => s.time))
       : null;
-    return { ao5, ao12, sessionMean, bestSingle };
+    return { currentAo5, currentAo12, sessionMean, bestSingle };
   }, [solves]);
 
   // DSA-1: Sliding window O(n) — each step slices exactly 5 elements (O(1)),
   // not the entire tail (O(n-i)). Total: O(n) vs the previous O(n²).
   const perSolveAo5 = useMemo(
-    () => solves.map((_, index) => calculateAverage(solves.slice(index, index + 5), 5)),
+    () => solves.map((_, index) => ao5(solves.slice(index, index + 5))),
     [solves]
   );
 
@@ -71,11 +53,11 @@ const SolveLog = ({
       <div className="stats-container">
         <div className="stat-box">
           <span className="stat-label">Ao5</span>
-          <span className="stat-value">{fmt(ao5)}</span>
+          <span className="stat-value">{fmt(currentAo5)}</span>
         </div>
         <div className="stat-box">
           <span className="stat-label">Ao12</span>
-          <span className="stat-value">{fmt(ao12)}</span>
+          <span className="stat-value">{fmt(currentAo12)}</span>
         </div>
         <div className="stat-box">
           <span className="stat-label">Mean</span>

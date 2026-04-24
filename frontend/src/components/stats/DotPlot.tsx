@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Scatter, XAxis, YAxis, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 import { formatTime } from '../../utils/formatTime';
+import { trimmedMeanNumbers } from '../../utils/averages';
 import { useSettings } from '../../hooks/useSettings';
 import { chartColors } from '../../utils/themeColors';
 import type { Solve } from '../../types';
@@ -33,8 +34,7 @@ const DotPlot = ({ solves }: { solves: Solve[] }): React.ReactElement => {
     for (const p of points) {
       ts.push(p.time);
       if (ts.length < 5) { result.push({ index: p.index, ao5: null }); continue; }
-      const window = ts.slice(-5).sort((a, b) => a - b).slice(1, 4);
-      result.push({ index: p.index, ao5: window.reduce((a, b) => a + b, 0) / 3 });
+      result.push({ index: p.index, ao5: trimmedMeanNumbers(ts.slice(-5)) });
     }
     return result;
   }, [points]);

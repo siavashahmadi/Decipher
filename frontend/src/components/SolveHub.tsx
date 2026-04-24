@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatTime } from '../utils/formatTime';
+import { ao5 } from '../utils/averages';
 import { useSettings } from '../hooks/useSettings';
 import { chartColors } from '../utils/themeColors';
 import type { Solve, PersonalBest } from '../types';
@@ -69,16 +70,14 @@ const SolveHub = ({
 
     if (times.length === 0) return null;
 
-    const ao5 = times.length >= 5
-      ? times.slice(0, 5).sort((a, b) => a - b).slice(1, 4).reduce((a, b) => a + b, 0) / 3
-      : null;
+    const ao5Result = ao5(solves);
 
     return {
       totalSolves: solves.length,
       validSolves: validSolves.length,
       bestTime: Math.min(...times),
       averageTime: times.reduce((a, b) => a + b, 0) / times.length,
-      ao5,
+      ao5: typeof ao5Result === 'number' ? ao5Result : null,
     };
   }, [solves]);
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatTime } from '../utils/formatTime';
+import { ao5 } from '../utils/averages';
 import type { Solve } from '../types';
 import './SolveDetailModal.css';
 
@@ -13,19 +14,6 @@ interface SolveDetailModalProps {
   onDelete: (solve: Solve) => void;
 }
 
-const effectiveTime = (s: Solve): number =>
-  s.dnf ? Number.POSITIVE_INFINITY : s.plus_two ? s.time + 2 : s.time;
-
-const computeAo5 = (solveWindow: Solve[]): number | null => {
-  if (solveWindow.length < 5) return null;
-  const times = solveWindow.slice(0, 5).map(effectiveTime);
-  const dnfs = times.filter(t => t === Number.POSITIVE_INFINITY).length;
-  if (dnfs > 1) return null;
-  const sorted = [...times].sort((a, b) => a - b).slice(1, -1);
-  if (sorted.some(t => t === Number.POSITIVE_INFINITY)) return null;
-  return sorted.reduce((a, b) => a + b, 0) / sorted.length;
-};
-
 const formatLabel = (s: Solve): string =>
   s.dnf ? 'DNF' : s.plus_two ? `${formatTime(s.time + 2)}+` : formatTime(s.time);
 
@@ -33,7 +21,7 @@ const SolveDetailModal = ({
   solve, window: solveWindow, index, onClose, onUpdate, onDelete,
 }: SolveDetailModalProps): React.ReactElement => {
   const [copied, setCopied] = useState(false);
-  const ao5 = computeAo5(solveWindow);
+  const windowAo5 = ao5(solveWindow);
   const navigate = useNavigate();
 
   const useThisScramble = (): void => {
@@ -129,7 +117,9 @@ const SolveDetailModal = ({
             ))}
           </div>
           <div className="solve-detail-ao5">
-            ao5: <span data-testid="ao5-value">{ao5 === null ? '-' : formatTime(ao5)}</span>
+            ao5: <span data-testid="ao5-value">{
+              windowAo5 === null ? '-' : windowAo5 === 'DNF' ? 'DNF' : formatTime(windowAo5)
+            }</span>
           </div>
         </div>
 

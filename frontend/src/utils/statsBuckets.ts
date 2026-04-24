@@ -1,4 +1,5 @@
 import type { Solve } from '../types';
+import { trimmedMeanNumbers } from './averages';
 
 export interface HistogramBin {
   min: number;
@@ -58,19 +59,11 @@ export interface StatsSummary {
   currentAo100: number | null;
 }
 
-// Trimmed mean: drop best + worst, average the rest.
-function trimmedMean(window: number[]): number | null {
-  if (window.length < 3) return null;
-  const sorted = [...window].sort((a, b) => a - b);
-  const inner = sorted.slice(1, -1);
-  return inner.reduce((s, v) => s + v, 0) / inner.length;
-}
-
 function bestWindow(times: number[], size: number): number | null {
   if (times.length < size) return null;
   let best: number | null = null;
   for (let i = 0; i + size <= times.length; i++) {
-    const avg = trimmedMean(times.slice(i, i + size));
+    const avg = trimmedMeanNumbers(times.slice(i, i + size));
     if (avg !== null && (best === null || avg < best)) best = avg;
   }
   return best;
@@ -93,7 +86,7 @@ export function computeSummary(solves: Solve[]): StatsSummary {
     bestAo5: bestWindow(chronological, 5),
     bestAo12: bestWindow(chronological, 12),
     currentAo100: chronological.length >= 100
-      ? trimmedMean(chronological.slice(-100))
+      ? trimmedMeanNumbers(chronological.slice(-100))
       : null,
   };
 }
