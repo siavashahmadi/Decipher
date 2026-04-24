@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './components/Auth';
 import TimerPage from './pages/Timer';
@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabaseConfigMissing } from './services/auth';
 import './App.css';
 
-const ConfigError = (): React.ReactElement => (
+const ConfigError = (): ReactElement => (
   <div className="app-wrapper" style={{ padding: '2rem', lineHeight: 1.5 }}>
     <h1>Configuration error</h1>
     <p>
@@ -19,7 +19,7 @@ const ConfigError = (): React.ReactElement => (
   </div>
 );
 
-const AppRoutes = (): React.ReactElement => {
+const AppRoutes = (): ReactElement => {
   const { isGuest, signInVisible, hideSignIn } = useAuth();
   if (signInVisible && isGuest) {
     return <div className="app-wrapper"><Auth onBack={hideSignIn} /></div>;
@@ -38,7 +38,7 @@ const AppRoutes = (): React.ReactElement => {
   );
 };
 
-const App = (): React.ReactElement => {
+const App = (): ReactElement => {
   if (supabaseConfigMissing) return <ConfigError />;
   return (
     <AuthProvider>
