@@ -1,5 +1,11 @@
 import type { PuzzleType, Solve } from '../types';
 
+// Guest solves live in localStorage and are read/written without any
+// cross-tab coordination. If the same user has two tabs open and mutates
+// solves in both, whichever save lands second will overwrite the first
+// (last-writer-wins on the full per-puzzle array). This is an accepted
+// limitation, not a TODO: guests are expected to be single-tab, and
+// signed-in users write through the backend instead.
 const SOLVES_KEY = (puzzleType: PuzzleType): string => `ao5_guest_solves_${puzzleType}`;
 const MANIFEST_KEY = 'ao5_guest_puzzle_types';
 
