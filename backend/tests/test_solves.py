@@ -211,3 +211,70 @@ def test_patch_solve_422_on_invalid_type(fake_supabase_factory, client, auth_hea
     assert r.status_code == 422
     body = r.get_json()
     assert "dnf" in body.get("fields", {})
+
+
+# ---------------------------------------------------------------------------
+# Shareable solve tokens
+# ---------------------------------------------------------------------------
+def test_share_token_requires_owner(fake_supabase_factory, client, auth_headers, app):
+    app.config["SHARE_SECRET"] = "test-share-secret"
+    fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    r = client.get("/api/solves/abc/share-token", headers=auth_headers)
+    assert r.status_code == 404
+
+
+def test_share_token_round_trip(
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+):
+    app.config["SHARE_SECRET"] = "test-share-secret"
+    fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
+    r = client.get("/api/solves/abc/share-token", headers=auth_headers)
+    assert r.status_code == 200
+    token = r.get_json()["token"]
+    assert "." in token
+
+    fake_service_supabase_factory(scripts={
+        "solves": [{"data": [{
+            "id": "abc",
+            "puzzle_type": "333",
+            "time": 9.87,
+            "dnf": False,
+            "plus_two": False,
+            "scramble": "R U R' U'",
+            "created_at": "2026-04-20T00:00:00Z",
+        }]}],
+    })
+    r2 = client.get(f"/api/solves/share/{token}")
+    assert r2.status_code == 200
+    body = r2.get_json()
+    assert body["id"] == "abc"
+    assert body["time"] == 9.87
+    assert "user_id" not in body
+
+
+def test_share_token_rejects_tampered(
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+):
+    app.config["SHARE_SECRET"] = "test-share-secret"
+    fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
+    token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
+
+    id_part, mac_part = token.split(".", 1)
+    swapped = "A" if mac_part[0] != "A" else "B"
+    tampered = f"{id_part}.{swapped}{mac_part[1:]}"
+
+    fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
+    r = client.get(f"/api/solves/share/{tampered}")
+    assert r.status_code == 404
+
+
+def test_share_token_404_on_soft_deleted(
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+):
+    app.config["SHARE_SECRET"] = "test-share-secret"
+    fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
+    token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
+
+    fake_service_supabase_factory(scripts={"solves": [{"data": []}]})
+    r = client.get(f"/api/solves/share/{token}")
+    assert r.status_code == 404

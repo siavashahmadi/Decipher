@@ -86,6 +86,20 @@ def fake_supabase_factory(monkeypatch):
 
 
 @pytest.fixture
+def fake_service_supabase_factory(monkeypatch):
+    """Installs a FakeSupabase for the service-role client used by share routes."""
+    def install(scripts=None):
+        fake = FakeSupabase(scripts=scripts)
+        monkeypatch.setattr(
+            solves_module,
+            "get_supabase_service_client",
+            lambda: fake,
+        )
+        return fake
+    return install
+
+
+@pytest.fixture
 def app():
     app = create_app()
     app.config["TESTING"] = True

@@ -1,7 +1,10 @@
+import base64
+import hashlib
+import hmac
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
-from ..db import get_supabase_client
+from ..db import get_supabase_client, get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve
 from ..extensions import limiter
 
@@ -214,6 +217,86 @@ def delete_solve(solve_id):
         return jsonify(result.data[0])
     except Exception:
         current_app.logger.exception("delete_solve failed")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+# ---------------------------------------------------------------------------
+# Shareable solve links (signed token). The token is deterministic HMAC over
+# the solve id — no storage, no DB column. Verification is constant-time.
+# ---------------------------------------------------------------------------
+def _b64url(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')
+
+
+def _b64url_decode(s: str) -> bytes:
+    padding = '=' * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s + padding)
+
+
+def _require_share_secret() -> bytes:
+    secret = current_app.config.get('SHARE_SECRET')
+    if not secret:
+        raise RuntimeError("SHARE_SECRET is not configured")
+    return secret.encode()
+
+
+def _sign_solve_id(solve_id: str) -> str:
+    mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
+    return f"{_b64url(solve_id.encode())}.{_b64url(mac)}"
+
+
+def _verify_token(token: str):
+    try:
+        id_part, mac_part = token.split('.', 1)
+        solve_id = _b64url_decode(id_part).decode('utf-8')
+        provided_mac = _b64url_decode(mac_part)
+    except (ValueError, UnicodeDecodeError):
+        return None
+    expected_mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
+    if not hmac.compare_digest(provided_mac, expected_mac):
+        return None
+    return solve_id
+
+
+@solves.route('/solves/<solve_id>/share-token', methods=['GET'])
+@require_auth
+@limiter.limit("30 per minute")
+def get_share_token(solve_id):
+    try:
+        result = (request.supabase.table('solves')
+                  .select('id')
+                  .eq('id', solve_id)
+                  .eq('user_id', request.user_id)
+                  .is_('deleted_at', None)
+                  .limit(1)
+                  .execute())
+        if not result.data:
+            return jsonify({"error": "Solve not found"}), 404
+        return jsonify({"token": _sign_solve_id(solve_id)})
+    except Exception:
+        current_app.logger.exception("get_share_token failed")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@solves.route('/solves/share/<token>', methods=['GET'])
+@limiter.limit("60 per minute")
+def get_shared_solve(token):
+    solve_id = _verify_token(token)
+    if solve_id is None:
+        return jsonify({"error": "Invalid or expired share link"}), 404
+    try:
+        service = get_supabase_service_client()
+        result = (service.table('solves')
+                  .select('id,puzzle_type,time,dnf,plus_two,scramble,created_at')
+                  .eq('id', solve_id)
+                  .is_('deleted_at', None)
+                  .limit(1)
+                  .execute())
+        if not result.data:
+            return jsonify({"error": "Invalid or expired share link"}), 404
+        return jsonify(result.data[0])
+    except Exception:
+        current_app.logger.exception("get_shared_solve failed")
         return jsonify({"error": "Internal server error"}), 500
 
 
