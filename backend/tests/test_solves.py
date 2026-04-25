@@ -34,6 +34,32 @@ def test_auth_service_failure_returns_503(client, monkeypatch, auth_headers):
     assert r.status_code == 503
 
 
+def test_require_auth_skips_supabase_when_local_jwt_valid(
+    fake_supabase_factory, client, auth_headers, monkeypatch
+):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    monkeypatch.setattr(solves_module, "verify_token_local", lambda token: "user-123")
+
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    r = client.get("/api/solves", headers=auth_headers)
+    assert r.status_code == 200
+    fake.auth.get_user.assert_not_called()
+
+
+def test_require_auth_falls_back_when_local_verify_fails(
+    fake_supabase_factory, client, auth_headers, monkeypatch
+):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    monkeypatch.setattr(solves_module, "verify_token_local", lambda token: None)
+
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    r = client.get("/api/solves", headers=auth_headers)
+    assert r.status_code == 200
+    fake.auth.get_user.assert_called_once()
+
+
 def test_get_solves_returns_data_and_next_cursor(fake_supabase_factory, client, auth_headers):
     rows = [{"id": str(i), "created_at": f"2026-01-{i:02d}T00:00:00Z"} for i in range(1, 4)]
     fake_supabase_factory(scripts={"solves": [{"data": rows}]})

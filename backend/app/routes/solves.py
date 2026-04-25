@@ -4,6 +4,7 @@ import hmac
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
+from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve
 from ..extensions import limiter
@@ -24,19 +25,30 @@ def require_auth(f):
         if not token:
             return jsonify({"error": "No authorization token provided"}), 401
 
-        try:
-            supabase = get_supabase_client(token)
-            user = supabase.auth.get_user(jwt=token)
-        except Exception:
-            # Auth provider unreachable or rejecting; don't leak which.
-            current_app.logger.exception("Supabase auth lookup failed")
-            return jsonify({"error": "Auth service unavailable"}), 503
+        # Fast path: verify the JWT locally via cached JWKS so we skip a
+        # per-request Supabase round-trip. Falls back to auth.get_user() only
+        # when local verification cannot succeed (legacy HS256 projects, JWKS
+        # fetch failure, expired keys).
+        user_id = verify_token_local(token)
 
-        if not user or not getattr(user, 'user', None):
-            return jsonify({"error": "Invalid authentication token"}), 401
+        if user_id is None:
+            try:
+                supabase = get_supabase_client(token)
+                user = supabase.auth.get_user(jwt=token)
+            except Exception:
+                # Auth provider unreachable or rejecting; don't leak which.
+                current_app.logger.exception("Supabase auth lookup failed")
+                return jsonify({"error": "Auth service unavailable"}), 503
 
-        request.user_id = user.user.id
-        request.supabase = supabase
+            if not user or not getattr(user, 'user', None):
+                return jsonify({"error": "Invalid authentication token"}), 401
+
+            user_id = user.user.id
+            request.supabase = supabase
+        else:
+            request.supabase = get_supabase_client(token)
+
+        request.user_id = user_id
         return f(*args, **kwargs)
     return decorated
 
