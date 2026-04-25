@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Establish a CI baseline, then fix the nine critical correctness bugs surfaced by the 2026-04-25 full-stack audit (Cluster 0 + Cluster A in `refactor_audit_plan.md`).
+**Goal:** Establish a CI baseline, then fix the nine critical correctness bugs surfaced by the 2026-04-25 full-stack audit (Cluster 0 + Cluster A in `docs/audits/2026-04-25-full-stack-audit.md`).
 
 **Architecture:** Each item ships as its own commit (and ideally its own PR) so that any single fix can be reverted independently. Backend changes use the existing Flask + FakeSupabase test pattern in `backend/tests/`. Frontend changes use the existing Vitest + RTL pattern in `frontend/src/**/*.test.{ts,tsx}`. One new SQL migration is added (DELETE policy on `personal_bests`).
 
@@ -937,7 +937,7 @@ This task is split into 4 sub-steps because it touches both stacks plus the data
 
   Push and confirm the CI workflow added in Task 0.2 is green for the final commit.
 
-- [ ] **Step 3: Update refactor_audit_plan.md**
+- [ ] **Step 3: Update docs/audits/2026-04-25-full-stack-audit.md**
 
   Mark each completed item in the master plan with a check (or a "shipped 2026-04-25" note) so the next session has a fresh starting point.
 

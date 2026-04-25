@@ -30,7 +30,15 @@ solves_module = importlib.import_module("app.routes.solves")
 
 
 class FakeQuery:
-    """Fluent stub that records filters and returns a scripted `execute` value."""
+    """Fluent stub that records filters and returns a scripted `execute` value.
+
+    IMPORTANT: FakeQuery records every filter call (.eq, .is_, .lt, etc) but does
+    NOT apply them to the scripted response. Tests that depend on a production
+    query actually applying a filter must assert the call's presence explicitly,
+    e.g. `[c for c in query.calls if c[0] == "is_"]`. See the G.17 follow-up in
+    docs/audits/2026-04-25-full-stack-audit.md for the long-term fix (path 2: teach
+    FakeQuery to apply filters to scripted data).
+    """
 
     def __init__(self, table_name, script):
         self.table_name = table_name

@@ -9,11 +9,13 @@
 -- The UPDATE policy is added now as defense-in-depth so future code
 -- that updates PBs does not hit the same silent-failure trap.
 
+DROP POLICY IF EXISTS "Users can delete own personal bests" ON personal_bests;
 CREATE POLICY "Users can delete own personal bests"
     ON personal_bests
     FOR DELETE
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own personal bests" ON personal_bests;
 CREATE POLICY "Users can update own personal bests"
     ON personal_bests
     FOR UPDATE
