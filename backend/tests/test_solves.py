@@ -420,4 +420,5 @@ def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_he
         json={"time": 999},
     )
     assert r.status_code == 422
-    assert "fields" in r.get_json() or "body" in r.get_json().get("fields", {})
+    body = r.get_json()
+    assert body.get("fields", {}).get("body") == "must include dnf or plus_two"
