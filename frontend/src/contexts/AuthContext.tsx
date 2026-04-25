@@ -63,3 +63,7 @@ export const useAuth = (): AuthContextValue => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };
+
+export const useOptionalAuth = (): AuthContextValue | null => {
+  return useContext(AuthContext);
+};
