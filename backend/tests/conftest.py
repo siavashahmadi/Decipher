@@ -16,6 +16,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 os.environ.setdefault("SUPABASE_URL", "http://localhost")
 os.environ.setdefault("SUPABASE_ANON_KEY", "test-anon-key")
+# create_app() enforces a SHARE_SECRET length floor in production. Tests
+# satisfy the check with a deterministic 32-char value; individual tests
+# that exercise share-link signing override app.config['SHARE_SECRET'].
+os.environ.setdefault("SHARE_SECRET", "test-share-secret-padded-xxxxxxxx")
 
 import importlib  # noqa: E402
 from app import create_app  # noqa: E402

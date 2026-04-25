@@ -110,6 +110,8 @@ def get_solves():
 
 
 SOLVE_LIFETIME_CAP = 100_000
+SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
+MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
 
 
 # ---------------------------------------------------------------------------
@@ -272,20 +274,48 @@ def _require_share_secret() -> bytes:
     return secret.encode()
 
 
+def _now_seconds() -> int:
+    return int(datetime.now(timezone.utc).timestamp())
+
+
+def _pack_int(n: int) -> bytes:
+    return n.to_bytes(8, "big", signed=False)
+
+
+def _unpack_int(b: bytes) -> int:
+    if len(b) != 8:
+        raise ValueError("expected 8 bytes")
+    return int.from_bytes(b, "big", signed=False)
+
+
 def _sign_solve_id(solve_id: str) -> str:
-    mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
-    return f"{_b64url(solve_id.encode())}.{_b64url(mac)}"
+    iat = _now_seconds()
+    exp = iat + SHARE_TOKEN_TTL_SECONDS
+    msg = f"{solve_id}:{iat}:{exp}".encode()
+    mac = hmac.new(_require_share_secret(), msg, hashlib.sha256).digest()[:MAC_LENGTH]
+    return ".".join((
+        _b64url(solve_id.encode()),
+        _b64url(_pack_int(iat)),
+        _b64url(_pack_int(exp)),
+        _b64url(mac),
+    ))
 
 
 def _verify_token(token: str):
     try:
-        id_part, mac_part = token.split('.', 1)
-        solve_id = _b64url_decode(id_part).decode('utf-8')
+        id_part, iat_part, exp_part, mac_part = token.split(".", 3)
+        solve_id = _b64url_decode(id_part).decode("utf-8")
+        iat = _unpack_int(_b64url_decode(iat_part))
+        exp = _unpack_int(_b64url_decode(exp_part))
         provided_mac = _b64url_decode(mac_part)
     except (ValueError, UnicodeDecodeError):
         return None
-    expected_mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
+
+    msg = f"{solve_id}:{iat}:{exp}".encode()
+    expected_mac = hmac.new(_require_share_secret(), msg, hashlib.sha256).digest()[:MAC_LENGTH]
     if not hmac.compare_digest(provided_mac, expected_mac):
+        return None
+    if _now_seconds() > exp:
         return None
     return solve_id
 

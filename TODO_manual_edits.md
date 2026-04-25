@@ -89,3 +89,9 @@ To fix:
    ```
    Expected: at least four policies including the two new ones (DELETE, UPDATE).
 3. End-to-end check: in the app, record a fast solve to create a PB, then delete that solve from the UI. Confirm the matching `personal_bests` row is gone.
+
+### A.7 Share-link tokens reissued (breaking change)
+
+The share-link token format changed from 2 segments (`b64(id).b64(mac)`) to 4 segments (`b64(id).b64(iat).b64(exp).b64(mac)`) and now expires 30 days after issue. Any existing share links 404 immediately on deploy. If anyone has externally-pasted share links pointing at this app, they need a new one.
+
+Also: `SHARE_SECRET` must now be at least 32 characters in production. The startup check in `create_app` raises `RuntimeError` if the env var is shorter. Generate a fresh value if needed: `openssl rand -hex 32`.

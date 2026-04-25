@@ -422,3 +422,48 @@ def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_he
     assert r.status_code == 422
     body = r.get_json()
     assert body.get("fields", {}).get("body") == "must include dnf or plus_two"
+
+
+def test_share_token_has_four_segments(app, fake_supabase_factory, client, auth_headers):
+    app.config["SHARE_SECRET"] = "x" * 32
+    fake_supabase_factory(scripts={
+        "solves": [{"data": [{"id": "abc-123"}]}],
+    })
+    r = client.get("/api/solves/abc-123/share-token", headers=auth_headers)
+    assert r.status_code == 200
+    token = r.get_json()["token"]
+    # New token format: id . iat . exp . mac
+    assert token.count(".") == 3
+
+
+def test_share_token_expired_returns_404(app, monkeypatch, fake_service_supabase_factory, client):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    app.config["SHARE_SECRET"] = "x" * 32
+    real_now = solves_module._now_seconds
+    # Sign a token, then jump the clock past the TTL
+    monkeypatch.setattr(
+        solves_module,
+        "_now_seconds",
+        lambda: real_now() - solves_module.SHARE_TOKEN_TTL_SECONDS - 1,
+    )
+    with app.app_context():
+        token = solves_module._sign_solve_id("abc-123")
+    monkeypatch.setattr(solves_module, "_now_seconds", real_now)
+    fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc-123"}]}]})
+    r = client.get(f"/api/solves/share/{token}")
+    assert r.status_code == 404
+
+
+def test_share_token_tampered_mac_returns_404(app, fake_service_supabase_factory, client):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    app.config["SHARE_SECRET"] = "x" * 32
+    with app.app_context():
+        token = solves_module._sign_solve_id("abc-123")
+    # Flip the last char of the MAC segment
+    parts = token.split(".")
+    parts[-1] = parts[-1][:-1] + ("A" if parts[-1][-1] != "A" else "B")
+    bad_token = ".".join(parts)
+    r = client.get(f"/api/solves/share/{bad_token}")
+    assert r.status_code == 404
