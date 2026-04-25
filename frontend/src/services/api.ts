@@ -95,6 +95,8 @@ const api = {
 				await api.createSolve(payload);
 				migrated.push(solve);
 			} catch (err) {
+				// Silent at this layer: the caller (AuthContext) inspects the
+				// returned `failed` array and surfaces a single aggregate toast.
 				failed.push(solve);
 				console.error('Failed to migrate guest solve:', solve.id, err);
 			}

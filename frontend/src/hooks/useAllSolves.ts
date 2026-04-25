@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import api from '../services/api';
 import { getGuestSolves } from '../services/guestStorage';
 import type { PuzzleType, Solve } from '../types';
@@ -53,7 +54,10 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
           setTruncated(didTruncate);
         }
       } catch (e) {
-        if (!cancelled) setError(e);
+        if (!cancelled) {
+          setError(e);
+          toast.error('Could not load all solves for stats.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import './Auth.css';
 
@@ -43,7 +44,7 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
         if (error) throw error;
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : String(error));
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }

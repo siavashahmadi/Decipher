@@ -16,6 +16,8 @@ const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGues
   useEffect(() => {
     if (isGuest) { setPbs([]); return; }
     let cancelled = false;
+    // Silent: a non-essential chart that already renders an empty-state when
+    // pbs is short. A toast on every nav for a flaky network would be noise.
     api.getPersonalBests(puzzleType).then(d => { if (!cancelled) setPbs(d); }).catch(() => {});
     return () => { cancelled = true; };
   }, [puzzleType, isGuest]);
