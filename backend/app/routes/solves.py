@@ -135,7 +135,7 @@ def create_solve():
                         .is_('deleted_at', None)
                         .execute())
         existing = getattr(count_result, 'count', None) or 0
-        if existing > SOLVE_LIFETIME_CAP:
+        if existing >= SOLVE_LIFETIME_CAP:
             return jsonify({
                 "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
             }), 429

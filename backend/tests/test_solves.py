@@ -355,3 +355,37 @@ def test_share_token_404_on_soft_deleted(
     fake_service_supabase_factory(scripts={"solves": [{"data": []}]})
     r = client.get(f"/api/solves/share/{token}")
     assert r.status_code == 404
+
+
+def test_create_solve_rejects_when_at_lifetime_cap(fake_supabase_factory, client, auth_headers):
+    from app.routes.solves import SOLVE_LIFETIME_CAP
+    fake_supabase_factory(scripts={
+        "solves": [{"data": [], "count": SOLVE_LIFETIME_CAP}],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 12.34, "scramble": ""},
+    )
+    assert r.status_code == 429
+    assert "limit" in r.get_json()["error"].lower()
+
+
+def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_headers):
+    from app.routes.solves import SOLVE_LIFETIME_CAP
+    fake_supabase_factory(scripts={
+        "solves": [
+            {"data": [], "count": SOLVE_LIFETIME_CAP - 1},
+            {"data": [{
+                "id": "s1", "time": 12.34, "puzzle_type": "333",
+                "scramble": "", "dnf": False, "plus_two": False,
+                "created_at": "2026-04-25T00:00:00Z",
+            }]},
+        ],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 12.34, "scramble": "", "dnf": True},
+    )
+    assert r.status_code == 200
