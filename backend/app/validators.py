@@ -1,7 +1,6 @@
 VALID_PUZZLE_TYPES = {
     '333', '222', '444', '555', '666', '777',
-    '333bf', '333oh', 'clock', 'minx', 'pyram',
-    'skewb', 'sq1', '444bf', '555bf'
+    'clock', 'mega', 'pyram', 'skewb', 'sq1',
 }
 
 
