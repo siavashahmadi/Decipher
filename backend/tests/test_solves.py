@@ -393,8 +393,11 @@ def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_h
 
 def test_patch_returns_404_for_soft_deleted_solve(fake_supabase_factory, client, auth_headers):
     # Soft-deleted rows should not be reachable via PATCH.
-    fake_supabase_factory(scripts={
-        "solves": [{"data": []}],  # filter excludes soft-deleted, so empty
+    # We assert two things: the route returns 404 when the (filtered) query
+    # returns empty, AND the route actually applied the `.is_('deleted_at', None)`
+    # filter on the query (otherwise this test would pass even without the fix).
+    fake = fake_supabase_factory(scripts={
+        "solves": [{"data": []}],
     })
     r = client.patch(
         "/api/solves/abc-123",
@@ -402,6 +405,10 @@ def test_patch_returns_404_for_soft_deleted_solve(fake_supabase_factory, client,
         json={"dnf": True},
     )
     assert r.status_code == 404
+    query = fake.queries[0]
+    is_calls = [c for c in query.calls if c[0] == "is_"]
+    assert is_calls, "PATCH must filter out soft-deleted rows via .is_('deleted_at', None)"
+    assert is_calls[0][1] == ("deleted_at", None)
 
 
 def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_headers):
