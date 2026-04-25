@@ -62,6 +62,24 @@ After deploying on an asymmetric-keys project:
 
 ## Audit Cluster A (2026-04-25)
 
+### A.4 Run production puzzle_type audit (decision D1, blocks A.4)
+
+Before the puzzle-type vocabulary reconciliation can ship, we need to know what values exist in production. In Supabase dashboard → SQL editor, run:
+
+```sql
+SELECT puzzle_type, count(*) FROM solves GROUP BY puzzle_type ORDER BY 2 DESC;
+```
+
+Record the result here:
+
+| puzzle_type | count |
+|---|---|
+| (fill in) | (fill in) |
+
+If any rows have `puzzle_type IN ('minx', '333bf', '333oh', '444bf', '555bf')`, A.4 needs an extra step: a one-shot rename migration before the validator change ships. The rename SQL is documented in the plan at `docs/superpowers/plans/2026-04-25-audit-cluster-0-and-a.md` under Task A.4 Step 3. Run it in the same SQL editor, then record the row counts touched here too.
+
+If all rows are already in the new whitelist (`333, 222, 444, 555, 666, 777, clock, mega, pyram, skewb, sq1`), no data migration needed; just say so here and proceed.
+
 ### A.9 Apply migration 005 (personal_bests RLS)
 
 Migration file: `backend/migrations/005_personal_bests_delete_policy.sql`
