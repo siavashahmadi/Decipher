@@ -1,7 +1,10 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { formatTime } from '../utils/formatTime';
 import { ao5 } from '../utils/averages';
+import api from '../services/api';
+import { useOptionalAuth } from '../contexts/AuthContext';
 import type { Solve } from '../types';
 import './SolveDetailModal.css';
 
@@ -21,8 +24,11 @@ const SolveDetailModal = ({
   solve, window: solveWindow, index, onClose, onUpdate, onDelete,
 }: SolveDetailModalProps): ReactElement => {
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const windowAo5 = ao5(solveWindow);
   const navigate = useNavigate();
+  const auth = useOptionalAuth();
+  const isGuest = auth?.isGuest ?? true;
 
   const useThisScramble = (): void => {
     if (!solve.scramble) return;
@@ -47,6 +53,17 @@ const SolveDetailModal = ({
       setTimeout(() => setCopied(false), 1500);
     } catch {
       // ignore clipboard failures
+    }
+  };
+
+  const copyShareLink = async (): Promise<void> => {
+    try {
+      const token = await api.getShareToken(solve.id);
+      await navigator.clipboard.writeText(`${window.location.origin}/s/${token}`);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 1500);
+    } catch {
+      toast.error('Could not generate share link.');
     }
   };
 
@@ -100,6 +117,15 @@ const SolveDetailModal = ({
             >
               Use this scramble
             </button>
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={copyShareLink}
+                aria-label="Copy shareable link to this solve"
+              >
+                {shareCopied ? 'Link copied' : 'Copy share link'}
+              </button>
+            )}
           </div>
         </div>
 
