@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import DateRangeFilter from '../components/stats/DateRangeFilter';
 import StatsSummary from '../components/stats/StatsSummary';
+import RecentTrend from '../components/stats/RecentTrend';
 import DotPlot from '../components/stats/DotPlot';
 import Histogram from '../components/stats/Histogram';
 import PBProgression from '../components/stats/PBProgression';
@@ -11,6 +12,7 @@ import ScrambleHistory from '../components/stats/ScrambleHistory';
 import useAllSolves from '../hooks/useAllSolves';
 import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
+import { computeRecentTrend } from '../utils/recentTrend';
 import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
 import type { PuzzleType, Solve } from '../types';
@@ -52,6 +54,7 @@ const StatsPage = (): React.ReactElement => {
 
   const filteredSolves = useMemo(() => filterSolvesByRange(solves, bounds), [solves, bounds]);
   const summary = useMemo(() => computeSummary(filteredSolves), [filteredSolves]);
+  const trend = useMemo(() => computeRecentTrend(filteredSolves), [filteredSolves]);
 
   const handleExport = (): void => {
     const today = new Date().toISOString().slice(0, 10);
@@ -104,6 +107,9 @@ const StatsPage = (): React.ReactElement => {
               <p className="stats-truncation-notice">
                 Showing your most recent 10,000 solves. Use the date range filter to see older ranges.
               </p>
+            )}
+            {trend && (
+              <section className="stats-card"><h2>Trend</h2><RecentTrend solves={filteredSolves} /></section>
             )}
             <section className="stats-card"><h2>Summary</h2><StatsSummary summary={summary} /></section>
             <section className="stats-card"><h2>Times</h2><DotPlot solves={filteredSolves} /></section>
