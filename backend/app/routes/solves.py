@@ -109,6 +109,9 @@ def get_solves():
         return jsonify({"error": "Internal server error"}), 500
 
 
+SOLVE_LIFETIME_CAP = 100_000
+
+
 # ---------------------------------------------------------------------------
 # SD-4: Input validation
 # SD-3: Write-time PB materialization
@@ -123,6 +126,20 @@ def create_solve():
         return jsonify({"error": "Validation failed", "fields": errors}), 422
 
     try:
+        # Cheap insurance against a malicious sign-up + mass-post spree.
+        # Counts non-deleted solves only; soft-deleted rows still occupy
+        # storage but do not block honest users.
+        count_result = (request.supabase.table('solves')
+                        .select('id', count='exact', head=True)
+                        .eq('user_id', request.user_id)
+                        .is_('deleted_at', None)
+                        .execute())
+        existing = getattr(count_result, 'count', None) or 0
+        if existing > SOLVE_LIFETIME_CAP:
+            return jsonify({
+                "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
+            }), 429
+
         data['user_id'] = request.user_id
         result = request.supabase.table('solves').insert(data).execute()
         saved_solve = result.data[0]

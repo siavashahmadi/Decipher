@@ -94,10 +94,13 @@ def test_get_solves_clamps_limit(fake_supabase_factory, client, auth_headers):
 
 def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_headers):
     fake = fake_supabase_factory(scripts={
-        "solves": [{"data": [{
-            "id": "solve-1", "time": 10.5,
-            "created_at": "2026-04-20T00:00:00Z",
-        }]}],
+        "solves": [
+            {"data": [], "count": 0},
+            {"data": [{
+                "id": "solve-1", "time": 10.5,
+                "created_at": "2026-04-20T00:00:00Z",
+            }]},
+        ],
         "personal_bests": [
             {"data": []},      # no existing PB
             {"data": [{}]},    # insert acknowledged
@@ -120,10 +123,13 @@ def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_
 
 def test_create_solve_skips_pb_on_dnf(fake_supabase_factory, client, auth_headers):
     fake = fake_supabase_factory(scripts={
-        "solves": [{"data": [{
-            "id": "s1", "time": 10.0,
-            "created_at": "2026-04-20T00:00:00Z",
-        }]}],
+        "solves": [
+            {"data": [], "count": 0},
+            {"data": [{
+                "id": "s1", "time": 10.0,
+                "created_at": "2026-04-20T00:00:00Z",
+            }]},
+        ],
     })
     r = client.post(
         "/api/solves",
@@ -216,6 +222,51 @@ def test_create_solve_rejects_tiny_time(fake_supabase_factory, client, auth_head
     assert r.status_code == 422
     body = r.get_json()
     assert "time" in body.get("fields", {})
+
+
+def test_create_solve_returns_429_above_lifetime_cap(
+    fake_supabase_factory, client, auth_headers
+):
+    fake_supabase_factory(scripts={
+        "solves": [{"data": [], "count": 100_001}],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 10.0},
+    )
+    assert r.status_code == 429
+    assert "limit" in r.get_json().get("error", "").lower()
+
+
+def test_create_solve_under_cap_inserts_normally(
+    fake_supabase_factory, client, auth_headers
+):
+    fake = fake_supabase_factory(scripts={
+        "solves": [
+            {"data": [], "count": 5},
+            {"data": [{
+                "id": "solve-1", "time": 10.5,
+                "created_at": "2026-04-20T00:00:00Z",
+            }]},
+        ],
+        "personal_bests": [
+            {"data": []},
+            {"data": [{}]},
+        ],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 10.5},
+    )
+    assert r.status_code == 200
+    # First solves query is the count, second is the insert.
+    solves_queries = [q for q in fake.queries if q.table_name == "solves"]
+    assert len(solves_queries) == 2
+    assert any(c[0] == "select" for c in solves_queries[0].calls)
+    assert any(c[0] == "insert" for c in solves_queries[1].calls)
+
 
 def test_patch_solve_404_when_missing(fake_supabase_factory, client, auth_headers):
     fake_supabase_factory(scripts={"solves": [{"data": []}]})

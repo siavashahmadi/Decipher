@@ -62,7 +62,10 @@ class FakeSupabase:
         self.postgrest = MagicMock()
 
     def table(self, name):
-        q = FakeQuery(name, list(self.scripts.get(name, [])))
+        # Share the script list across table() calls on the same name so
+        # sequential queries (e.g. SELECT count then INSERT) drain the queue
+        # in order. A fresh list per call would reset the cursor.
+        q = FakeQuery(name, self.scripts.setdefault(name, []))
         self.queries.append(q)
         return q
 
