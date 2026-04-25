@@ -194,6 +194,7 @@ def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solv
 
 @solves.route('/solves/<solve_id>', methods=['PATCH'])
 @require_auth
+@limiter.limit("60 per minute")
 def update_solve(solve_id):
     data = request.json
     errors = validate_update_solve(data)
@@ -220,6 +221,7 @@ def update_solve(solve_id):
 
 @solves.route('/solves/<solve_id>', methods=['DELETE'])
 @require_auth
+@limiter.limit("60 per minute")
 def delete_solve(solve_id):
     try:
         # Use an ISO UTC timestamp — the Supabase Python client sends JSON to
