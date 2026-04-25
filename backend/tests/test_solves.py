@@ -308,7 +308,7 @@ def test_share_token_round_trip(
     r = client.get("/api/solves/abc/share-token", headers=auth_headers)
     assert r.status_code == 200
     token = r.get_json()["token"]
-    assert "." in token
+    assert token.count(".") == 3
 
     fake_service_supabase_factory(scripts={
         "solves": [{"data": [{
@@ -336,9 +336,9 @@ def test_share_token_rejects_tampered(
     fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
 
-    id_part, mac_part = token.split(".", 1)
-    swapped = "A" if mac_part[0] != "A" else "B"
-    tampered = f"{id_part}.{swapped}{mac_part[1:]}"
+    parts = token.split(".")
+    parts[-1] = ("A" if parts[-1][-1] != "A" else "B") + parts[-1][1:]
+    tampered = ".".join(parts)
 
     fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     r = client.get(f"/api/solves/share/{tampered}")
@@ -461,9 +461,11 @@ def test_share_token_tampered_mac_returns_404(app, fake_service_supabase_factory
     app.config["SHARE_SECRET"] = "x" * 32
     with app.app_context():
         token = solves_module._sign_solve_id("abc-123")
-    # Flip the last char of the MAC segment
+    # Flip the first char of the MAC segment. Flipping the last char is
+    # unreliable because base64url's final char encodes only 2 useful bits
+    # for a 16-byte payload; substitutions can decode to identical bytes.
     parts = token.split(".")
-    parts[-1] = parts[-1][:-1] + ("A" if parts[-1][-1] != "A" else "B")
+    parts[-1] = ("A" if parts[-1][0] != "A" else "B") + parts[-1][1:]
     bad_token = ".".join(parts)
     r = client.get(f"/api/solves/share/{bad_token}")
     assert r.status_code == 404
