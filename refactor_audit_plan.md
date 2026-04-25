@@ -620,6 +620,14 @@ Ranked by the QA agent's risk assessment.
 - Lets the real axios layer execute in tests instead of being entirely mocked.
 - Effort and benefit are moderate; not urgent.
 
+### G.17 [M] Close systemic FakeSupabase TDD gap on soft-delete filters
+- Discovered during Task A.3+A.6 review (2026-04-25). The `FakeQuery` in `backend/tests/conftest.py` records calls but does not enforce them, so `script {"data": []} + assert 404` passes even when the production `.is_('deleted_at', None)` filter is removed.
+- Negative-control sweep showed 4 of 6 soft-delete filters in `routes/solves.py` (lines 95, 135, 300, 322) have no test that would catch their removal. PATCH (line 211) and DELETE (line 232) are now covered.
+- Two paths:
+  1. Extend the `is_calls = [c for c in query.calls if c[0] == "is_"]` pattern to `test_get_solves_*`, `test_create_solve_*`, `test_share_token_*`, `test_get_shared_solve_*`. Quick.
+  2. Teach `FakeQuery` to actually apply `.eq()` / `.is_()` filters against scripted data so any filter regression naturally surfaces. Stronger but more invasive.
+- Recommend path 2 long-term; path 1 as a stop-gap.
+
 ---
 
 ## Cluster H. Architecture
