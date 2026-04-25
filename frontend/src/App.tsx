@@ -4,6 +4,7 @@ import Auth from './components/Auth';
 import TimerPage from './pages/Timer';
 import StatsPage from './pages/Stats';
 import TrainersPage from './pages/Trainers';
+import SharedSolve from './pages/SharedSolve';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabaseConfigMissing } from './services/auth';
 import './App.css';
@@ -31,6 +32,7 @@ const AppRoutes = (): ReactElement => {
           <Route path="/" element={<TimerPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/trainers/*" element={<TrainersPage />} />
+          <Route path="/s/:token" element={<SharedSolve />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
