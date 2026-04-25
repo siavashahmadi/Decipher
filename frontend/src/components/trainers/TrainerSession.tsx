@@ -15,6 +15,27 @@ import './PllTrainer.css';
 
 const RECENT_CAP = 5;
 
+const storageKey = (type: TrainerType): string => `trainer-recent:${type}`;
+
+const loadRecent = (type: TrainerType): RecentEntry[] => {
+  try {
+    const raw = sessionStorage.getItem(storageKey(type));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveRecent = (type: TrainerType, entries: RecentEntry[]): void => {
+  try {
+    sessionStorage.setItem(storageKey(type), JSON.stringify(entries));
+  } catch {
+    // Private-mode Safari or quota; fall back to in-memory only.
+  }
+};
+
 interface TrainerSessionProps {
   type: TrainerType;
 }
@@ -38,14 +59,18 @@ const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
   const [scramble, setScramble] = useState<string>(() =>
     buildScramble(type, 'all', 'any')
   );
-  const [recent, setRecent] = useState<RecentEntry[]>([]);
+  const [recent, setRecent] = useState<RecentEntry[]>(() => loadRecent(type));
 
   useEffect(() => {
     setCaseChoice('all');
     setAlgChoice('any');
-    setRecent([]);
+    setRecent(loadRecent(type));
     setScramble(buildScramble(type, 'all', 'any'));
   }, [type]);
+
+  useEffect(() => {
+    saveRecent(type, recent);
+  }, [type, recent]);
 
   useEffect(() => {
     setScramble(buildScramble(type, caseChoice, algChoice));
