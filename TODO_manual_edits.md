@@ -59,3 +59,23 @@ After deploying on an asymmetric-keys project:
 - Sign in, make a handful of authenticated requests (hit the timer, open Stats).
 - Tail backend logs. You should see NO `Supabase auth lookup failed` entries on the happy path, and no outbound HTTPS to `*.supabase.co/auth/v1/user` per request (only the initial one-time JWKS fetch).
 - If you still see `auth.get_user` chatter per request, the fallback is firing — most likely the JWKS endpoint is unreachable or the project is still on HS256.
+
+## Audit Cluster A (2026-04-25)
+
+### A.9 Apply migration 005 (personal_bests RLS)
+
+Migration file: `backend/migrations/005_personal_bests_delete_policy.sql`
+
+Today the user-scoped Supabase client cannot DELETE rows from `personal_bests` because no DELETE RLS policy exists. The route at `backend/app/routes/solves.py:239` calls `.delete()` and PostgREST returns "0 rows affected" with no exception. Result: every PB-holding solve that gets deleted leaves an orphan PB row.
+
+To fix:
+
+1. In Supabase dashboard → SQL editor, paste the contents of `backend/migrations/005_personal_bests_delete_policy.sql` and run.
+2. Verify with:
+   ```sql
+   SELECT polname FROM pg_policy
+   WHERE polrelid = 'public.personal_bests'::regclass
+   ORDER BY polname;
+   ```
+   Expected: at least four policies including the two new ones (DELETE, UPDATE).
+3. End-to-end check: in the app, record a fast solve to create a PB, then delete that solve from the UI. Confirm the matching `personal_bests` row is gone.
