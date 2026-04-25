@@ -208,6 +208,7 @@ def update_solve(solve_id):
                   .update(allowed)
                   .eq('id', solve_id)
                   .eq('user_id', request.user_id)
+                  .is_('deleted_at', None)
                   .execute())
         if not result.data:
             return jsonify({"error": "Solve not found"}), 404

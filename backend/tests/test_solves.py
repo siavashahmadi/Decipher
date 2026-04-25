@@ -389,3 +389,28 @@ def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_h
         json={"puzzle_type": "333", "time": 12.34, "scramble": "", "dnf": True},
     )
     assert r.status_code == 200
+
+
+def test_patch_returns_404_for_soft_deleted_solve(fake_supabase_factory, client, auth_headers):
+    # Soft-deleted rows should not be reachable via PATCH.
+    fake_supabase_factory(scripts={
+        "solves": [{"data": []}],  # filter excludes soft-deleted, so empty
+    })
+    r = client.patch(
+        "/api/solves/abc-123",
+        headers=auth_headers,
+        json={"dnf": True},
+    )
+    assert r.status_code == 404
+
+
+def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_headers):
+    # Body with no recognized fields should 422 before hitting Supabase.
+    fake_supabase_factory()
+    r = client.patch(
+        "/api/solves/abc-123",
+        headers=auth_headers,
+        json={"time": 999},
+    )
+    assert r.status_code == 422
+    assert "fields" in r.get_json() or "body" in r.get_json().get("fields", {})

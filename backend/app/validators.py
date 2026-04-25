@@ -46,6 +46,9 @@ def validate_update_solve(data):
     if not data:
         return {"body": "Request body is required"}
 
+    if not any(k in data for k in ('dnf', 'plus_two')):
+        return {"body": "must include dnf or plus_two"}
+
     errors = {}
 
     if 'dnf' in data and not isinstance(data['dnf'], bool):
