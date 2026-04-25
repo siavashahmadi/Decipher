@@ -62,23 +62,15 @@ After deploying on an asymmetric-keys project:
 
 ## Audit Cluster A (2026-04-25)
 
-### A.4 Run production puzzle_type audit (decision D1, blocks A.4)
+### Supabase project is paused
 
-Before the puzzle-type vocabulary reconciliation can ship, we need to know what values exist in production. In Supabase dashboard → SQL editor, run:
+The Supabase project has been paused (no app usage for a couple weeks). All Cluster A items that touch the live DB are gated on unpausing first. Specifically: A.9 (apply migration 005) and any future end-to-end checks. Code-only items (A.4 validator change, A.7 share-link expiry) ship without touching the DB.
 
-```sql
-SELECT puzzle_type, count(*) FROM solves GROUP BY puzzle_type ORDER BY 2 DESC;
-```
+To unpause: Supabase dashboard → project picker → "Restore project". Wait for the status to go green before applying A.9.
 
-Record the result here:
+### A.4 Production puzzle_type audit (no longer required)
 
-| puzzle_type | count |
-|---|---|
-| (fill in) | (fill in) |
-
-If any rows have `puzzle_type IN ('minx', '333bf', '333oh', '444bf', '555bf')`, A.4 needs an extra step: a one-shot rename migration before the validator change ships. The rename SQL is documented in the plan at `docs/superpowers/plans/2026-04-25-audit-cluster-0-and-a.md` under Task A.4 Step 3. Run it in the same SQL editor, then record the row counts touched here too.
-
-If all rows are already in the new whitelist (`333, 222, 444, 555, 666, 777, clock, mega, pyram, skewb, sq1`), no data migration needed; just say so here and proceed.
+The plan originally called for an audit of `solves.puzzle_type` to check for `'minx', '333bf', '333oh', '444bf', '555bf'` rows that would be rejected by the new validator. Verified by codebase grep: those tokens exist ONLY in `backend/app/validators.py` and nowhere else in the application (no UI button, no hotkey, no scramble generator, no display path). Realistically no row in any environment has those values. A.4 ships without a data migration.
 
 ### A.9 Apply migration 005 (personal_bests RLS)
 
