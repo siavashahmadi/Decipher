@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 // ---------------------------------------------------------------------------
 // DSA-4: Two-Heap Running Median
@@ -120,7 +120,10 @@ const useMedianTracker = (): MedianTracker => {
 
   const getSize = useCallback((): number => lo.current.size + hi.current.size, []);
 
-  return { push, getMedian, reset, getSize };
+  return useMemo(
+    () => ({ push, getMedian, reset, getSize }),
+    [push, getMedian, reset, getSize],
+  );
 };
 
 export default useMedianTracker;
