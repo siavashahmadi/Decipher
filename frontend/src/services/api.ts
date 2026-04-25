@@ -20,6 +20,16 @@ export interface SolvesPage {
 
 export type SolvePayload = Omit<Solve, 'id' | 'user_id' | 'created_at'>;
 
+export interface PublicSolve {
+	id: string;
+	puzzle_type: PuzzleType;
+	time: number;
+	dnf: boolean;
+	plus_two: boolean;
+	scramble: string;
+	created_at: string;
+}
+
 const api = {
 	// SD-2: cursor-based pagination. Pass cursor=null for the first page;
 	// pass the returned next_cursor for the next.
@@ -55,6 +65,22 @@ const api = {
 			headers,
 			params: { puzzle_type: puzzleType },
 		});
+		return response.data;
+	},
+
+	getShareToken: async (solveId: string): Promise<string> => {
+		const headers = await getAuthHeader();
+		const response = await axios.get<{ token: string }>(
+			`${API_URL}/solves/${solveId}/share-token`,
+			{ headers },
+		);
+		return response.data.token;
+	},
+
+	getSharedSolve: async (token: string): Promise<PublicSolve> => {
+		const response = await axios.get<PublicSolve>(
+			`${API_URL}/solves/share/${encodeURIComponent(token)}`,
+		);
 		return response.data;
 	},
 
