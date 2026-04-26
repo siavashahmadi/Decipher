@@ -95,3 +95,49 @@ To fix:
 The share-link token format changed from 2 segments (`b64(id).b64(mac)`) to 4 segments (`b64(id).b64(iat).b64(exp).b64(mac)`) and now expires 30 days after issue. Any existing share links 404 immediately on deploy. If anyone has externally-pasted share links pointing at this app, they need a new one.
 
 Also: `SHARE_SECRET` must now be at least 32 characters in production. The startup check in `create_app` raises `RuntimeError` if the env var is shorter. Generate a fresh value if needed: `openssl rand -hex 32`.
+
+## Audit Cluster B (2026-04-26)
+
+### B.4 New required env vars
+
+`create_app` now refuses to boot on any missing required env var. In addition to `SHARE_SECRET` (already required), these three must be set in `backend/.env` AND in your deployed host:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+If you were already running the app, all three are presumably set. The only practical risk is a fresh deploy or a CI environment that previously skipped one of them — startup will now crash with `RuntimeError: Required environment variables missing: ...` instead of failing at first request.
+
+### B.7 phase 2: flip CSP from Report-Only to enforcing
+
+CSP currently ships as `Content-Security-Policy-Report-Only`, which means browsers report violations to DevTools console but do NOT block them. Phase 2 flips the header name to `Content-Security-Policy`, at which point any violation actively blocks the resource.
+
+Before flipping:
+
+1. Use the app in production for at least one to two weeks across the major flows: sign in, record a solve, view Stats, view a Trainer, open a share link in incognito.
+2. In each session, open DevTools → Console and look for `Refused to ...` or `Content Security Policy` violation messages. There should be **none**. If any appear, the allowlist needs adjustment before enforcement (most likely cause: a new CDN/font/analytics tag added since 2026-04-26).
+3. Edit `backend/app/__init__.py`: change `response.headers.setdefault("Content-Security-Policy-Report-Only", csp)` to `response.headers.setdefault("Content-Security-Policy", csp)`. The existing test in `backend/tests/test_security_headers.py` accepts either header name and stays green.
+4. Commit, deploy, and re-run the same flow check. Anything blocked now is a real CSP problem and needs investigation, not a quick allowlist add.
+
+### B.8 New flask-cors version
+
+`flask-cors` was bumped from 4.0.0 to 5.0.x. After pulling, run `pip install -r backend/requirements.txt` to upgrade locally. Your deployed host's build step should pick this up automatically on next deploy.
+
+### B.10 Per-user rate limiting (post-deploy check)
+
+Authenticated requests are now rate-limited per JWT subject instead of per source IP. After deploying:
+
+- Open the app in two tabs signed in to the same account, hammer one tab. The OTHER tab should also see 429s once the bucket drains. (Same user, same bucket.)
+- Sign out in one tab, hit unauthed endpoints (e.g. a share link). That bucket is per-IP again.
+
+If users behind a corporate NAT report more 429s than expected, the previous per-IP behavior was masking the real per-user limit. Bump `@limiter.limit("30 per minute")` etc. in `backend/app/routes/solves.py` if 30/minute is too tight for your usage shape.
+
+### B.11 Optional: switch limiter to Redis in production
+
+The limiter still defaults to `memory://` (per-process). If you run multiple workers in production, the same user can effectively get N times the documented rate by hitting a different worker. To fix without a code change:
+
+1. Provision a Redis instance (or any flask-limiter-supported store).
+2. Set `LIMITER_STORAGE_URI=redis://<host>:<port>/<db>` in your deployed host's env.
+3. Restart workers. Verify by hammering one user from two terminals against two workers and confirming the bucket is shared.
+
+Not urgent if you currently run a single backend process.
