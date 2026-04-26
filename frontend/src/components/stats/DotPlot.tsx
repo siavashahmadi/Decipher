@@ -40,11 +40,14 @@ const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
   }, [points]);
 
   const { effectiveTheme } = useSettings();
-  const colors = chartColors(effectiveTheme);
+  const colors = useMemo(() => chartColors(effectiveTheme), [effectiveTheme]);
+
+  const merged = useMemo(
+    () => points.map((p, i) => ({ ...p, ao5: ao5Line[i]?.ao5 ?? null })),
+    [points, ao5Line],
+  );
 
   if (!points.length) return <p className="dot-plot-empty">No solves in range.</p>;
-
-  const merged = points.map((p, i) => ({ ...p, ao5: ao5Line[i]?.ao5 ?? null }));
 
   return (
     <ResponsiveContainer width="100%" height={260}>
