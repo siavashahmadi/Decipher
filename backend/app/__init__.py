@@ -27,11 +27,27 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024  # 16KB; solve payloads are sub-1KB
 
-    share_secret = os.environ.get("SHARE_SECRET", "")
-    # A.7: prevent boot with a weak share-link signing key
+    # B.4: refuse to boot on any missing required config. Crashing here
+    # produces a clear stack at deploy time rather than a 500 on first
+    # request when something downstream tries to call create_client(None).
+    required = {
+        "SUPABASE_URL": Config.SUPABASE_URL,
+        "SUPABASE_ANON_KEY": Config.SUPABASE_ANON_KEY,
+        "SUPABASE_SERVICE_ROLE_KEY": Config.SUPABASE_SERVICE_ROLE_KEY,
+        "SHARE_SECRET": os.environ.get("SHARE_SECRET", ""),
+    }
+    missing = [k for k, v in required.items() if not v]
+    if missing:
+        raise RuntimeError(
+            f"Required environment variables missing: {', '.join(missing)}"
+        )
+
+    share_secret = required["SHARE_SECRET"]
+    # A.7: prevent boot with a weak share-link signing key.
     if len(share_secret) < 32:
         raise RuntimeError(
-            "SHARE_SECRET must be set and at least 32 characters"
+            "SHARE_SECRET must be at least 32 characters "
+            f"(got {len(share_secret)})"
         )
     app.config["SHARE_SECRET"] = share_secret
 
