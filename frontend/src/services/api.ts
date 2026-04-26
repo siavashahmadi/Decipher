@@ -85,11 +85,16 @@ const api = {
 	},
 
 	// Migrate guest solves to server after signup. Sequential to stay within
-	// the 30/min rate limit and preserve PB materialization order.
+	// the 30/min rate limit. Sort by created_at ascending so server-side PB
+	// materialization sees solves in the order they were earned, not in
+	// localStorage manifest order.
 	migrateSolves: async (allGuestSolves: Solve[]): Promise<{ migrated: Solve[]; failed: Solve[] }> => {
 		const migrated: Solve[] = [];
 		const failed: Solve[] = [];
-		for (const solve of allGuestSolves) {
+		const sorted = [...allGuestSolves].sort(
+			(a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+		);
+		for (const solve of sorted) {
 			const { id: _localId, user_id: _uid, created_at: _createdAt, ...payload } = solve;
 			try {
 				await api.createSolve(payload);
