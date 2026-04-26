@@ -6,6 +6,7 @@ import useScrambleQueue from './useScrambleQueue';
 import useSolveStore from './useSolveStore';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import { mergeSortedAsc } from '../utils/mergeSortedAsc';
 import type { PersonalBest, PuzzleType, Solve } from '../types';
 
 export interface PenaltyFlags { plusTwo: boolean; dnf: boolean }
@@ -152,10 +153,12 @@ export default function useSolveSession(): UseSolveSessionResult {
 
       const newTimes = moreData
         .filter(s => !s.dnf)
-        .map(s => (s.plus_two ? s.time + 2 : s.time));
-      newTimes.forEach(t => medianTracker.push(t));
-      sortedTimesRef.current = [...sortedTimesRef.current, ...newTimes]
+        .map(s => (s.plus_two ? s.time + 2 : s.time))
         .sort((a, b) => a - b);
+      newTimes.forEach(t => medianTracker.push(t));
+      // Linear merge of the new page (already sorted) into the existing
+      // sorted ref. O(n + m) instead of the previous O((n + m) log (n + m)).
+      sortedTimesRef.current = mergeSortedAsc(sortedTimesRef.current, newTimes);
       setCurrentMedian(medianTracker.getMedian());
     } catch (err) {
       console.error(err);
