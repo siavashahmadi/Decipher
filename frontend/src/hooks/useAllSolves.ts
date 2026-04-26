@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { toast } from 'sonner';
 import api from '../services/api';
 import { getGuestSolves } from '../services/guestStorage';
@@ -7,9 +8,7 @@ import type { PuzzleType, Solve } from '../types';
 interface UseAllSolvesResult {
   solves: Solve[];
   loading: boolean;
-  error: unknown;
   truncated: boolean;
-  refetch: () => void;
 }
 
 // Paginates through /api/solves until next_cursor is null.
@@ -17,21 +16,16 @@ interface UseAllSolvesResult {
 export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): UseAllSolvesResult {
   const [solves, setSolves] = useState<Solve[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
   const [truncated, setTruncated] = useState(false);
-  const [tick, setTick] = useState(0);
-
-  const refetch = useCallback(() => setTick(t => t + 1), []);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     const run = async () => {
       setLoading(true);
-      setError(null);
       setTruncated(false);
       try {
         if (isGuest) {
-          if (!cancelled) setSolves(getGuestSolves(puzzleType));
+          if (!controller.signal.aborted) setSolves(getGuestSolves(puzzleType));
           return;
         }
         const all: Solve[] = [];
@@ -40,7 +34,7 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
         let pages = 0;
         let didTruncate = false;
         do {
-          const page = await api.getSolves(puzzleType, cursor);
+          const page = await api.getSolves(puzzleType, cursor, controller.signal);
           all.push(...page.solves);
           cursor = page.next_cursor;
           pages += 1;
@@ -49,22 +43,24 @@ export default function useAllSolves(puzzleType: PuzzleType, isGuest: boolean): 
             break;
           }
         } while (cursor);
-        if (!cancelled) {
+        if (!controller.signal.aborted) {
           setSolves(all);
           setTruncated(didTruncate);
         }
       } catch (e) {
-        if (!cancelled) {
-          setError(e);
+        // Cancellation is expected on puzzle/route change. Swallow it
+        // silently; only surface real failures.
+        if (axios.isCancel(e) || (e instanceof Error && e.name === 'CanceledError')) return;
+        if (!controller.signal.aborted) {
           toast.error('Could not load all solves for stats.');
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     run();
-    return () => { cancelled = true; };
-  }, [puzzleType, isGuest, tick]);
+    return () => { controller.abort(); };
+  }, [puzzleType, isGuest]);
 
-  return { solves, loading, error, truncated, refetch };
+  return { solves, loading, truncated };
 }

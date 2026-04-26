@@ -29,4 +29,21 @@ describe('useAllSolves (auth)', () => {
     expect(result.current.solves.map(s => s.id)).toEqual(['a', 'b', 'c']);
     expect(api.getSolves).toHaveBeenCalledTimes(2);
   });
+
+  it('passes an AbortSignal to api.getSolves and aborts on unmount', async () => {
+    (api.getSolves as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      solves: [], next_cursor: null,
+    });
+
+    const { unmount } = renderHook(() => useAllSolves('333', false));
+    await waitFor(() => expect(api.getSolves).toHaveBeenCalled());
+
+    const call = (api.getSolves as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    const signal = call[2] as AbortSignal;
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(signal.aborted).toBe(false);
+
+    unmount();
+    expect(signal.aborted).toBe(true);
+  });
 });
