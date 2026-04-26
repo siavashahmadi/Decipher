@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
 import { formatTime } from '../../utils/formatTime';
@@ -11,7 +11,7 @@ import type { PuzzleType, PersonalBest } from '../../types';
 const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGuest: boolean }): ReactElement => {
   const [pbs, setPbs] = useState<PersonalBest[]>([]);
   const { effectiveTheme } = useSettings();
-  const colors = chartColors(effectiveTheme);
+  const colors = useMemo(() => chartColors(effectiveTheme), [effectiveTheme]);
 
   useEffect(() => {
     if (isGuest) { setPbs([]); return; }
@@ -22,11 +22,14 @@ const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGues
     return () => { cancelled = true; };
   }, [puzzleType, isGuest]);
 
-  const data = pbs.map(pb => ({
-    ts: new Date(pb.achieved_at).getTime(),
-    label: new Date(pb.achieved_at).toLocaleDateString(),
-    time: Number(pb.time),
-  }));
+  const data = useMemo(
+    () => pbs.map(pb => ({
+      ts: new Date(pb.achieved_at).getTime(),
+      label: new Date(pb.achieved_at).toLocaleDateString(),
+      time: Number(pb.time),
+    })),
+    [pbs],
+  );
 
   if (data.length < 2) return <p style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>Not enough PB history yet.</p>;
 
