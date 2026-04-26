@@ -93,6 +93,8 @@ These are real bugs visible to users today.
 
 Order roughly by likelihood of exploitation.
 
+**Status: all 15 items shipped on 2026-04-26.** Plan: `docs/superpowers/plans/2026-04-26-audit-cluster-b.md` (originally drafted at `~/.claude/plans/.../adaptive-walrus.md`). 13 commits between `6171785` (test flake pre-work) and `b2fce20` (B.13 doc). B.7 ships in two phases: phase 1 (CSP-Report-Only + 4 enforcing headers) is in `dc57cf7`; phase 2 (flip CSP to enforcing after a burn-in window) is intentionally deferred and tracked in the plan's "Items intentionally deferred" section.
+
 ### B.1 [S] Add JWT `issuer` check
 - File: `backend/app/auth.py:39-44`.
 - Pass `issuer=f"{Config.SUPABASE_URL}/auth/v1"` to `jwt.decode`.
