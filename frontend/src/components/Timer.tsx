@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { formatTime } from '../utils/formatTime';
 import {
   beep,
@@ -305,18 +305,27 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     onPressUp();
   }, [onPressUp]);
 
-  const isWarning = phase === 'inspection' && inspectionCount <= 3 && inspectionCount > 0;
-  const isHoldReady = (phase === 'ready' || phase === 'armed') && holdMet;
+  const isWarning = useMemo(
+    () => phase === 'inspection' && inspectionCount <= 3 && inspectionCount > 0,
+    [phase, inspectionCount],
+  );
+  const isHoldReady = useMemo(
+    () => (phase === 'ready' || phase === 'armed') && holdMet,
+    [phase, holdMet],
+  );
 
-  const timerClass = [
-    phase === 'ready' ? 'ready' : '',
-    phase === 'armed' ? 'armed' : '',
-    isHoldReady ? 'hold-met' : '',
-    phase === 'running' ? 'running' : '',
-    phase === 'inspection' && !isWarning ? 'inspection' : '',
-    isWarning ? 'inspection-warning' : '',
-    flashYellow ? 'flash-yellow' : '',
-  ].filter(Boolean).join(' ');
+  const timerClass = useMemo(
+    () => [
+      phase === 'ready' ? 'ready' : '',
+      phase === 'armed' ? 'armed' : '',
+      isHoldReady ? 'hold-met' : '',
+      phase === 'running' ? 'running' : '',
+      phase === 'inspection' && !isWarning ? 'inspection' : '',
+      isWarning ? 'inspection-warning' : '',
+      flashYellow ? 'flash-yellow' : '',
+    ].filter(Boolean).join(' '),
+    [phase, isHoldReady, isWarning, flashYellow],
+  );
 
   return (
     <div>
