@@ -38,6 +38,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
 
   const phaseRef = useRef<Phase>('idle');
   const timeRef = useRef(0);
+  const timerDivRef = useRef<HTMLDivElement>(null);
   const inspectionStartRef = useRef<number | null>(null);
   const holdStartRef = useRef<number | null>(null);
   const holdMetRef = useRef(false);
@@ -175,11 +176,17 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     setTime(0);
     timeRef.current = 0;
     timerStartRef.current = performance.now();
+    // RAF writes timer text directly to the div's textContent instead of
+    // calling setState, so the running phase produces zero React renders
+    // (~60Hz state churn -> 0). React still owns the text on transitions
+    // out of running because finishSolve calls setTime(rounded) below.
     const tick = () => {
       const elapsed = performance.now() - timerStartRef.current;
       const rounded = Math.floor(elapsed / 10) * 10;
       timeRef.current = rounded;
-      setTime(rounded);
+      if (timerDivRef.current) {
+        timerDivRef.current.textContent = formatTime(rounded / 1000);
+      }
       timerRafRef.current = requestAnimationFrame(tick);
     };
     timerRafRef.current = requestAnimationFrame(tick);
@@ -331,6 +338,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     <div>
       <div
         id="timer"
+        ref={timerDivRef}
         className={timerClass}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
