@@ -10,7 +10,7 @@ const effective = (s: Solve): number => s.plus_two ? s.time + 2 : s.time;
 
 const Histogram = ({ solves, bins = 20 }: { solves: Solve[]; bins?: number }): ReactElement => {
   const { effectiveTheme } = useSettings();
-  const colors = chartColors(effectiveTheme);
+  const colors = useMemo(() => chartColors(effectiveTheme), [effectiveTheme]);
 
   const data = useMemo(() => {
     const times = solves.filter(s => !s.dnf).map(effective);
