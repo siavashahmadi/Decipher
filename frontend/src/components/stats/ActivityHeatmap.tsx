@@ -17,10 +17,16 @@ interface Props {
 const ActivityHeatmap = ({ solves, from, to }: Props): ReactElement => {
   const data = useMemo(() => buildHeatmapData(solves), [solves]);
   const { effectiveTheme } = useSettings();
-  const colors = chartColors(effectiveTheme);
+  const colors = useMemo(() => chartColors(effectiveTheme), [effectiveTheme]);
 
-  const values = data.map(d => d.value).sort((a, b) => a - b);
-  const maxValue = values.length ? values[values.length - 1] : 1;
+  const maxValue = useMemo(() => {
+    if (data.length === 0) return 1;
+    let max = data[0].value;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].value > max) max = data[i].value;
+    }
+    return max;
+  }, [data]);
 
   const safeFrom = Number.isFinite(from.getTime()) ? from : new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
   const safeTo = Number.isFinite(to.getTime()) ? to : new Date();
