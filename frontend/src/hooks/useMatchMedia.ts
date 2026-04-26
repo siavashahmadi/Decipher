@@ -10,7 +10,6 @@ const useMatchMedia = (query: string): boolean => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mq = window.matchMedia(query);
     const handler = (e: MediaQueryListEvent): void => setMatches(e.matches);
-    setMatches(mq.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, [query]);
