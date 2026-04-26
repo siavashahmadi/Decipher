@@ -100,6 +100,8 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     }
   }, []);
 
+  const lastShownSecondRef = useRef<number | null>(null);
+
   const startInspection = useCallback(() => {
     beep(INSPECTION_START_HZ, INSPECTION_START_MS);
     inspectionStartRef.current = Date.now();
@@ -111,13 +113,22 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       flashTimeoutRef.current = null;
     }
     setInspectionCount(15);
+    lastShownSecondRef.current = 15;
     setInspectionBadge(null);
+    // 250ms cadence (4 Hz) is plenty for a once-per-second display, and
+    // gating setInspectionCount on the integer-second changing keeps
+    // React renders to ~1 per displayed second instead of 1 per tick.
+    // Auto-DNF still fires within 250ms of the 17s mark, an acceptable
+    // tolerance for an already-DNF'd attempt.
     inspectionIntervalRef.current = setInterval(() => {
       const start = inspectionStartRef.current;
       if (start === null) return;
       const elapsed = Date.now() - start;
       const remaining = Math.ceil((15000 - elapsed) / 1000);
-      setInspectionCount(remaining);
+      if (remaining !== lastShownSecondRef.current) {
+        lastShownSecondRef.current = remaining;
+        setInspectionCount(remaining);
+      }
       if (elapsed > 17000) {
         if (inspectionIntervalRef.current !== null) {
           clearInterval(inspectionIntervalRef.current);
@@ -153,7 +164,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
         warning3FiredRef.current = true;
         beep(INSPECTION_12S_WARNING_HZ, INSPECTION_12S_WARNING_MS);
       }
-    }, 100);
+    }, 250);
     phaseRef.current = 'inspection';
     setPhase('inspection');
   }, [onSolveComplete]);

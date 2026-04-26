@@ -139,7 +139,9 @@ describe('Timer state machine', () => {
     spaceDown();
     await advance(400);
     spaceUp();
-    await advance(17200);
+    // Inspection interval ticks at 250ms cadence so auto-DNF fires
+    // within ~250ms of the 17s mark; advance enough to span a tick.
+    await advance(17500);
     expect(onComplete).toHaveBeenCalledWith(0, { plusTwo: false, dnf: true });
     expect(timerClass()).not.toContain('inspection');
     expect(timerClass()).not.toContain('running');
