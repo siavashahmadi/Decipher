@@ -91,6 +91,12 @@ export default function useSolveSession(): UseSolveSessionResult {
   const medianTracker = useMedianTracker();
   const [currentMedian, setCurrentMedian] = useState<number | null>(null);
 
+  // Mirror the latest solves into a ref so async handlers can capture a
+  // snapshot for optimistic-update rollback without depending on `solves`
+  // (which would invalidate every callback identity on every solve change).
+  const solvesRef = useRef<Solve[]>([]);
+  solvesRef.current = solves;
+
   useEffect(() => {
     const fetchSolves = async () => {
       try {
@@ -114,7 +120,10 @@ export default function useSolveSession(): UseSolveSessionResult {
       }
     };
     fetchSolves();
-  }, [puzzleType, store, medianTracker]);
+    // medianTracker omitted: A.8 made its identity stable so it never
+    // changes between renders. Including it would only re-fire this fetch
+    // if that contract regressed.
+  }, [puzzleType, store]);
 
   useEffect(() => {
     if (isGuest) {
@@ -154,7 +163,8 @@ export default function useSolveSession(): UseSolveSessionResult {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [nextCursor, isLoadingMore, puzzleType, store, medianTracker]);
+    // medianTracker omitted: identity stable since A.8.
+  }, [nextCursor, isLoadingMore, store]);
 
   const recentSolves = useMemo(() => solves.slice(0, 12).reverse(), [solves]);
 
@@ -203,8 +213,8 @@ export default function useSolveSession(): UseSolveSessionResult {
     [puzzleType, currentScramble, advanceScramble, store, medianTracker],
   );
 
-  const handleSolveUpdate = async (updatedSolve: Solve) => {
-    const snapshot = solves;
+  const handleSolveUpdate = useCallback(async (updatedSolve: Solve) => {
+    const snapshot = solvesRef.current;
     setSolves(prev => prev.map(s => (s.id === updatedSolve.id ? updatedSolve : s)));
     try {
       await store.update(updatedSolve);
@@ -213,10 +223,10 @@ export default function useSolveSession(): UseSolveSessionResult {
       console.error(err);
       toast.error('Could not update solve.');
     }
-  };
+  }, [store]);
 
-  const handleSolveDelete = async (solveToDelete: Solve) => {
-    const snapshot = solves;
+  const handleSolveDelete = useCallback(async (solveToDelete: Solve) => {
+    const snapshot = solvesRef.current;
     const sortedSnapshot = sortedTimesRef.current;
 
     setSolves(prev => prev.filter(s => s.id !== solveToDelete.id));
@@ -243,7 +253,8 @@ export default function useSolveSession(): UseSolveSessionResult {
       console.error(err);
       toast.error('Could not delete solve.');
     }
-  };
+    // medianTracker omitted: identity stable since A.8.
+  }, [store]);
 
   const handleTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>,
