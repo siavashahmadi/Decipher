@@ -141,3 +141,64 @@ The limiter still defaults to `memory://` (per-process). If you run multiple wor
 3. Restart workers. Verify by hammering one user from two terminals against two workers and confirming the bucket is shared.
 
 Not urgent if you currently run a single backend process.
+
+## Audit Cluster C (2026-04-26)
+
+All 13 items shipped as 21 commits between `965bb22` and `eda6eb1`. Type checks and 290/290 vitest cases pass. The remaining work is **observation-only**: the perf claims in the commit messages need eyes on a real browser to confirm. None of these change behavior, so a regression here means the optimization didn't land cleanly, not that the app is broken.
+
+For all of the React DevTools steps below, install **React Developer Tools** for Chrome or Firefox, open DevTools, and switch to the "Profiler" tab. Click the round record button, perform the action, click the stop button, then read the flame graph.
+
+### C.1 Timer running-phase Profiler check
+
+Claim: zero Timer re-renders during a running solve. The RAF loop now writes to `div.textContent` directly instead of calling `setTime`, so React should not commit between phase transitions.
+
+1. Run the dev server (`npm run dev` in `frontend/`).
+2. Open the app, open DevTools → Profiler.
+3. Start recording, do a single solve (space-down, hold, space-up, wait ~5–10 s, space-down to stop).
+4. Stop recording.
+5. In the flame graph, find the rendered `Timer` component. Between the "phase = ready" / "phase = running" commit and the final "phase = idle" commit there should be zero intermediate Timer commits.
+6. If you see a wall of identical 60-Hz Timer commits, RAF is still calling `setTime` somewhere. File this as a regression rather than ignoring it; the whole point of the change is gone.
+
+### C.2 Inspection-tick Profiler check
+
+Claim: inspection now produces about 1 Timer render per displayed second (down from 10/s).
+
+1. Profiler recording on, enter inspection (hold space ~400 ms, release).
+2. Watch the visible countdown go 15 → 14 → 13 for ~3 seconds.
+3. Stop recording.
+4. Expect ~3 Timer commits, one per visible second change. If you see ~30, the second-change gate (`lastShownSecondRef`) regressed.
+
+### C.3 Network-cancellation check
+
+Claim: switching puzzles on `/stats` mid-fetch cancels the in-flight `/api/solves` requests.
+
+1. Open `/stats` in the running app. DevTools → Network tab. Filter for `solves`.
+2. Throttle to "Slow 3G" so requests take long enough to interrupt.
+3. Click into a different puzzle (e.g. 2x2) before the current page's pagination loop finishes.
+4. Look at the Network panel: the in-flight requests for the previous puzzle should show as **cancelled** (red status, "(canceled)"). Without C.3, they would complete normally in the background.
+
+### C.5 Virtualized SolveLog browser check
+
+Claim: scrolling a multi-thousand-solve session stays at 60 fps. JSDOM has no layout, so the unit tests only verify the component mounts; visual correctness needs a real browser.
+
+1. Sign in to an account with at least 1,000 solves on one puzzle (or seed dev data via the timer).
+2. Open the timer page, scroll the right-hand SolveLog rapidly with the scroll wheel.
+3. DevTools → Performance tab. Record a few seconds of scrolling. Look at the FPS row at the top of the recording: it should hold near 60 (green bars) even with 5,000+ solves loaded. If it drops to 20–30 under heavy scrolling, the virtualizer is not engaging — most likely the scroll container `.solves-list-scroll` is not getting an actual sized parent, so all items mount at once. Inspect the DOM: only the visible window's `<li>` nodes should be present; if you see thousands of `<li>` siblings the virtualization regressed.
+
+### C.12 Lazy-load route nav
+
+Claim: each non-timer route loads as a separate JS chunk; the home/timer route stays eager.
+
+1. After deploying (or `npm run build && npm run preview`), open the app fresh. Network tab open, filter for `.js`.
+2. Land on `/`. The `Stats-*.js`, `Trainers-*.js`, and `SharedSolve-*.js` chunks should NOT appear in the network log.
+3. Click "Stats" in the header. The `Stats-*.js` chunk loads now, briefly showing the empty `.route-loading` shell, then the page renders.
+4. Hard-reload `/`. Confirm the timer renders with no fallback flicker (the home route is intentionally not lazy).
+5. If you see all three chunks loaded on the home route, the `lazy()` wrapping in `App.tsx` regressed.
+
+### C.13 Safari audio check
+
+Claim: dropping the `webkitAudioContext` fallback is safe because Safari ships unprefixed `AudioContext` since 14.1 (March 2021).
+
+1. Open the deployed (or preview) build in Safari on macOS or iOS.
+2. Settings → Sound on. Start a solve with inspection. You should hear the start beep, the 8-second warning, and the 12-second warning.
+3. If audio is silent on Safari but works on Chrome/Firefox, you are running on a Safari version older than 14.1 and the fallback removal needs to be reverted. (Realistically: Safari < 14.1 is a 2020-or-earlier build; this is a vanishingly small risk.)
