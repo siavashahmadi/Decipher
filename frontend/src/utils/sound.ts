@@ -13,9 +13,8 @@ let soundEnabled = false;
 const getCtx = (): AudioContext | null => {
   if (audioCtx) return audioCtx;
   try {
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return null;
-    audioCtx = new Ctor();
+    if (typeof AudioContext === 'undefined') return null;
+    audioCtx = new AudioContext();
     return audioCtx;
   } catch {
     return null;
