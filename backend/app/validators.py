@@ -1,7 +1,6 @@
 VALID_PUZZLE_TYPES = {
     '333', '222', '444', '555', '666', '777',
-    '333bf', '333oh', 'clock', 'minx', 'pyram',
-    'skewb', 'sq1', '444bf', '555bf'
+    'clock', 'mega', 'pyram', 'skewb', 'sq1',
 }
 
 
@@ -45,6 +44,9 @@ def validate_update_solve(data):
     """Validate PATCH /solves/<id> payload. Returns dict of field errors or None."""
     if not data:
         return {"body": "Request body is required"}
+
+    if not any(k in data for k in ('dnf', 'plus_two')):
+        return {"body": "must include dnf or plus_two"}
 
     errors = {}
 

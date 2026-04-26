@@ -308,7 +308,7 @@ def test_share_token_round_trip(
     r = client.get("/api/solves/abc/share-token", headers=auth_headers)
     assert r.status_code == 200
     token = r.get_json()["token"]
-    assert "." in token
+    assert token.count(".") == 3
 
     fake_service_supabase_factory(scripts={
         "solves": [{"data": [{
@@ -336,9 +336,9 @@ def test_share_token_rejects_tampered(
     fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
 
-    id_part, mac_part = token.split(".", 1)
-    swapped = "A" if mac_part[0] != "A" else "B"
-    tampered = f"{id_part}.{swapped}{mac_part[1:]}"
+    parts = token.split(".")
+    parts[-1] = ("A" if parts[-1][-1] != "A" else "B") + parts[-1][1:]
+    tampered = ".".join(parts)
 
     fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     r = client.get(f"/api/solves/share/{tampered}")
@@ -354,4 +354,118 @@ def test_share_token_404_on_soft_deleted(
 
     fake_service_supabase_factory(scripts={"solves": [{"data": []}]})
     r = client.get(f"/api/solves/share/{token}")
+    assert r.status_code == 404
+
+
+def test_create_solve_rejects_when_at_lifetime_cap(fake_supabase_factory, client, auth_headers):
+    from app.routes.solves import SOLVE_LIFETIME_CAP
+    fake_supabase_factory(scripts={
+        "solves": [{"data": [], "count": SOLVE_LIFETIME_CAP}],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 12.34, "scramble": ""},
+    )
+    assert r.status_code == 429
+    assert "limit" in r.get_json()["error"].lower()
+
+
+def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_headers):
+    from app.routes.solves import SOLVE_LIFETIME_CAP
+    fake_supabase_factory(scripts={
+        "solves": [
+            {"data": [], "count": SOLVE_LIFETIME_CAP - 1},
+            {"data": [{
+                "id": "s1", "time": 12.34, "puzzle_type": "333",
+                "scramble": "", "dnf": False, "plus_two": False,
+                "created_at": "2026-04-25T00:00:00Z",
+            }]},
+        ],
+    })
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 12.34, "scramble": "", "dnf": True},
+    )
+    assert r.status_code == 200
+
+
+def test_patch_returns_404_for_soft_deleted_solve(fake_supabase_factory, client, auth_headers):
+    # Soft-deleted rows should not be reachable via PATCH.
+    # We assert two things: the route returns 404 when the (filtered) query
+    # returns empty, AND the route actually applied the `.is_('deleted_at', None)`
+    # filter on the query (otherwise this test would pass even without the fix).
+    fake = fake_supabase_factory(scripts={
+        "solves": [{"data": []}],
+    })
+    r = client.patch(
+        "/api/solves/abc-123",
+        headers=auth_headers,
+        json={"dnf": True},
+    )
+    assert r.status_code == 404
+    query = fake.queries[0]
+    is_calls = [c for c in query.calls if c[0] == "is_"]
+    assert is_calls, "PATCH must filter out soft-deleted rows via .is_('deleted_at', None)"
+    assert is_calls[0][1] == ("deleted_at", None)
+
+
+def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_headers):
+    # Body with no recognized fields should 422 before hitting Supabase.
+    fake_supabase_factory()
+    r = client.patch(
+        "/api/solves/abc-123",
+        headers=auth_headers,
+        json={"time": 999},
+    )
+    assert r.status_code == 422
+    body = r.get_json()
+    assert body.get("fields", {}).get("body") == "must include dnf or plus_two"
+
+
+def test_share_token_has_four_segments(app, fake_supabase_factory, client, auth_headers):
+    app.config["SHARE_SECRET"] = "x" * 32
+    fake_supabase_factory(scripts={
+        "solves": [{"data": [{"id": "abc-123"}]}],
+    })
+    r = client.get("/api/solves/abc-123/share-token", headers=auth_headers)
+    assert r.status_code == 200
+    token = r.get_json()["token"]
+    # New token format: id . iat . exp . mac
+    assert token.count(".") == 3
+
+
+def test_share_token_expired_returns_404(app, monkeypatch, fake_service_supabase_factory, client):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    app.config["SHARE_SECRET"] = "x" * 32
+    real_now = solves_module._now_seconds
+    # Sign a token, then jump the clock past the TTL
+    monkeypatch.setattr(
+        solves_module,
+        "_now_seconds",
+        lambda: real_now() - solves_module.SHARE_TOKEN_TTL_SECONDS - 1,
+    )
+    with app.app_context():
+        token = solves_module._sign_solve_id("abc-123")
+    monkeypatch.setattr(solves_module, "_now_seconds", real_now)
+    fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc-123"}]}]})
+    r = client.get(f"/api/solves/share/{token}")
+    assert r.status_code == 404
+
+
+def test_share_token_tampered_mac_returns_404(app, fake_service_supabase_factory, client):
+    import importlib
+    solves_module = importlib.import_module("app.routes.solves")
+    app.config["SHARE_SECRET"] = "x" * 32
+    with app.app_context():
+        token = solves_module._sign_solve_id("abc-123")
+    # Flip the first char of the MAC segment. Flipping the last char is
+    # unreliable because base64url's final char encodes only 2 useful bits
+    # for a 16-byte payload; substitutions can decode to identical bytes.
+    parts = token.split(".")
+    parts[-1] = ("A" if parts[-1][0] != "A" else "B") + parts[-1][1:]
+    bad_token = ".".join(parts)
+    r = client.get(f"/api/solves/share/{bad_token}")
     assert r.status_code == 404

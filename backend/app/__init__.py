@@ -27,6 +27,14 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024  # 16KB; solve payloads are sub-1KB
 
+    share_secret = os.environ.get("SHARE_SECRET", "")
+    # A.7: prevent boot with a weak share-link signing key
+    if len(share_secret) < 32:
+        raise RuntimeError(
+            "SHARE_SECRET must be set and at least 32 characters"
+        )
+    app.config["SHARE_SECRET"] = share_secret
+
     # SD-5: Token bucket rate limiter (in-memory, no Redis required)
     limiter.init_app(app)
 

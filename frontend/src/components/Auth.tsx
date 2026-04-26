@@ -31,7 +31,11 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
         if (error) throw error;
         alert('Check your email for the confirmation link!');
       } else if (mode === 'reset') {
-        alert('Check your email for the password reset link!');
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        });
+        if (error) throw error;
+        toast.success('Check your email for the password reset link.');
         setMode('login');
       } else if (mode === 'update') {
         const { error } = await supabase.auth.updateUser({ password });

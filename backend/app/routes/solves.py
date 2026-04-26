@@ -110,6 +110,8 @@ def get_solves():
 
 
 SOLVE_LIFETIME_CAP = 100_000
+SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
+MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +137,7 @@ def create_solve():
                         .is_('deleted_at', None)
                         .execute())
         existing = getattr(count_result, 'count', None) or 0
-        if existing > SOLVE_LIFETIME_CAP:
+        if existing >= SOLVE_LIFETIME_CAP:
             return jsonify({
                 "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
             }), 429
@@ -194,6 +196,7 @@ def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solv
 
 @solves.route('/solves/<solve_id>', methods=['PATCH'])
 @require_auth
+@limiter.limit("60 per minute")
 def update_solve(solve_id):
     data = request.json
     errors = validate_update_solve(data)
@@ -208,6 +211,7 @@ def update_solve(solve_id):
                   .update(allowed)
                   .eq('id', solve_id)
                   .eq('user_id', request.user_id)
+                  .is_('deleted_at', None)
                   .execute())
         if not result.data:
             return jsonify({"error": "Solve not found"}), 404
@@ -219,6 +223,7 @@ def update_solve(solve_id):
 
 @solves.route('/solves/<solve_id>', methods=['DELETE'])
 @require_auth
+@limiter.limit("60 per minute")
 def delete_solve(solve_id):
     try:
         # Use an ISO UTC timestamp — the Supabase Python client sends JSON to
@@ -269,20 +274,48 @@ def _require_share_secret() -> bytes:
     return secret.encode()
 
 
+def _now_seconds() -> int:
+    return int(datetime.now(timezone.utc).timestamp())
+
+
+def _pack_int(n: int) -> bytes:
+    return n.to_bytes(8, "big", signed=False)
+
+
+def _unpack_int(b: bytes) -> int:
+    if len(b) != 8:
+        raise ValueError("expected 8 bytes")
+    return int.from_bytes(b, "big", signed=False)
+
+
 def _sign_solve_id(solve_id: str) -> str:
-    mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
-    return f"{_b64url(solve_id.encode())}.{_b64url(mac)}"
+    iat = _now_seconds()
+    exp = iat + SHARE_TOKEN_TTL_SECONDS
+    msg = f"{solve_id}:{iat}:{exp}".encode()
+    mac = hmac.new(_require_share_secret(), msg, hashlib.sha256).digest()[:MAC_LENGTH]
+    return ".".join((
+        _b64url(solve_id.encode()),
+        _b64url(_pack_int(iat)),
+        _b64url(_pack_int(exp)),
+        _b64url(mac),
+    ))
 
 
 def _verify_token(token: str):
     try:
-        id_part, mac_part = token.split('.', 1)
-        solve_id = _b64url_decode(id_part).decode('utf-8')
+        id_part, iat_part, exp_part, mac_part = token.split(".", 3)
+        solve_id = _b64url_decode(id_part).decode("utf-8")
+        iat = _unpack_int(_b64url_decode(iat_part))
+        exp = _unpack_int(_b64url_decode(exp_part))
         provided_mac = _b64url_decode(mac_part)
     except (ValueError, UnicodeDecodeError):
         return None
-    expected_mac = hmac.new(_require_share_secret(), solve_id.encode(), hashlib.sha256).digest()[:16]
+
+    msg = f"{solve_id}:{iat}:{exp}".encode()
+    expected_mac = hmac.new(_require_share_secret(), msg, hashlib.sha256).digest()[:MAC_LENGTH]
     if not hmac.compare_digest(provided_mac, expected_mac):
+        return None
+    if _now_seconds() > exp:
         return None
     return solve_id
 
