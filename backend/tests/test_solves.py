@@ -337,7 +337,14 @@ def test_share_token_rejects_tampered(
     token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
 
     parts = token.split(".")
-    parts[-1] = ("A" if parts[-1][-1] != "A" else "B") + parts[-1][1:]
+    # Flip a mid-segment char of the MAC. Mutating the first or last char is
+    # flaky: the first b64 char only encodes the high bits of the first byte
+    # (replacement might match), and the last char of a 22-char MAC encodes
+    # only the top 2 bits of the trailing byte, so 4 different b64 chars
+    # decode to the same byte.
+    mac = parts[-1]
+    swap = "B" if mac[5] != "B" else "C"
+    parts[-1] = mac[:5] + swap + mac[6:]
     tampered = ".".join(parts)
 
     fake_service_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
