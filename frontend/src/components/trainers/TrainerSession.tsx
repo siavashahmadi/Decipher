@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import Timer from '../Timer';
 import Scramble from '../Scramble';
 import ScramblePreview from '../ScramblePreview';
@@ -56,25 +56,36 @@ const buildScramble = (
 const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
   const [caseChoice, setCaseChoice] = useState<CaseChoice>('all');
   const [algChoice, setAlgChoice] = useState<AlgChoice>('any');
-  const [scramble, setScramble] = useState<string>(() =>
-    buildScramble(type, 'all', 'any')
-  );
   const [recent, setRecent] = useState<RecentEntry[]>(() => loadRecent(type));
+  // bumpCounter forces a fresh scramble on Skip / after-solve without
+  // having to track scramble itself in state.
+  const [bumpCounter, setBumpCounter] = useState(0);
 
-  useEffect(() => {
+  // Detect a type change during render (the React docs' "storing
+  // information from previous renders" pattern). Setting state during
+  // render schedules an immediate re-render with the corrected case/alg,
+  // so the scramble useMemo below runs exactly once per type change
+  // instead of twice.
+  const [prevType, setPrevType] = useState(type);
+  if (prevType !== type) {
+    setPrevType(type);
     setCaseChoice('all');
     setAlgChoice('any');
+  }
+
+  const scramble = useMemo(
+    () => buildScramble(type, caseChoice, algChoice),
+    // bumpCounter is in deps so Skip / after-solve regenerate.
+    [type, caseChoice, algChoice, bumpCounter],
+  );
+
+  useEffect(() => {
     setRecent(loadRecent(type));
-    setScramble(buildScramble(type, 'all', 'any'));
   }, [type]);
 
   useEffect(() => {
     saveRecent(type, recent);
   }, [type, recent]);
-
-  useEffect(() => {
-    setScramble(buildScramble(type, caseChoice, algChoice));
-  }, [type, caseChoice, algChoice]);
 
   const handleCaseChange = useCallback((next: CaseChoice) => {
     setCaseChoice(next);
@@ -86,8 +97,8 @@ const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
   }, []);
 
   const handleSkip = useCallback(() => {
-    setScramble(buildScramble(type, caseChoice, algChoice));
-  }, [type, caseChoice, algChoice]);
+    setBumpCounter((c) => c + 1);
+  }, []);
 
   const handleSolveComplete = useCallback(
     (time: number, flags: { plusTwo: boolean; dnf: boolean }) => {
@@ -97,9 +108,9 @@ const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
           RECENT_CAP
         )
       );
-      setScramble(buildScramble(type, caseChoice, algChoice));
+      setBumpCounter((c) => c + 1);
     },
-    [type, caseChoice, algChoice]
+    []
   );
 
   return (
