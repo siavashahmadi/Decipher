@@ -32,12 +32,18 @@ export interface PublicSolve {
 
 const api = {
 	// SD-2: cursor-based pagination. Pass cursor=null for the first page;
-	// pass the returned next_cursor for the next.
-	getSolves: async (puzzleType: PuzzleType, cursor: string | null = null): Promise<SolvesPage> => {
+	// pass the returned next_cursor for the next. Optional `signal` lets
+	// callers (e.g. useAllSolves's pagination loop) cancel in-flight
+	// requests when the user navigates or switches puzzles mid-fetch.
+	getSolves: async (
+		puzzleType: PuzzleType,
+		cursor: string | null = null,
+		signal?: AbortSignal,
+	): Promise<SolvesPage> => {
 		const headers = await getAuthHeader();
 		const params: { puzzle_type: PuzzleType; cursor?: string } = { puzzle_type: puzzleType };
 		if (cursor) params.cursor = cursor;
-		const response = await axios.get<SolvesPage>(`${API_URL}/solves`, { headers, params });
+		const response = await axios.get<SolvesPage>(`${API_URL}/solves`, { headers, params, signal });
 		return response.data;
 	},
 

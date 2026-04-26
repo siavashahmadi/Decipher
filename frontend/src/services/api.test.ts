@@ -85,3 +85,31 @@ describe('api.migrateSolves', () => {
     expect(failed.map((s) => s.id)).toEqual(['b']);
   });
 });
+
+describe('api.getSolves AbortSignal', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('passes the provided AbortSignal through to axios', async () => {
+    const get = axios.get as unknown as ReturnType<typeof vi.fn>;
+    get.mockResolvedValue({ data: { solves: [], next_cursor: null } });
+    const controller = new AbortController();
+
+    await api.getSolves('333', null, controller.signal);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    const opts = get.mock.calls[0][1] as { signal?: AbortSignal };
+    expect(opts.signal).toBe(controller.signal);
+  });
+
+  it('omits signal from axios options when none is provided', async () => {
+    const get = axios.get as unknown as ReturnType<typeof vi.fn>;
+    get.mockResolvedValue({ data: { solves: [], next_cursor: null } });
+
+    await api.getSolves('333');
+
+    const opts = get.mock.calls[0][1] as { signal?: AbortSignal };
+    expect(opts.signal).toBeUndefined();
+  });
+});
