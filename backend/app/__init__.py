@@ -61,4 +61,33 @@ def create_app(config_class=Config):
     def health_check():
         return {"status": "healthy"}
 
+    # B.7 (phase 1, Report-Only). Once the report-only header has been
+    # quiet in production for a burn-in window, swap the CSP header name
+    # to 'Content-Security-Policy' (phase 2). The other four headers are
+    # always enforcing.
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'wasm-unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; "
+        "font-src 'self'; "
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
+        "worker-src 'self' blob:; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+
+    @app.after_request
+    def _security_headers(response):
+        response.headers.setdefault("Content-Security-Policy-Report-Only", csp)
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault(
+            "Strict-Transport-Security",
+            "max-age=31536000; includeSubDomains",
+        )
+        return response
+
     return app
