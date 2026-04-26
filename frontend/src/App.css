@@ -12,3 +12,7 @@ body {
   min-height: 100vh;
   color: var(--color-text);
 }
+
+.route-loading {
+  min-height: 100vh;
+}
