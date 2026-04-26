@@ -12,6 +12,7 @@
     "@nivo/calendar": "^0.87.0",
     "@nivo/core": "^0.87.0",
     "@supabase/supabase-js": "^2.48.1",
+    "@tanstack/react-virtual": "^3.13.24",
     "axios": "^1.7.3",
     "cubing": "^0.54.5",
     "react": "^18.3.1",
