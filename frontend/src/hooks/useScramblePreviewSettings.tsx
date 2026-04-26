@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
 
 export type PreviewMode = '3D' | '2D';
 
@@ -76,16 +76,19 @@ export const ScramblePreviewSettingsProvider = ({
     setState(prev => ({ ...prev, showHintFacelets }));
   }, []);
 
-  const value: ScramblePreviewSettings = {
-    mode: state.mode,
-    collapsed: state.collapsed,
-    enabled: state.enabled,
-    showHintFacelets: state.showHintFacelets,
-    setMode,
-    setCollapsed,
-    setEnabled,
-    setShowHintFacelets,
-  };
+  const value = useMemo<ScramblePreviewSettings>(
+    () => ({
+      mode: state.mode,
+      collapsed: state.collapsed,
+      enabled: state.enabled,
+      showHintFacelets: state.showHintFacelets,
+      setMode,
+      setCollapsed,
+      setEnabled,
+      setShowHintFacelets,
+    }),
+    [state.mode, state.collapsed, state.enabled, state.showHintFacelets, setMode, setCollapsed, setEnabled, setShowHintFacelets],
+  );
 
   return (
     <ScramblePreviewSettingsContext.Provider value={value}>
