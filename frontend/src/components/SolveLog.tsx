@@ -1,4 +1,5 @@
-import { useMemo, type ReactElement } from 'react';
+import { useMemo, useRef, type ReactElement } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatTime } from '../utils/formatTime';
 import { ao5, ao12, type AverageResult } from '../utils/averages';
 import type { Solve } from '../types';
@@ -6,6 +7,11 @@ import './SolveLog.css';
 
 const fmt = (v: AverageResult): string =>
   v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
+
+// Approximate row height; the virtualizer uses dynamic measurement to
+// correct as items render. Set close to actual to minimize the first
+// scroll-frame correction.
+const ROW_HEIGHT = 40;
 
 interface SolveLogProps {
   solves: Solve[];
@@ -48,6 +54,17 @@ const SolveLog = ({
     [solves]
   );
 
+  const scrollParentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: solves.length,
+    getScrollElement: () => scrollParentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+
   return (
     <div className="solve-log">
       <div className="stats-container">
@@ -69,53 +86,73 @@ const SolveLog = ({
         </div>
       </div>
 
-      <ul className="solves-list">
-        {solves.map((solve, index) => {
-          const currentAo5 = perSolveAo5[index];
-          return (
-            <li key={solve.id} className="solve-log-item">
-              <button
-                type="button"
-                className="solve-row-button"
-                onClick={() => onSolveClick(solve, index)}
-                aria-label={`Solve ${index + 1} details`}
+      <div ref={scrollParentRef} className="solves-list-scroll">
+        <ul
+          className="solves-list"
+          style={{ height: `${totalSize}px` }}
+          role="list"
+          aria-rowcount={solves.length}
+        >
+          {virtualItems.map(vi => {
+            const solve = solves[vi.index];
+            const itemAo5 = perSolveAo5[vi.index];
+            return (
+              <li
+                key={solve.id}
+                data-index={vi.index}
+                ref={virtualizer.measureElement}
+                className="solve-log-item"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  transform: `translateY(${vi.start}px)`,
+                }}
               >
-                <span className="solve-time">
-                  {solve.dnf
-                    ? 'DNF'
-                    : solve.plus_two
-                      ? `${formatTime(solve.time + 2)}+`
-                      : formatTime(solve.time)}
-                </span>
-                <span className="solve-ao5">
-                  {currentAo5 !== null ? `(${fmt(currentAo5)})` : ''}
-                </span>
-              </button>
-              <div className="solve-actions" onClick={e => e.stopPropagation()}>
                 <button
-                  onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
-                  className={`dnf-button ${solve.dnf ? 'active' : ''}`}
+                  type="button"
+                  className="solve-row-button"
+                  onClick={() => onSolveClick(solve, vi.index)}
+                  aria-label={`Solve ${vi.index + 1} details`}
                 >
-                  DNF
+                  <span className="solve-time">
+                    {solve.dnf
+                      ? 'DNF'
+                      : solve.plus_two
+                        ? `${formatTime(solve.time + 2)}+`
+                        : formatTime(solve.time)}
+                  </span>
+                  <span className="solve-ao5">
+                    {itemAo5 !== null ? `(${fmt(itemAo5)})` : ''}
+                  </span>
                 </button>
-                <button
-                  onClick={() => onSolveUpdate({ ...solve, plus_two: !solve.plus_two })}
-                  className={`plus_two-button ${solve.plus_two ? 'active' : ''}`}
-                >
-                  +2
-                </button>
-                <button
-                  onClick={() => onSolveDelete(solve)}
-                  className="delete-button"
-                  title="Delete solve"
-                >
-                  ×
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                <div className="solve-actions" onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
+                    className={`dnf-button ${solve.dnf ? 'active' : ''}`}
+                  >
+                    DNF
+                  </button>
+                  <button
+                    onClick={() => onSolveUpdate({ ...solve, plus_two: !solve.plus_two })}
+                    className={`plus_two-button ${solve.plus_two ? 'active' : ''}`}
+                  >
+                    +2
+                  </button>
+                  <button
+                    onClick={() => onSolveDelete(solve)}
+                    className="delete-button"
+                    title="Delete solve"
+                  >
+                    ×
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
       {/* SD-2: Load more for cursor-based pagination */}
       {hasMore && (

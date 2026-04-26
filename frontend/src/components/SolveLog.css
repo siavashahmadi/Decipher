@@ -2,7 +2,14 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+}
+
+.solves-list-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  position: relative;
 }
 
 .clear-view-button {
@@ -57,7 +64,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow-y: auto;
+  position: relative;
+  width: 100%;
 }
 
 .solve-log-item {
