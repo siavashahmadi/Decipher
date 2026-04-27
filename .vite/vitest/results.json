@@ -1,0 +1,1 @@
+{"version":"2.1.9","results":[[":frontend/src/hooks/useSortedSolveStats.test.tsx",{"duration":6.788291000000015,"failed":true}],[":frontend/src/hooks/useReplayState.test.tsx",{"duration":5.991542000000038,"failed":true}],[":frontend/src/hooks/useSolveSession.test.tsx",{"duration":2.6251249999999686,"failed":true}]]}

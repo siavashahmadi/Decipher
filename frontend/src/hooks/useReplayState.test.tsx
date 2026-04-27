@@ -1,8 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useReplayState } from './useReplayState';
+
+const navigateMock = vi.fn();
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 
 function makeWrapper(initialEntries: { pathname: string; state?: unknown }[]) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -46,5 +56,16 @@ describe('useReplayState', () => {
     const { result } = renderHook(() => useReplayState(), { wrapper });
     expect(result.current.scramble).toBeUndefined();
     expect(result.current.puzzle).toBeUndefined();
+  });
+
+  it('calls navigate with replace=true and state=null when location.state is non-null', () => {
+    navigateMock.mockClear();
+
+    const wrapper = makeWrapper([
+      { pathname: '/timer', state: { replayScramble: 'R U R\'', replayPuzzle: '333' } },
+    ]);
+    renderHook(() => useReplayState(), { wrapper });
+
+    expect(navigateMock).toHaveBeenCalledWith('/timer', { replace: true, state: null });
   });
 });
