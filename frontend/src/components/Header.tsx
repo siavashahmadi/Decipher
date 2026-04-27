@@ -7,26 +7,8 @@ import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
 import SettingsPanel from './SettingsPanel';
 import AppNav from './AppNav';
 import type { PuzzleType } from '../types';
+import { PUZZLES } from '../data/puzzles';
 import './Header.css';
-
-interface PuzzleOption {
-  value: PuzzleType;
-  label: string;
-}
-
-const PUZZLES: PuzzleOption[] = [
-  { value: '222', label: '2x2' },
-  { value: '333', label: '3x3' },
-  { value: '444', label: '4x4' },
-  { value: '555', label: '5x5' },
-  { value: '666', label: '6x6' },
-  { value: '777', label: '7x7' },
-  { value: 'pyram', label: 'Pyraminx' },
-  { value: 'mega', label: 'Megaminx' },
-  { value: 'skewb', label: 'Skewb' },
-  { value: 'sq1', label: 'SQ-1' },
-  { value: 'clock', label: 'Clock' },
-];
 
 interface HeaderProps {
   type: PuzzleType;

@@ -10,24 +10,8 @@ import HotkeyHelp from './HotkeyHelp';
 import useHotkeys from '../hooks/useHotkeys';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import useSolveSession from '../hooks/useSolveSession';
-import type { PuzzleType } from '../types';
+import { PUZZLE_HOTKEYS } from '../data/puzzles';
 import './SolveSession.css';
-
-// Alt+digit puzzle shortcuts. Order mirrors Header.PUZZLES:
-// 1..9 cover 2x2 through Skewb, 0 selects SQ-1. Clock is the 11th
-// puzzle and stays mouse-only (no sensible digit key left).
-const PUZZLE_HOTKEYS: Record<string, PuzzleType> = {
-  'Alt+1': '222',
-  'Alt+2': '333',
-  'Alt+3': '444',
-  'Alt+4': '555',
-  'Alt+5': '666',
-  'Alt+6': '777',
-  'Alt+7': 'pyram',
-  'Alt+8': 'mega',
-  'Alt+9': 'skewb',
-  'Alt+0': 'sq1',
-};
 
 const SolveSession = (): ReactElement => {
   const {
