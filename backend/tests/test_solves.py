@@ -494,3 +494,25 @@ def test_delete_dnf_solve_skips_pb_cleanup(client, fake_supabase_factory, auth_h
     assert response.status_code == 200
     pb_queries = [q for q in fake.queries if q.table_name == "personal_bests"]
     assert pb_queries == [], "DNF delete must not query personal_bests"
+
+
+def test_get_solves_does_not_select_user_id_or_deleted_at(client, fake_supabase_factory, auth_headers):
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    client.get('/api/solves', headers=auth_headers)
+    select_calls = [c for c in fake.queries[0].calls if c[0] == "select"]
+    assert select_calls, "expected a .select() call"
+    args = select_calls[0][1]
+    columns = args[0] if args else ""
+    assert columns != "*", "must not select * — drop user_id and deleted_at"
+    assert "user_id" not in columns
+    assert "deleted_at" not in columns
+
+
+def test_get_personal_bests_does_not_select_user_id(client, fake_supabase_factory, auth_headers):
+    fake = fake_supabase_factory(scripts={"personal_bests": [{"data": []}]})
+    client.get('/api/personal-bests', headers=auth_headers)
+    select_calls = [c for c in fake.queries[0].calls if c[0] == "select"]
+    args = select_calls[0][1]
+    columns = args[0] if args else ""
+    assert columns != "*"
+    assert "user_id" not in columns

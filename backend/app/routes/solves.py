@@ -90,7 +90,7 @@ def get_solves():
 
     try:
         query = (g.supabase.table('solves')
-                 .select('*')
+                 .select('id,puzzle_type,time,dnf,plus_two,scramble,created_at')
                  .eq('user_id', g.user_id)
                  .is_('deleted_at', None))
         if puzzle_type:
@@ -375,7 +375,7 @@ def get_personal_bests():
 
     try:
         query = (g.supabase.table('personal_bests')
-                 .select('*')
+                 .select('id,puzzle_type,time,achieved_at,solve_id')
                  .eq('user_id', g.user_id))
         if puzzle_type:
             query = query.eq('puzzle_type', puzzle_type)
