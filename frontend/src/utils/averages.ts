@@ -1,9 +1,7 @@
 import type { Solve } from '../types';
+import { effectiveTime } from './solveTime';
 
 export type AverageResult = number | 'DNF' | null;
-
-const effective = (s: Solve): number =>
-  s.dnf ? Number.POSITIVE_INFINITY : s.plus_two ? s.time + 2 : s.time;
 
 /**
  * WCA-style trimmed mean: drop best and worst, average the rest.
@@ -12,7 +10,7 @@ const effective = (s: Solve): number =>
  */
 export function trimmedMean(solves: Solve[], size: number): AverageResult {
   if (solves.length < size) return null;
-  const window = solves.slice(0, size).map(effective);
+  const window = solves.slice(0, size).map(effectiveTime);
   const dnfCount = window.filter(t => t === Number.POSITIVE_INFINITY).length;
   if (dnfCount > 1) return 'DNF';
   const sorted = [...window].sort((a, b) => a - b);

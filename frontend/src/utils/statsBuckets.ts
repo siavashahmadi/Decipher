@@ -1,5 +1,7 @@
 import type { Solve } from '../types';
 import { trimmedMeanNumbers } from './averages';
+import { effectiveTime } from './solveTime';
+import { localDateKey } from './localDateKey';
 
 export interface HistogramBin {
   min: number;
@@ -7,9 +9,6 @@ export interface HistogramBin {
   count: number;
   label: string;
 }
-
-// Effective time (accounts for +2). DNFs are the caller's problem.
-const effective = (s: Solve): number => (s.plus_two ? s.time + 2 : s.time);
 
 export function buildHistogram(times: number[], binCount: number): HistogramBin[] {
   if (!times.length || binCount <= 0) return [];
@@ -43,11 +42,7 @@ export function buildHeatmapData(solves: Solve[]): HeatmapCell[] {
   const counts = new Map<string, number>();
   for (const s of solves) {
     if (s.dnf) continue;
-    const d = new Date(s.created_at);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const key = `${year}-${month}-${day}`;
+    const key = localDateKey(s.created_at);
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return [...counts.entries()].map(([day, value]) => ({ day, value }));
@@ -75,7 +70,7 @@ function bestWindow(times: number[], size: number): number | null {
 
 export function computeSummary(solves: Solve[]): StatsSummary {
   const valid = solves.filter(s => !s.dnf);
-  const times = valid.map(effective);
+  const times = valid.map(effectiveTime);
   // Solves arrive newest-first from the API; bestWindow assumes chronological.
   const chronological = [...times].reverse();
   return {

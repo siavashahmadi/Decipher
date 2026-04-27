@@ -4,16 +4,15 @@ import { formatTime } from '../../utils/formatTime';
 import { buildHistogram } from '../../utils/statsBuckets';
 import { useSettings } from '../../hooks/useSettings';
 import { chartColors } from '../../utils/themeColors';
+import { effectiveTime } from '../../utils/solveTime';
 import type { Solve } from '../../types';
-
-const effective = (s: Solve): number => s.plus_two ? s.time + 2 : s.time;
 
 const Histogram = ({ solves, bins = 20 }: { solves: Solve[]; bins?: number }): ReactElement => {
   const { effectiveTheme } = useSettings();
   const colors = useMemo(() => chartColors(effectiveTheme), [effectiveTheme]);
 
   const data = useMemo(() => {
-    const times = solves.filter(s => !s.dnf).map(effective);
+    const times = solves.filter(s => !s.dnf).map(effectiveTime);
     return buildHistogram(times, bins).map(b => ({
       label: formatTime((b.min + b.max) / 2),
       count: b.count,

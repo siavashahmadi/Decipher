@@ -4,12 +4,11 @@ import { formatTime } from '../../utils/formatTime';
 import { trimmedMeanNumbers } from '../../utils/averages';
 import { useSettings } from '../../hooks/useSettings';
 import { chartColors } from '../../utils/themeColors';
+import { effectiveTime } from '../../utils/solveTime';
 import type { Solve } from '../../types';
 import './DotPlot.css';
 
 interface Point { index: number; time: number; isPb: boolean; isWorst: boolean; created_at: string; }
-
-const effective = (s: Solve): number => s.plus_two ? s.time + 2 : s.time;
 
 const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
   // Chronological order (API returns newest first).
@@ -18,11 +17,11 @@ const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
   const points = useMemo<Point[]>(() => {
     const valid = chronological.filter(s => !s.dnf);
     if (!valid.length) return [];
-    const times = valid.map(effective);
+    const times = valid.map(effectiveTime);
     let pb = times[0], worst = times[0];
     for (const t of times) { if (t < pb) pb = t; if (t > worst) worst = t; }
     return valid.map((s, i) => {
-      const t = effective(s);
+      const t = effectiveTime(s);
       return { index: i + 1, time: t, isPb: t === pb, isWorst: t === worst, created_at: s.created_at };
     });
   }, [chronological]);

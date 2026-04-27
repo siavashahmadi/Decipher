@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { formatTime } from '../utils/formatTime';
 import { ao5 } from '../utils/averages';
+import { formatSolveLabel } from '../utils/solveLabel';
 import api from '../services/api';
 import { useOptionalAuth } from '../contexts/AuthContext';
 import type { Solve } from '../types';
@@ -16,9 +17,6 @@ interface SolveDetailModalProps {
   onUpdate: (solve: Solve) => void;
   onDelete: (solve: Solve) => void;
 }
-
-const formatLabel = (s: Solve): string =>
-  s.dnf ? 'DNF' : s.plus_two ? `${formatTime(s.time + 2)}+` : formatTime(s.time);
 
 const SolveDetailModal = ({
   solve, window: solveWindow, index, onClose, onUpdate, onDelete,
@@ -93,7 +91,7 @@ const SolveDetailModal = ({
         </button>
 
         <div className="solve-detail-time" data-testid="solve-detail-time">
-          {solve.dnf ? 'DNF' : formatTime(solve.plus_two ? solve.time + 2 : solve.time)}
+          {formatSolveLabel(solve, { plusSuffix: false })}
         </div>
         <div className="solve-detail-date">{dateStr}</div>
 
@@ -138,7 +136,7 @@ const SolveDetailModal = ({
                 className={`ao5-cell${i === index ? ' focused' : ''}`}
                 data-testid={i === index ? 'ao5-focused' : undefined}
               >
-                {formatLabel(s)}
+                {formatSolveLabel(s)}
               </span>
             ))}
           </div>

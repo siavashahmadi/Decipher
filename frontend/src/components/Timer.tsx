@@ -9,6 +9,12 @@ import {
   INSPECTION_12S_WARNING_HZ,
   INSPECTION_12S_WARNING_MS,
 } from '../utils/sound';
+import {
+  INSPECTION_LIMIT_MS,
+  INSPECTION_PLUS_TWO_MS,
+  INSPECTION_8S_WARNING_AT_MS,
+  INSPECTION_12S_WARNING_AT_MS,
+} from '../utils/inspectionConstants';
 import { useSettings } from '../hooks/useSettings';
 import './Timer.css';
 
@@ -124,12 +130,12 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
       const start = inspectionStartRef.current;
       if (start === null) return;
       const elapsed = Date.now() - start;
-      const remaining = Math.ceil((15000 - elapsed) / 1000);
+      const remaining = Math.ceil((INSPECTION_LIMIT_MS - elapsed) / 1000);
       if (remaining !== lastShownSecondRef.current) {
         lastShownSecondRef.current = remaining;
         setInspectionCount(remaining);
       }
-      if (elapsed > 17000) {
+      if (elapsed > INSPECTION_PLUS_TWO_MS) {
         if (inspectionIntervalRef.current !== null) {
           clearInterval(inspectionIntervalRef.current);
           inspectionIntervalRef.current = null;
@@ -151,16 +157,16 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
         penaltyFlagsRef.current = { plusTwo: false, dnf: false };
         return;
       }
-      if (elapsed > 15000) setInspectionBadge('+2');
+      if (elapsed > INSPECTION_LIMIT_MS) setInspectionBadge('+2');
       else setInspectionBadge(null);
-      if (elapsed >= 8000 && !warning7FiredRef.current) {
+      if (elapsed >= INSPECTION_8S_WARNING_AT_MS && !warning7FiredRef.current) {
         warning7FiredRef.current = true;
         beep(INSPECTION_8S_WARNING_HZ, INSPECTION_8S_WARNING_MS);
         setFlashYellow(true);
         if (flashTimeoutRef.current !== null) clearTimeout(flashTimeoutRef.current);
         flashTimeoutRef.current = setTimeout(() => setFlashYellow(false), 200);
       }
-      if (elapsed >= 12000 && !warning3FiredRef.current) {
+      if (elapsed >= INSPECTION_12S_WARNING_AT_MS && !warning3FiredRef.current) {
         warning3FiredRef.current = true;
         beep(INSPECTION_12S_WARNING_HZ, INSPECTION_12S_WARNING_MS);
       }
@@ -177,9 +183,9 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
     const inspectionElapsed = inspectionStartRef.current
       ? Date.now() - inspectionStartRef.current
       : 0;
-    if (inspectionElapsed > 17000) {
+    if (inspectionElapsed > INSPECTION_PLUS_TWO_MS) {
       penaltyFlagsRef.current = { plusTwo: false, dnf: true };
-    } else if (inspectionElapsed > 15000) {
+    } else if (inspectionElapsed > INSPECTION_LIMIT_MS) {
       penaltyFlagsRef.current = { plusTwo: true, dnf: false };
     } else {
       penaltyFlagsRef.current = { plusTwo: false, dnf: false };

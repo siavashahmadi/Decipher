@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import api, { type PublicSolve } from '../services/api';
-import { formatTime } from '../utils/formatTime';
+import { formatSolveLabel } from '../utils/solveLabel';
+import type { Solve } from '../types';
 import './SharedSolve.css';
 
 const SharedSolve = (): ReactElement => {
@@ -55,9 +56,7 @@ const SharedSolve = (): ReactElement => {
     );
   }
 
-  const display = solve.dnf
-    ? 'DNF'
-    : formatTime(solve.plus_two ? solve.time + 2 : solve.time);
+  const display = formatSolveLabel(solve as Solve);
 
   return (
     <div className="shared-solve-page">

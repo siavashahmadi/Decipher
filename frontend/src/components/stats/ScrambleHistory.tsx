@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatTime } from '../../utils/formatTime';
+import { formatSolveLabel } from '../../utils/solveLabel';
 import type { Solve } from '../../types';
 import './ScrambleHistory.css';
 
@@ -13,9 +13,6 @@ const TRUNCATE = 60;
 
 const truncate = (s: string): string =>
   s.length <= TRUNCATE ? s : `${s.slice(0, TRUNCATE)}...`;
-
-const label = (s: Solve): string =>
-  s.dnf ? 'DNF' : formatTime(s.plus_two ? s.time + 2 : s.time);
 
 const ScrambleHistory = ({ solves }: ScrambleHistoryProps): ReactElement => {
   const navigate = useNavigate();
@@ -39,7 +36,7 @@ const ScrambleHistory = ({ solves }: ScrambleHistoryProps): ReactElement => {
           <span className="scramble-history-date">
             {new Date(s.created_at).toLocaleDateString()}
           </span>
-          <span className="scramble-history-time">{label(s)}</span>
+          <span className="scramble-history-time">{formatSolveLabel(s)}</span>
           <code className="scramble-history-text" title={s.scramble}>
             {truncate(s.scramble || '\u2014')}
           </code>

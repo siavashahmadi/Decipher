@@ -4,6 +4,7 @@ import { formatTime } from '../utils/formatTime';
 import { ao5 } from '../utils/averages';
 import { useSettings } from '../hooks/useSettings';
 import { chartColors } from '../utils/themeColors';
+import { effectiveTime } from '../utils/solveTime';
 import type { Solve, PersonalBest } from '../types';
 import './SolveHub.css';
 
@@ -66,7 +67,7 @@ const SolveHub = ({
     if (!solves?.length) return null;
 
     const validSolves = solves.filter(s => !s.dnf);
-    const times = validSolves.map(s => s.plus_two ? s.time + 2 : s.time);
+    const times = validSolves.map(effectiveTime);
 
     if (times.length === 0) return null;
 
@@ -93,7 +94,7 @@ const SolveHub = ({
   const chartData = useMemo(() => {
     return recentSolves
       .filter(s => !s.dnf)
-      .map((s, i) => ({ solve: i + 1, time: s.plus_two ? s.time + 2 : s.time }));
+      .map((s, i) => ({ solve: i + 1, time: effectiveTime(s) }));
   }, [recentSolves]);
 
   // SD-3: PB progression chart data

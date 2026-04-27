@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { formatTime } from '../../utils/formatTime';
+import { formatSolveLabel } from '../../utils/solveLabel';
 import './TrainerRecentStrip.css';
 
 export interface RecentEntry {
@@ -12,12 +12,16 @@ interface TrainerRecentStripProps {
   entries: RecentEntry[];
 }
 
-const renderEntry = (entry: RecentEntry): string => {
-  if (entry.dnf) return 'DNF';
-  const displayTime = entry.plusTwo ? entry.time + 2 : entry.time;
-  const base = formatTime(displayTime);
-  return entry.plusTwo ? `${base}+` : base;
-};
+const renderEntry = (entry: RecentEntry): string =>
+  formatSolveLabel({
+    id: '',
+    puzzle_type: '333',
+    scramble: '',
+    created_at: '',
+    dnf: entry.dnf,
+    plus_two: entry.plusTwo,
+    time: entry.time,
+  });
 
 const TrainerRecentStrip = ({
   entries,

@@ -1,28 +1,18 @@
 import type { Solve } from '../types';
+import { effectiveTime } from './solveTime';
+import { localDateKey } from './localDateKey';
 
 export interface TrendResult {
   recentAvg: number;
   priorAvg: number;
   deltaSec: number;
   deltaPct: number;
-  recentSessions: number;
-  priorSessions: number;
 }
 
 interface Options {
   sessionMinSolves?: number;
   windowSize?: number;
 }
-
-const effective = (s: Solve): number => (s.plus_two ? s.time + 2 : s.time);
-
-const localDateKey = (iso: string): string => {
-  const d = new Date(iso);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // Groups solves by local-date, filters to qualifying sessions (>= min non-DNF
 // solves), then averages the last-N sessions vs. the prior-N weighted by solve
@@ -61,7 +51,7 @@ export function computeRecentTrend(
     let count = 0;
     for (const s of sessions) {
       for (const solve of s.valid) {
-        sum += effective(solve);
+        sum += effectiveTime(solve);
         count += 1;
       }
     }
@@ -78,7 +68,5 @@ export function computeRecentTrend(
     priorAvg,
     deltaSec,
     deltaPct,
-    recentSessions: recentSessions.length,
-    priorSessions: priorSessions.length,
   };
 }

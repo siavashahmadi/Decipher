@@ -2,6 +2,7 @@ import { useMemo, useRef, type ReactElement } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatTime } from '../utils/formatTime';
 import { ao5, ao12, type AverageResult } from '../utils/averages';
+import { formatSolveLabel } from '../utils/solveLabel';
 import type { Solve } from '../types';
 import './SolveLog.css';
 
@@ -117,11 +118,7 @@ const SolveLog = ({
                   aria-label={`Solve ${vi.index + 1} details`}
                 >
                   <span className="solve-time">
-                    {solve.dnf
-                      ? 'DNF'
-                      : solve.plus_two
-                        ? `${formatTime(solve.time + 2)}+`
-                        : formatTime(solve.time)}
+                    {formatSolveLabel(solve)}
                   </span>
                   <span className="solve-ao5">
                     {itemAo5 !== null ? `(${fmt(itemAo5)})` : ''}

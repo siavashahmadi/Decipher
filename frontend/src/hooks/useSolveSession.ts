@@ -7,6 +7,7 @@ import useSolveStore from './useSolveStore';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { mergeSortedAsc } from '../utils/mergeSortedAsc';
+import { effectiveTime } from '../utils/solveTime';
 import type { PersonalBest, PuzzleType, Solve } from '../types';
 
 export interface PenaltyFlags { plusTwo: boolean; dnf: boolean }
@@ -108,7 +109,7 @@ export default function useSolveSession(): UseSolveSessionResult {
 
         const times = data
           .filter(s => !s.dnf)
-          .map(s => (s.plus_two ? s.time + 2 : s.time))
+          .map(effectiveTime)
           .sort((a, b) => a - b);
         sortedTimesRef.current = times;
 
@@ -153,7 +154,7 @@ export default function useSolveSession(): UseSolveSessionResult {
 
       const newTimes = moreData
         .filter(s => !s.dnf)
-        .map(s => (s.plus_two ? s.time + 2 : s.time))
+        .map(effectiveTime)
         .sort((a, b) => a - b);
       newTimes.forEach(t => medianTracker.push(t));
       // Linear merge of the new page (already sorted) into the existing
@@ -174,9 +175,9 @@ export default function useSolveSession(): UseSolveSessionResult {
   const handleSolveComplete = useCallback(
     async (time: number, flags: PenaltyFlags) => {
       const { plusTwo, dnf } = flags;
-      const effectiveTime = plusTwo ? time + 2 : time;
+      const adjustedTime = plusTwo ? time + 2 : time;
       const prev = sortedTimesRef.current;
-      const pos = bisectLeft(prev, effectiveTime);
+      const pos = bisectLeft(prev, adjustedTime);
 
       const payload = {
         puzzle_type: puzzleType,
@@ -197,8 +198,8 @@ export default function useSolveSession(): UseSolveSessionResult {
           if (prev.length > 0) {
             setLastPercentile(Math.round(((prev.length - pos) / prev.length) * 100));
           }
-          sortedTimesRef.current = [...prev.slice(0, pos), effectiveTime, ...prev.slice(pos)];
-          medianTracker.push(effectiveTime);
+          sortedTimesRef.current = [...prev.slice(0, pos), adjustedTime, ...prev.slice(pos)];
+          medianTracker.push(adjustedTime);
           setCurrentMedian(medianTracker.getMedian());
         }
       } catch (err) {
@@ -235,7 +236,7 @@ export default function useSolveSession(): UseSolveSessionResult {
     setSolves(prev => prev.filter(s => s.id !== solveToDelete.id));
 
     if (!solveToDelete.dnf) {
-      const t = solveToDelete.plus_two ? solveToDelete.time + 2 : solveToDelete.time;
+      const t = effectiveTime(solveToDelete);
       const pos = bisectLeft(sortedSnapshot, t);
       const newSorted = [...sortedSnapshot.slice(0, pos), ...sortedSnapshot.slice(pos + 1)];
       sortedTimesRef.current = newSorted;
