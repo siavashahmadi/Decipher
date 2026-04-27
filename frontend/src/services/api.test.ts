@@ -29,24 +29,32 @@ describe('api.migrateSolves', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (axios.post as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: {},
+      data: { solves: [] },
     });
   });
 
-  it('posts solves in ascending created_at order', async () => {
+  it('sends all solves in a single POST /solves/batch request', async () => {
     const post = axios.post as unknown as ReturnType<typeof vi.fn>;
-    // Times encode the desired sorted order so we can read it back from
-    // axios.post's call history. Input is intentionally not pre-sorted.
     const input = [
       mkSolve('c', '2026-04-25T12:00:00Z', 30),
       mkSolve('a', '2026-04-25T08:00:00Z', 10),
       mkSolve('b', '2026-04-25T10:00:00Z', 20),
     ];
     await api.migrateSolves(input);
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(post.mock.calls[0][0]).toMatch(/\/solves\/batch$/);
+  });
 
-    expect(post).toHaveBeenCalledTimes(3);
-    const sentTimes = post.mock.calls.map((c) => (c[1] as { time: number }).time);
-    expect(sentTimes).toEqual([10, 20, 30]);
+  it('posts solves in ascending created_at order inside the batch body', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    const input = [
+      mkSolve('c', '2026-04-25T12:00:00Z', 30),
+      mkSolve('a', '2026-04-25T08:00:00Z', 10),
+      mkSolve('b', '2026-04-25T10:00:00Z', 20),
+    ];
+    await api.migrateSolves(input);
+    const body = post.mock.calls[0][1] as { solves: { time: number }[] };
+    expect(body.solves.map((s) => s.time)).toEqual([10, 20, 30]);
   });
 
   it('does not mutate the input array', async () => {
@@ -64,25 +72,32 @@ describe('api.migrateSolves', () => {
     const ts = '2026-04-25T08:00:00Z';
     const input = [mkSolve('first', ts, 1), mkSolve('second', ts, 2)];
     await api.migrateSolves(input);
-    const sentTimes = post.mock.calls.map((c) => (c[1] as { time: number }).time);
-    expect(sentTimes).toEqual([1, 2]);
+    const body = post.mock.calls[0][1] as { solves: { time: number }[] };
+    expect(body.solves.map((s) => s.time)).toEqual([1, 2]);
   });
 
-  it('continues iterating on per-solve failure and partitions results', async () => {
+  it('returns the inserted solves on success', async () => {
     const post = axios.post as unknown as ReturnType<typeof vi.fn>;
-    post.mockReset();
-    post
-      .mockResolvedValueOnce({ data: {} })
-      .mockRejectedValueOnce(new Error('429'))
-      .mockResolvedValueOnce({ data: {} });
-    const input = [
-      mkSolve('a', '2026-04-25T08:00:00Z', 10),
-      mkSolve('b', '2026-04-25T09:00:00Z', 20),
-      mkSolve('c', '2026-04-25T10:00:00Z', 30),
-    ];
+    post.mockResolvedValue({ data: { solves: [mkSolve('s1', '2026-04-25T08:00:00Z', 10)] } });
+    const result = await api.migrateSolves([mkSolve('a', '2026-04-25T08:00:00Z', 10)]);
+    expect(result.migrated).toHaveLength(1);
+    expect(result.failed).toEqual([]);
+  });
+
+  it('returns input as failed on POST error', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue(new Error('429'));
+    const input = [mkSolve('a', '2026-04-25T08:00:00Z', 10)];
     const { migrated, failed } = await api.migrateSolves(input);
-    expect(migrated.map((s) => s.id)).toEqual(['a', 'c']);
-    expect(failed.map((s) => s.id)).toEqual(['b']);
+    expect(migrated).toEqual([]);
+    expect(failed.map((s) => s.id)).toEqual(['a']);
+  });
+
+  it('returns empty result for empty input without making any HTTP call', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    const result = await api.migrateSolves([]);
+    expect(result).toEqual({ migrated: [], failed: [] });
+    expect(post).not.toHaveBeenCalled();
   });
 });
 

@@ -90,29 +90,37 @@ const api = {
 		return response.data;
 	},
 
-	// Migrate guest solves to server after signup. Sequential to stay within
-	// the 30/min rate limit. Sort by created_at ascending so server-side PB
-	// materialization sees solves in the order they were earned, not in
-	// localStorage manifest order.
-	migrateSolves: async (allGuestSolves: Solve[]): Promise<{ migrated: Solve[]; failed: Solve[] }> => {
-		const migrated: Solve[] = [];
-		const failed: Solve[] = [];
+	// Migrate guest solves in a single batch. The backend's POST
+	// /solves/batch accepts up to 1000 rows in one transaction and
+	// recomputes PBs server-side after the bulk insert, so we no longer
+	// have to stay below the 30/min per-solve rate limit.
+	migrateSolves: async (
+		allGuestSolves: Solve[],
+	): Promise<{ migrated: Solve[]; failed: Solve[]; errorStatus?: number }> => {
+		if (allGuestSolves.length === 0) return { migrated: [], failed: [] };
+		// Sort ascending so the server's PB recompute receives them in the
+		// order they were earned. The batch endpoint also recomputes from
+		// solves.created_at after insert, but sending sorted is harmless and
+		// makes server-side ordering testable.
 		const sorted = [...allGuestSolves].sort(
 			(a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
 		);
-		for (const solve of sorted) {
-			const { id: _localId, user_id: _uid, created_at: _createdAt, ...payload } = solve;
-			try {
-				await api.createSolve(payload);
-				migrated.push(solve);
-			} catch (err) {
-				// Silent at this layer: the caller (AuthContext) inspects the
-				// returned `failed` array and surfaces a single aggregate toast.
-				failed.push(solve);
-				console.error('Failed to migrate guest solve:', solve.id, err);
-			}
+		const payload = sorted.map(({ id: _id, user_id: _uid, created_at: _createdAt, ...rest }) => rest);
+		try {
+			const headers = await getAuthHeader();
+			const response = await axios.post<{ solves: Solve[] }>(
+				`${API_URL}/solves/batch`,
+				{ solves: payload },
+				{ headers },
+			);
+			return { migrated: response.data.solves, failed: [] };
+		} catch (err) {
+			console.error('Failed to migrate guest solves:', err);
+			// Surface the HTTP status so callers can pick a useful toast
+			// (429 vs 422 vs 500). Atomic batch -> all-or-nothing failure.
+			const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+			return { migrated: [], failed: sorted, errorStatus: status };
 		}
-		return { migrated, failed };
 	},
 };
 
