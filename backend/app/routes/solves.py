@@ -180,9 +180,9 @@ def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solv
                      .limit(1)
                      .execute())
 
-        current_pb = float(pb_result.data[0]['time']) if pb_result.data else None
+        best_pb_time = float(pb_result.data[0]['time']) if pb_result.data else None
 
-        if current_pb is None or new_time < current_pb:
+        if best_pb_time is None or new_time < best_pb_time:
             supabase.table('personal_bests').insert({
                 'user_id': user_id,
                 'puzzle_type': puzzle_type,
