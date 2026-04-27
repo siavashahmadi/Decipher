@@ -9,6 +9,12 @@ from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve, validate_create_solves_batch
 from ..extensions import limiter
+from ..repositories.solves_repo import SolvesRepository  # used in service factories
+from ..repositories.personal_bests_repo import PersonalBestsRepository
+from ..services.solves_service import SolvesService
+from ..services.solves_service import SOLVE_LIFETIME_CAP  # re-exported for backward compat
+from ..services.share_links_service import ShareLinksService
+from ..services.exceptions import SolveLimitReached, SolveNotFound
 
 # Cursor pagination tokens are user-supplied; both halves get interpolated
 # into a PostgREST .or_() filter, so unsafe characters could break out of
@@ -85,7 +91,28 @@ def _internal_error(label: str) -> tuple[Response, int]:
 
 
 # ---------------------------------------------------------------------------
-# SD-2: Cursor-based pagination
+# Per-request service factories (cached on flask.g)
+# ---------------------------------------------------------------------------
+
+def _solves_service() -> SolvesService:
+    if "solves_service" not in g:
+        g.solves_service = SolvesService(
+            SolvesRepository(g.supabase),
+            PersonalBestsRepository(g.supabase),
+        )
+    return g.solves_service
+
+
+def _share_links_service() -> ShareLinksService:
+    if "share_links_service" not in g:
+        g.share_links_service = ShareLinksService(
+            SolvesRepository(get_supabase_service_client()),
+        )
+    return g.share_links_service
+
+
+# ---------------------------------------------------------------------------
+# SD-2: Cursor-based pagination helpers (HTTP-shape concerns, stay in routes)
 #
 # Why cursor over OFFSET:
 #   OFFSET N rescans N rows on every request and breaks when rows are deleted
@@ -95,244 +122,7 @@ def _internal_error(label: str) -> tuple[Response, int]:
 # Request:  GET /api/solves?puzzle_type=333&limit=50&cursor=<ISO timestamp>
 # Response: { "solves": [...], "next_cursor": "<ISO timestamp> | null" }
 # ---------------------------------------------------------------------------
-@solves.route('/solves', methods=['GET'])
-@require_auth
-@limiter.limit("60 per minute")
-def get_solves():
-    puzzle_type = request.args.get('puzzle_type')
-    try:
-        limit = _parse_positive_int(request.args.get('limit'), default=50, maximum=100)
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    cursor = request.args.get('cursor')  # ISO 8601 created_at of last seen row
 
-    try:
-        query = (g.supabase.table('solves')
-                 .select('id,puzzle_type,time,dnf,plus_two,scramble,created_at')
-                 .eq('user_id', g.user_id)
-                 .is_('deleted_at', None))
-        if puzzle_type:
-            query = query.eq('puzzle_type', puzzle_type)
-        if cursor:
-            cursor_ts, cursor_id = _decode_solve_cursor(cursor)
-            if cursor_id:
-                query = query.or_(
-                    f'created_at.lt.{cursor_ts},'
-                    f'and(created_at.eq.{cursor_ts},id.lt.{cursor_id})'
-                )
-            else:
-                query = query.lt('created_at', cursor_ts)
-        query = query.order('created_at', desc=True).limit(limit)
-        result = query.execute()
-
-        data = result.data
-        # next_cursor is null when fewer rows than limit came back (last page)
-        next_cursor = (
-            _encode_solve_cursor(data[-1]['created_at'], data[-1]['id'])
-            if len(data) == limit else None
-        )
-        return jsonify({"solves": data, "next_cursor": next_cursor})
-    except Exception:
-        return _internal_error("get_solves")
-
-
-SOLVE_LIFETIME_CAP = 100_000
-SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
-MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
-
-
-# ---------------------------------------------------------------------------
-# SD-4: Input validation
-# SD-3: Write-time PB materialization
-# ---------------------------------------------------------------------------
-@solves.route('/solves', methods=['POST'])
-@require_auth
-@limiter.limit("30 per minute")
-def create_solve():
-    data = request.json
-    errors = validate_create_solve(data)
-    if errors:
-        return jsonify({"error": "Validation failed", "fields": errors}), 422
-
-    try:
-        # Cheap insurance against a malicious sign-up + mass-post spree.
-        # Counts non-deleted solves only; soft-deleted rows still occupy
-        # storage but do not block honest users.
-        stats_result = (g.supabase.table('user_stats')
-                        .select('solve_count')
-                        .eq('user_id', g.user_id)
-                        .limit(1)
-                        .execute())
-        existing = stats_result.data[0]['solve_count'] if stats_result.data else 0
-        if existing >= SOLVE_LIFETIME_CAP:
-            return jsonify({
-                "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
-            }), 429
-
-        data['user_id'] = g.user_id
-        result = g.supabase.table('solves').insert(data).execute()
-        saved_solve = result.data[0]
-
-        # SD-3: Check if this solve is a personal best and record it.
-        # This is write-time materialization — we pay a small cost on every
-        # non-DNF insert to keep GET /personal-bests O(1) at read time.
-        if not data.get('dnf', False):
-            _maybe_record_pb(
-                g.supabase,
-                g.user_id,
-                data['puzzle_type'],
-                float(saved_solve['time']),
-                saved_solve['created_at'],
-                saved_solve['id'],
-            )
-
-        return jsonify(saved_solve)
-    except Exception:
-        return _internal_error("create_solve")
-
-
-def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solve_id):
-    """Atomic PB materialization via the record_pb_if_better RPC.
-
-    The RPC takes a per-(user, puzzle) advisory lock so concurrent solves
-    cannot both insert competing PB rows. Errors are non-fatal: the
-    create_solve response succeeds even if PB tracking fails, but the
-    failure is logged.
-    """
-    try:
-        supabase.rpc('record_pb_if_better', {
-            'p_user_id':     user_id,
-            'p_puzzle_type': puzzle_type,
-            'p_solve_id':    solve_id,
-            'p_time':        new_time,
-            'p_achieved_at': achieved_at,
-        }).execute()
-    except Exception:
-        current_app.logger.exception("PB materialization failed (non-fatal)")
-
-
-@solves.route('/solves/<solve_id>', methods=['PATCH'])
-@require_auth
-@limiter.limit("60 per minute")
-def update_solve(solve_id):
-    data = request.json
-    errors = validate_update_solve(data)
-    if errors:
-        return jsonify({"error": "Validation failed", "fields": errors}), 422
-
-    # Only allow dnf and plus_two to be updated — strip everything else
-    allowed = {k: data[k] for k in ('dnf', 'plus_two') if k in data}
-
-    try:
-        result = (g.supabase.table('solves')
-                  .update(allowed)
-                  .eq('id', solve_id)
-                  .eq('user_id', g.user_id)
-                  .is_('deleted_at', None)
-                  .execute())
-        if not result.data:
-            return jsonify({"error": "Solve not found"}), 404
-        return jsonify(result.data[0])
-    except Exception:
-        return _internal_error("update_solve")
-
-
-@solves.route('/solves/<solve_id>', methods=['DELETE'])
-@require_auth
-@limiter.limit("60 per minute")
-def delete_solve(solve_id):
-    try:
-        # Use an ISO UTC timestamp — the Supabase Python client sends JSON to
-        # PostgREST, which does not interpret the literal string 'now()'.
-        deleted_at = datetime.now(timezone.utc).isoformat()
-        result = (g.supabase.table('solves')
-                  .update({'deleted_at': deleted_at})
-                  .eq('id', solve_id)
-                  .eq('user_id', g.user_id)
-                  .is_('deleted_at', None)
-                  .execute())
-        if not result.data:
-            return jsonify({"error": "Solve not found"}), 404
-        deleted_row = result.data[0]
-        # Remove the matching PB row only if this solve could have been a PB.
-        # DNF solves are never recorded as PBs (see _maybe_record_pb gate in
-        # create_solve), so the cleanup is wasted work for them.
-        if not deleted_row.get('dnf'):
-            try:
-                (g.supabase.table('personal_bests')
-                 .delete()
-                 .eq('user_id', g.user_id)
-                 .eq('solve_id', solve_id)
-                 .execute())
-            except Exception:
-                current_app.logger.exception("PB cleanup on delete failed (non-fatal)")
-        return jsonify(deleted_row)
-    except Exception:
-        return _internal_error("delete_solve")
-
-
-@solves.route('/solves/batch', methods=['POST'])
-@require_auth
-@limiter.limit("5 per minute")
-def create_solves_batch():
-    """Bulk-insert up to 1000 validated solves in one transaction.
-
-    Used by the guest-to-authed migration flow: a guest with N solves can
-    sign up and migrate them in one request rather than looping per-solve
-    against the standard 30/min rate limit. PB rows are recomputed
-    server-side after the bulk insert via recompute_pbs_for_user.
-    """
-    payload = request.get_json(silent=True)
-    err, rows = validate_create_solves_batch(payload)
-    if err:
-        return jsonify({"errors": err}), 422
-
-    try:
-        stats_result = (g.supabase.table('user_stats')
-                        .select('solve_count')
-                        .eq('user_id', g.user_id)
-                        .limit(1)
-                        .execute())
-        existing = stats_result.data[0]['solve_count'] if stats_result.data else 0
-        if existing + len(rows) > SOLVE_LIFETIME_CAP:
-            return jsonify({
-                "error": f"Batch would exceed lifetime cap of {SOLVE_LIFETIME_CAP}"
-            }), 429
-
-        # Bulk insert. PostgREST sends this as one SQL statement (atomic).
-        prepared = [{
-            'user_id':     g.user_id,
-            'puzzle_type': row['puzzle_type'],
-            'time':        row['time'],
-            'dnf':         row.get('dnf', False),
-            'plus_two':    row.get('plus_two', False),
-            'scramble':    row.get('scramble', ''),
-        } for row in rows]
-        insert_result = (g.supabase.table('solves')
-                         .insert(prepared)
-                         .execute())
-        inserted = insert_result.data or []
-
-        # Recompute PBs for every distinct puzzle_type in the batch. Done
-        # server-side so the client doesn't have to know per-puzzle minima.
-        puzzle_types = sorted({row['puzzle_type'] for row in rows})
-        try:
-            g.supabase.rpc('recompute_pbs_for_user', {
-                'p_user_id': g.user_id,
-                'p_puzzle_types': puzzle_types,
-            }).execute()
-        except Exception:
-            current_app.logger.exception("Batch PB recompute failed (non-fatal)")
-
-        return jsonify({"solves": inserted}), 200
-    except Exception:
-        return _internal_error("create_solves_batch")
-
-
-# ---------------------------------------------------------------------------
-# Shareable solve links (signed token). The token is deterministic HMAC over
-# the solve id, no storage, no DB column. Verification is constant-time.
-# ---------------------------------------------------------------------------
 def _b64url(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')
 
@@ -370,6 +160,14 @@ def _decode_solve_cursor(raw: str) -> tuple[str, str | None]:
     if _ISO_TIMESTAMP_RE.match(raw):
         return raw, None
     return raw, None
+
+
+# ---------------------------------------------------------------------------
+# Share-link token helpers (stay here: tests monkeypatch these module-level names)
+# ---------------------------------------------------------------------------
+
+SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
+MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
 
 
 def _require_share_secret() -> bytes:
@@ -425,19 +223,138 @@ def _verify_token(token: str):
     return solve_id
 
 
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
+
+@solves.route('/solves', methods=['GET'])
+@require_auth
+@limiter.limit("60 per minute")
+def get_solves():
+    puzzle_type = request.args.get('puzzle_type')
+    try:
+        limit = _parse_positive_int(request.args.get('limit'), default=50, maximum=100)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    cursor_param = request.args.get('cursor')
+    cursor = _decode_solve_cursor(cursor_param) if cursor_param else None
+
+    try:
+        data = _solves_service().list_solves(
+            g.user_id,
+            puzzle_type=puzzle_type,
+            limit=limit,
+            cursor=cursor,
+        )
+        next_cursor = (
+            _encode_solve_cursor(data[-1]['created_at'], data[-1]['id'])
+            if len(data) == limit else None
+        )
+        return jsonify({"solves": data, "next_cursor": next_cursor})
+    except Exception:
+        return _internal_error("get_solves")
+
+
+@solves.route('/personal-bests', methods=['GET'])
+@require_auth
+@limiter.limit("60 per minute")
+def get_personal_bests():
+    puzzle_type = request.args.get('puzzle_type')
+    try:
+        data = _solves_service().list_personal_bests(g.user_id, puzzle_type)
+        return jsonify(data)
+    except Exception:
+        return _internal_error("get_personal_bests")
+
+
+@solves.route('/solves/<solve_id>', methods=['DELETE'])
+@require_auth
+@limiter.limit("60 per minute")
+def delete_solve(solve_id):
+    try:
+        deleted = _solves_service().delete(g.user_id, solve_id)
+        return jsonify(deleted)
+    except SolveNotFound:
+        return jsonify({"error": "Solve not found"}), 404
+    except Exception:
+        return _internal_error("delete_solve")
+
+
+@solves.route('/solves/<solve_id>', methods=['PATCH'])
+@require_auth
+@limiter.limit("60 per minute")
+def update_solve(solve_id):
+    data = request.json
+    errors = validate_update_solve(data)
+    if errors:
+        return jsonify({"error": "Validation failed", "fields": errors}), 422
+
+    # Only allow dnf and plus_two to be updated — strip everything else.
+    allowed = {k: data[k] for k in ('dnf', 'plus_two') if k in data}
+
+    try:
+        result = _solves_service().update(g.user_id, solve_id, allowed)
+        return jsonify(result)
+    except SolveNotFound:
+        return jsonify({"error": "Solve not found"}), 404
+    except Exception:
+        return _internal_error("update_solve")
+
+
+# SD-4: Input validation / SD-3: Write-time PB materialization
+@solves.route('/solves', methods=['POST'])
+@require_auth
+@limiter.limit("30 per minute")
+def create_solve():
+    data = request.json
+    errors = validate_create_solve(data)
+    if errors:
+        return jsonify({"error": "Validation failed", "fields": errors}), 422
+
+    try:
+        solve = _solves_service().create(g.user_id, data)
+        return jsonify(solve)
+    except SolveLimitReached as e:
+        return jsonify({"error": str(e)}), 429
+    except Exception:
+        return _internal_error("create_solve")
+
+
+@solves.route('/solves/batch', methods=['POST'])
+@require_auth
+@limiter.limit("5 per minute")
+def create_solves_batch():
+    """Bulk-insert up to 1000 validated solves in one transaction.
+
+    Used by the guest-to-authed migration flow: a guest with N solves can
+    sign up and migrate them in one request rather than looping per-solve
+    against the standard 30/min rate limit. PB rows are recomputed
+    server-side after the bulk insert via recompute_pbs_for_user.
+    """
+    payload = request.get_json(silent=True)
+    err, rows = validate_create_solves_batch(payload)
+    if err:
+        return jsonify({"errors": err}), 422
+
+    try:
+        inserted = _solves_service().create_batch(g.user_id, rows)
+        return jsonify({"solves": inserted}), 200
+    except SolveLimitReached:
+        return jsonify({
+            "error": f"Batch would exceed lifetime cap of {SOLVE_LIFETIME_CAP}"
+        }), 429
+    except Exception:
+        return _internal_error("create_solves_batch")
+
+
 @solves.route('/solves/<solve_id>/share-token', methods=['GET'])
 @require_auth
 @limiter.limit("30 per minute")
 def get_share_token(solve_id):
     try:
-        result = (g.supabase.table('solves')
-                  .select('id')
-                  .eq('id', solve_id)
-                  .eq('user_id', g.user_id)
-                  .is_('deleted_at', None)
-                  .limit(1)
-                  .execute())
-        if not result.data:
+        row = _solves_service().get_by_id(g.user_id, solve_id)
+        if not row:
             return jsonify({"error": "Solve not found"}), 404
         return jsonify({"token": _sign_solve_id(solve_id)})
     except Exception:
@@ -451,37 +368,9 @@ def get_shared_solve(token):
     if solve_id is None:
         return jsonify({"error": "Invalid or expired share link"}), 404
     try:
-        service = get_supabase_service_client()
-        result = (service.table('solves')
-                  .select('id,puzzle_type,time,dnf,plus_two,scramble,created_at')
-                  .eq('id', solve_id)
-                  .is_('deleted_at', None)
-                  .limit(1)
-                  .execute())
-        if not result.data:
+        solve = _share_links_service().get_public_solve(solve_id)
+        if solve is None:
             return jsonify({"error": "Invalid or expired share link"}), 404
-        return jsonify(result.data[0])
+        return jsonify(solve)
     except Exception:
         return _internal_error("get_shared_solve")
-
-
-# ---------------------------------------------------------------------------
-# SD-3: Personal best history endpoint
-# ---------------------------------------------------------------------------
-@solves.route('/personal-bests', methods=['GET'])
-@require_auth
-@limiter.limit("60 per minute")
-def get_personal_bests():
-    puzzle_type = request.args.get('puzzle_type')
-
-    try:
-        query = (g.supabase.table('personal_bests')
-                 .select('id,puzzle_type,time,achieved_at,solve_id')
-                 .eq('user_id', g.user_id))
-        if puzzle_type:
-            query = query.eq('puzzle_type', puzzle_type)
-        query = query.order('achieved_at')
-        result = query.execute()
-        return jsonify(result.data)
-    except Exception:
-        return _internal_error("get_personal_bests")

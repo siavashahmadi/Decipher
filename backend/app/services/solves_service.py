@@ -80,3 +80,7 @@ class SolvesService:
 
     def list_personal_bests(self, user_id: str, puzzle_type=None) -> list:
         return self.pbs.list_for_user(user_id, puzzle_type)
+
+    def get_by_id(self, user_id: str, solve_id: str):
+        """Return a solve row if it exists and belongs to user, else None."""
+        return self.solves.get_by_id(solve_id, user_id)
