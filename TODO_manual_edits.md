@@ -202,3 +202,93 @@ Claim: dropping the `webkitAudioContext` fallback is safe because Safari ships u
 1. Open the deployed (or preview) build in Safari on macOS or iOS.
 2. Settings → Sound on. Start a solve with inspection. You should hear the start beep, the 8-second warning, and the 12-second warning.
 3. If audio is silent on Safari but works on Chrome/Firefox, you are running on a Safari version older than 14.1 and the fallback removal needs to be reverted. (Realistically: Safari < 14.1 is a 2020-or-earlier build; this is a vanishingly small risk.)
+
+## Audit Cluster D (2026-04-27)
+
+All 12 items shipped as 16 commits between `6b25694` and `c295dde`. Backend pytest 98/98, frontend vitest 293/293, tsc clean. The remaining work is the SQL apply (six new migrations) and three observation-only checks. Until the migrations are applied, the new routes will fail at first call because `user_stats`, `record_pb_if_better`, and `recompute_pbs_for_user` do not yet exist in the live DB.
+
+### D.1 to D.4, D.7, D.8: apply migrations 006 through 011
+
+The Supabase project may still be paused (see Cluster A note). Unpause first. Then in Supabase dashboard → SQL editor, run the up-migrations in order. Each has a paired `*.down.sql` if you need to roll back.
+
+1. `006_solves_active_index.sql` replaces the cursor-pagination index with a partial composite that includes `WHERE deleted_at IS NULL`. Verify the new index is being used:
+   ```sql
+   EXPLAIN
+   SELECT id, puzzle_type, time, dnf, plus_two, scramble, created_at
+   FROM solves
+   WHERE user_id = '<some uuid>' AND puzzle_type = '333' AND deleted_at IS NULL
+   ORDER BY created_at DESC LIMIT 50;
+   ```
+   Expected: `Index Scan using solves_user_puzzle_created_active_idx`. No `Filter: (deleted_at IS NULL)` recheck row.
+
+2. `007_personal_bests_time_index.sql` adds a time-ordered PB lookup index. Verify:
+   ```sql
+   EXPLAIN SELECT time FROM personal_bests
+   WHERE user_id = '<uuid>' AND puzzle_type = '333'
+   ORDER BY time ASC LIMIT 1;
+   ```
+   Expected: `Index Scan using personal_bests_user_puzzle_min_time_idx`.
+
+3. `008_user_fk_cascade.sql` adds `ON DELETE CASCADE` to `solves.user_id` and `personal_bests.user_id` foreign keys. **Run the orphan audit FIRST**:
+   ```sql
+   SELECT count(*) FROM solves s LEFT JOIN auth.users u ON u.id = s.user_id WHERE u.id IS NULL;
+   SELECT count(*) FROM personal_bests p LEFT JOIN auth.users u ON u.id = p.user_id WHERE u.id IS NULL;
+   ```
+   Both must return 0. If either is non-zero, delete the orphans before applying or the migration fails on the new constraint.
+
+4. `009_user_stats.sql` creates the `user_stats` counter table, the `update_user_solve_count` trigger, and backfills counts in one transaction. After applying, sanity-check the backfill:
+   ```sql
+   SELECT u.user_id, u.solve_count, c.actual
+   FROM user_stats u
+   JOIN (SELECT user_id, count(*) AS actual FROM solves WHERE deleted_at IS NULL GROUP BY user_id) c
+     ON c.user_id = u.user_id
+   WHERE u.solve_count <> c.actual;
+   ```
+   Expected: zero rows.
+
+5. `010_record_pb_if_better.sql` adds the atomic PB write RPC used by `create_solve`. No verification SQL needed; the route starts using it on next deploy.
+
+6. `011_recompute_pbs_for_user.sql` adds the batch-migration PB recompute RPC used by `POST /api/solves/batch`.
+
+### D.7 batch endpoint: end-to-end check
+
+After deploying the backend and frontend together:
+
+1. Sign out (guest mode), record at least 35 solves on `333` (more than the per-solve 30/min rate limit).
+2. Sign up. The migration toast should appear.
+3. Confirm all 35 solves appear on the Stats page.
+4. DevTools Network tab: confirm exactly ONE `POST /api/solves/batch` request, not 35 individual posts.
+5. Confirm the PB chart shows the chronologically correct PB progression. The server recomputes PBs from `(created_at, id)` so the rendered chart should match what you would expect from solve order.
+6. Tamper test: sign up with 1001 guest solves. The migration should return 422 with a "must contain at most 1000 rows" error rather than silently dropping the tail.
+
+### D.4 user_stats trigger sanity (after some app usage)
+
+After the cluster has been deployed and the app has been used for a few hours:
+
+```sql
+-- Pick any active user, compare denormalized count vs ground truth.
+SELECT u.solve_count AS denorm,
+       (SELECT count(*) FROM solves
+        WHERE user_id = u.user_id AND deleted_at IS NULL) AS ground_truth
+FROM user_stats u
+WHERE u.user_id = '<uuid>';
+```
+
+The two numbers must match. If they ever drift, the trigger has a bug. The most likely failure mode is an UPDATE branch that increments or decrements when it should not.
+
+### D.10 flask.g sanity (no manual action; just context)
+
+`require_auth` now sets `g.user_id` and `g.supabase` instead of monkey-patching the `request` object. The limiter in `extensions.py:_user_or_ip_key` is unaffected because it parses the JWT independently. If any future route stops working with "AttributeError: '_AppCtxGlobals' object has no attribute 'user_id'", it forgot the `@require_auth` decorator.
+
+### D.9 cursor format change (one-release legacy fallback)
+
+`GET /api/solves` now returns `next_cursor` as `base64url(<created_at>|<solve_id>)` instead of a bare ISO timestamp. The route accepts both shapes for one release so cached frontend cursors keep working. After the next release ships and stale cursors have rotated out (about 30 days of normal use), open a follow-up to delete the legacy branch in `_decode_solve_cursor` and reject any cursor that doesn't decode to the new shape.
+
+### Deferred follow-ups (open tickets when convenient)
+
+These were flagged by the cluster review but deliberately not done in this round:
+
+- **Per-route MAX_CONTENT_LENGTH cap.** The global limit was bumped from 16KB to 256KB to fit a 1000-row batch payload. Every other POST and PATCH route now allows 16x more body than necessary. A custom `@max_body(16 * 1024)` decorator applied to non-batch routes would restore the tighter limit. Not a security regression today but worth tightening when you have time.
+- **SQL-level integration tests for the trigger and RPCs.** All cluster D backend tests use the FakeSupabase mock. The trigger logic in `update_user_solve_count` and the function bodies of `record_pb_if_better` and `recompute_pbs_for_user` have no direct test coverage. A Postgres-backed integration test (Docker Compose Supabase or testcontainers) would catch trigger drift before deploy.
+- **Drop the legacy timestamp-only cursor fallback.** See D.9 note above.
+- **`MAX_CONTENT_LENGTH` per-route override** is also tracked in `backend/app/__init__.py`. The current 256KB only matters because the batch endpoint exists.
