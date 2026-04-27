@@ -4,7 +4,13 @@ Covers: auth parsing, limit clamping, pagination cursor, PB materialization,
 soft-delete timestamp, PATCH whitelist. The Supabase client is faked via
 `fake_supabase_factory` (see conftest.py).
 """
+import base64
+
 from datetime import datetime, timezone
+
+
+def _encode_cursor(created_at: str, solve_id: str) -> str:
+    return base64.urlsafe_b64encode(f"{created_at}|{solve_id}".encode()).decode().rstrip("=")
 
 
 def test_missing_auth_returns_401(client):
@@ -68,7 +74,7 @@ def test_get_solves_returns_data_and_next_cursor(fake_supabase_factory, client, 
     assert r.status_code == 200
     body = r.get_json()
     assert body["solves"] == rows
-    assert body["next_cursor"] == rows[-1]["created_at"]
+    assert body["next_cursor"] == _encode_cursor(rows[-1]["created_at"], rows[-1]["id"])
 
 
 def test_get_solves_last_page_has_null_cursor(fake_supabase_factory, client, auth_headers):
@@ -516,3 +522,54 @@ def test_get_personal_bests_does_not_select_user_id(client, fake_supabase_factor
     columns = args[0] if args else ""
     assert columns != "*"
     assert "user_id" not in columns
+
+
+# D.9: Cursor tiebreaker by id
+
+
+def test_get_solves_paginates_with_id_tiebreaker(client, fake_supabase_factory, auth_headers):
+    """Two solves at identical timestamps must paginate without skipping."""
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    solve_uuid = "11111111-2222-3333-4444-555555555555"
+    cursor = _encode_cursor("2026-04-25T12:00:00Z", solve_uuid)
+    client.get(f'/api/solves?cursor={cursor}', headers=auth_headers)
+
+    or_calls = [c for c in fake.queries[0].calls if c[0] == "or_"]
+    assert or_calls, "must emit an .or_() filter for tiebreaker"
+    expr = or_calls[0][1][0]
+    assert "created_at.lt.2026-04-25T12:00:00Z" in expr
+    assert "created_at.eq.2026-04-25T12:00:00Z" in expr
+    assert f"id.lt.{solve_uuid}" in expr
+
+
+def test_get_solves_rejects_cursor_with_non_uuid_id(client, fake_supabase_factory, auth_headers):
+    """A cursor with a non-UUID solve_id must not interpolate into the .or_() filter."""
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    cursor = _encode_cursor(
+        "2026-04-25T12:00:00Z",
+        "abc),user_id.neq.notmine,or(true",
+    )
+    client.get(f'/api/solves?cursor={cursor}', headers=auth_headers)
+    or_calls = [c for c in fake.queries[0].calls if c[0] == "or_"]
+    assert or_calls == [], "must reject non-UUID id rather than interpolate"
+
+
+def test_get_solves_returns_encoded_next_cursor(client, fake_supabase_factory, auth_headers):
+    fake_supabase_factory(scripts={"solves": [{"data": [
+        {"id": "s1", "puzzle_type": "333", "time": 9.0,
+         "dnf": False, "plus_two": False, "scramble": "",
+         "created_at": "2026-04-25T12:00:00Z"},
+    ]}]})
+    response = client.get('/api/solves?limit=1', headers=auth_headers)
+    body = response.get_json()
+    assert body["next_cursor"] is not None
+    decoded = base64.urlsafe_b64decode(body["next_cursor"] + "==").decode()
+    assert decoded == "2026-04-25T12:00:00Z|s1"
+
+
+def test_get_solves_accepts_legacy_timestamp_cursor(client, fake_supabase_factory, auth_headers):
+    """One-release fallback: a bare ISO timestamp should still work."""
+    fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
+    client.get('/api/solves?cursor=2026-04-25T12:00:00Z', headers=auth_headers)
+    lt_calls = [c for c in fake.queries[0].calls if c[0] == "lt"]
+    assert any(c[1][0] == "created_at" and c[1][1] == "2026-04-25T12:00:00Z" for c in lt_calls)

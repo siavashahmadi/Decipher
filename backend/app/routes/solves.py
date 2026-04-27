@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import re
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app, g
 from functools import wraps
@@ -8,6 +9,17 @@ from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve
 from ..extensions import limiter
+
+# Cursor pagination tokens are user-supplied; both halves get interpolated
+# into a PostgREST .or_() filter, so unsafe characters could break out of
+# the intended filter. Strict shape validation in _decode_solve_cursor
+# rejects anything that isn't a plain ISO-8601 timestamp + UUID.
+_ISO_TIMESTAMP_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$"
+)
+_UUID_RE = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
 
 solves = Blueprint('solves', __name__)
 solves.strict_slashes = False
@@ -96,13 +108,23 @@ def get_solves():
         if puzzle_type:
             query = query.eq('puzzle_type', puzzle_type)
         if cursor:
-            query = query.lt('created_at', cursor)
+            cursor_ts, cursor_id = _decode_solve_cursor(cursor)
+            if cursor_id:
+                query = query.or_(
+                    f'created_at.lt.{cursor_ts},'
+                    f'and(created_at.eq.{cursor_ts},id.lt.{cursor_id})'
+                )
+            else:
+                query = query.lt('created_at', cursor_ts)
         query = query.order('created_at', desc=True).limit(limit)
         result = query.execute()
 
         data = result.data
         # next_cursor is null when fewer rows than limit came back (last page)
-        next_cursor = data[-1]['created_at'] if len(data) == limit else None
+        next_cursor = (
+            _encode_solve_cursor(data[-1]['created_at'], data[-1]['id'])
+            if len(data) == limit else None
+        )
         return jsonify({"solves": data, "next_cursor": next_cursor})
     except Exception:
         current_app.logger.exception("get_solves failed")
@@ -267,6 +289,36 @@ def _b64url(data: bytes) -> str:
 def _b64url_decode(s: str) -> bytes:
     padding = '=' * (-len(s) % 4)
     return base64.urlsafe_b64decode(s + padding)
+
+
+def _encode_solve_cursor(created_at: str, solve_id: str) -> str:
+    return _b64url(f"{created_at}|{solve_id}".encode())
+
+
+def _decode_solve_cursor(raw: str) -> tuple[str, str | None]:
+    """Return (created_at, solve_id-or-None).
+
+    New format: base64url(<iso_ts>|<uuid>) -> (iso_ts, uuid).
+    Legacy format: bare ISO timestamp -> (iso_ts, None). Drop after one release.
+
+    Both halves are validated against strict regex shapes before being
+    returned. The caller interpolates them into a PostgREST .or_() filter
+    string, so anything that isn't a plain timestamp or UUID could
+    inject filter syntax. Invalid shapes fall back to the legacy path,
+    where get_solves only uses the timestamp via .lt() (escaped by
+    PostgREST).
+    """
+    try:
+        decoded = _b64url_decode(raw).decode("utf-8")
+        if "|" in decoded:
+            ts, sid = decoded.split("|", 1)
+            if _ISO_TIMESTAMP_RE.match(ts) and _UUID_RE.match(sid):
+                return ts, sid
+    except Exception:
+        pass
+    if _ISO_TIMESTAMP_RE.match(raw):
+        return raw, None
+    return raw, None
 
 
 def _require_share_secret() -> bytes:
