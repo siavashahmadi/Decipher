@@ -12,7 +12,7 @@ import './SolveDetailModal.css';
 
 interface SolveDetailModalProps {
   solve: Solve;
-  window: Solve[];
+  solveWindow: Solve[];
   index: number;
   onClose: () => void;
   onUpdate: (solve: Solve) => void;
@@ -20,7 +20,7 @@ interface SolveDetailModalProps {
 }
 
 const SolveDetailModal = ({
-  solve, window: solveWindow, index, onClose, onUpdate, onDelete,
+  solve, solveWindow, index, onClose, onUpdate, onDelete,
 }: SolveDetailModalProps): ReactElement => {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);

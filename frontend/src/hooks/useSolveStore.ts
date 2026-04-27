@@ -44,14 +44,10 @@ const makeGuestStore = (puzzleType: PuzzleType): SolveStore => ({
 });
 
 const makeApiStore = (puzzleType: PuzzleType): SolveStore => ({
-  fetchPage: (cursor = null) => api.getSolves(puzzleType, cursor),
-  create: async (payload) => api.createSolve(payload),
-  update: async (solve) => {
-    await api.updateSolve(solve.id, solve);
-  },
-  remove: async (solveId) => {
-    await api.deleteSolve(solveId);
-  },
+  fetchPage: cursor => api.getSolves(puzzleType, cursor ?? null),
+  create: api.createSolve,
+  update: solve => api.updateSolve(solve.id, solve).then(() => undefined),
+  remove: id => api.deleteSolve(id),
 });
 
 const useSolveStore = (isGuest: boolean, puzzleType: PuzzleType): SolveStore => {

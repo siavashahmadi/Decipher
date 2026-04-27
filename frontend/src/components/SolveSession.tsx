@@ -142,7 +142,7 @@ const SolveSession = (): ReactElement => {
       {selectedSolve && (
         <SolveDetailModal
           solve={selectedSolve}
-          window={detailWindow}
+          solveWindow={detailWindow}
           index={detailWindowIndex}
           onClose={() => setSelectedIndex(null)}
           onUpdate={s => { handleSolveUpdate(s); setSelectedIndex(null); }}

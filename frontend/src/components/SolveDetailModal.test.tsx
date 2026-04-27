@@ -21,13 +21,13 @@ const five = [
 
 describe('SolveDetailModal', () => {
   it('renders the focused solve time large', () => {
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByTestId('solve-detail-time').textContent).toBe('19.87');
   });
 
   it('renders the ±2 ao5 window with the focused solve marked', () => {
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     const focused = screen.getByTestId('ao5-focused');
     expect(focused.textContent).toBe('19.87');
@@ -36,14 +36,14 @@ describe('SolveDetailModal', () => {
   });
 
   it('falls back gracefully when fewer than 5 surrounding solves exist', () => {
-    render(<SolveDetailModal solve={five[0]} window={five.slice(0, 2)} index={0}
+    render(<SolveDetailModal solve={five[0]} solveWindow={five.slice(0, 2)} index={0}
       onClose={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByTestId('ao5-value').textContent).toBe('-');
   });
 
   it('toggles +2 and DNF', () => {
     const onUpdate = vi.fn();
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={vi.fn()} onUpdate={onUpdate} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: '+2' }));
     expect(onUpdate).toHaveBeenCalledWith({ ...five[2], plus_two: true });
@@ -54,7 +54,7 @@ describe('SolveDetailModal', () => {
   it('calls onDelete then onClose when Delete clicked', () => {
     const onClose = vi.fn();
     const onDelete = vi.fn();
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={onClose} onUpdate={vi.fn()} onDelete={onDelete} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDelete).toHaveBeenCalledWith(five[2]);
@@ -63,7 +63,7 @@ describe('SolveDetailModal', () => {
 
   it('closes on Escape', () => {
     const onClose = vi.fn();
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={onClose} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe('SolveDetailModal', () => {
   it('copies the scramble to clipboard', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /copy scramble/i }));
     expect(writeText).toHaveBeenCalledWith("R U R' U' F2");
@@ -82,7 +82,7 @@ describe('SolveDetailModal', () => {
     const navigate = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigate);
     const onClose = vi.fn();
-    render(<SolveDetailModal solve={five[2]} window={five} index={2}
+    render(<SolveDetailModal solve={five[2]} solveWindow={five} index={2}
       onClose={onClose} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /use this scramble/i }));
     expect(navigate).toHaveBeenCalledWith('/', {
