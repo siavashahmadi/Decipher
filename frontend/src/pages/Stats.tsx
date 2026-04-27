@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import DateRangeFilter from '../components/stats/DateRangeFilter';
@@ -10,10 +10,10 @@ import PBProgression from '../components/stats/PBProgression';
 import ActivityHeatmap from '../components/stats/ActivityHeatmap';
 import ScrambleHistory from '../components/stats/ScrambleHistory';
 import useAllSolves from '../hooks/useAllSolves';
+import { useStatsFilters } from '../hooks/useStatsFilters';
 import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
 import { computeRecentTrend } from '../utils/recentTrend';
-import { getPresetBounds, filterSolvesByRange, type DateRangePreset } from '../utils/dateRanges';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
 import type { PuzzleType, Solve } from '../types';
 import './Stats.css';
@@ -36,23 +36,8 @@ const StatsPage = (): React.ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
   const puzzleType = (searchParams.get('puzzle') as PuzzleType | null) ?? DEFAULT_PUZZLE;
 
-  const [preset, setPreset] = useState<DateRangePreset>('all');
-  const [customStart, setCustomStart] = useState<string | null>(null);
-  const [customEnd, setCustomEnd] = useState<string | null>(null);
-
   const { solves, loading, truncated } = useAllSolves(puzzleType, isGuest);
-
-  const bounds = useMemo(() => {
-    if (preset === 'custom') {
-      return {
-        start: customStart ? new Date(customStart) : null,
-        end: customEnd ? new Date(`${customEnd}T23:59:59.999Z`) : null,
-      };
-    }
-    return getPresetBounds(preset);
-  }, [preset, customStart, customEnd]);
-
-  const filteredSolves = useMemo(() => filterSolvesByRange(solves, bounds), [solves, bounds]);
+  const { preset, setPreset, customStart, setCustomStart, customEnd, setCustomEnd, bounds, filteredSolves } = useStatsFilters(solves);
   const summary = useMemo(() => computeSummary(filteredSolves), [filteredSolves]);
   const trend = useMemo(() => computeRecentTrend(filteredSolves), [filteredSolves]);
 
