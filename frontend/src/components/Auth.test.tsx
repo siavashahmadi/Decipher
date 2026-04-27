@@ -82,6 +82,13 @@ describe('Auth modes', () => {
     expect(screen.getByRole('button', { name: 'Send Reset Link' })).toBeInTheDocument();
   });
 
+  it('reset mode back-link reads "Back to Login" not "Already have an account? Login"', () => {
+    renderAuth();
+    fireEvent.click(screen.getByText('Forgot your password?'));
+    expect(screen.getByText('Back to Login')).toBeInTheDocument();
+    expect(screen.queryByText('Already have an account? Login')).not.toBeInTheDocument();
+  });
+
   it('renders update mode when URL hash contains type=recovery', () => {
     Object.defineProperty(window, 'location', {
       value: { hash: '#type=recovery&token=abc', origin: 'http://localhost' },
@@ -175,5 +182,28 @@ describe('Auth submit error paths', () => {
     fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
     await waitFor(() => expect(mockToastError).toHaveBeenCalledWith('Email already taken'));
+  });
+
+  it('reset: shows error toast on Supabase error', async () => {
+    mockResetPassword.mockResolvedValue({ error: new Error('reset failed') });
+    renderAuth();
+    fireEvent.click(screen.getByText('Forgot your password?'));
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'a@b.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send Reset Link' }));
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith('reset failed'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('update: shows error toast on Supabase error', async () => {
+    Object.defineProperty(window, 'location', {
+      value: { hash: '#type=recovery&token=abc', origin: 'http://localhost' },
+      writable: true,
+    });
+    mockUpdateUser.mockResolvedValue({ error: new Error('update failed') });
+    renderAuth();
+    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'newpass' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Update Password' }));
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith('update failed'));
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

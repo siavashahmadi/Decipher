@@ -19,6 +19,7 @@ interface ModeSpec {
   passwordPlaceholder?: string;
   submit: (ctx: SubmitContext) => Promise<{ message?: string; nextMode?: AuthMode }>;
   links?: AuthMode[];
+  linkLabel?: Partial<Record<AuthMode, string>>;
 }
 
 const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
@@ -59,6 +60,7 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
       return { message: 'Check your email for the password reset link.', nextMode: 'login' };
     },
     links: ['login'],
+    linkLabel: { login: 'Back to Login' },
   },
   update: {
     title: 'Update Password',
@@ -72,6 +74,7 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
       window.location.hash = '';
       return { message: 'Password updated successfully!', nextMode: 'login' };
     },
+    linkLabel: { login: 'Back to Login' },
   },
 };
 
@@ -160,7 +163,7 @@ export default function Auth(): React.ReactElement {
                 className="auth-link-button"
                 onClick={() => setMode(target)}
               >
-                {LINK_LABELS[target]}
+                {config.linkLabel?.[target] ?? LINK_LABELS[target]}
               </button>
             ))}
             {mode === 'login' && (
