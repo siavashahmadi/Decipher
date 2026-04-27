@@ -90,6 +90,21 @@ class SolvesRepository:
         result = self.sb.table("solves").insert(solves).execute()
         return result.data or []
 
+    def get_public_by_id(self, solve_id: str) -> Optional[dict]:
+        """Fetch public fields for any non-deleted solve (no user_id filter).
+
+        Intended for use with the service-role client, which bypasses RLS.
+        """
+        result = (
+            self.sb.table("solves")
+            .select("id,puzzle_type,time,dnf,plus_two,scramble,created_at")
+            .eq("id", solve_id)
+            .is_("deleted_at", None)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
     def user_solve_count(self, user_id: str) -> int:
         """Read the cached solve_count from user_stats. Returns 0 if no row exists."""
         result = (
