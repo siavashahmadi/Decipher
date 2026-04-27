@@ -3,12 +3,10 @@ import { Alg } from 'cubing/alg';
 import { cube3x3x3 } from 'cubing/puzzles';
 import {
   generateTrainerScramble,
-  generatePllScramble,
   validateTrainerCases,
   PLL_CASES,
   OLL_CASES,
   F2L_CASES,
-  PLL_CASE_MAP,
   CASES_BY_TYPE,
   type TrainerType,
 } from './trainerScramble';
@@ -78,35 +76,6 @@ describe('F2L_CASES', () => {
   it('has unique case ids', () => {
     const ids = F2L_CASES.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
-  });
-});
-
-describe('generatePllScramble (Phase 8 shim)', () => {
-  it('produces a parseable alg string', () => {
-    const { scramble } = generatePllScramble({ rng: seededRng(1) });
-    expect(() => new Alg(scramble)).not.toThrow();
-  });
-
-  it('honors an explicit caseId', () => {
-    const { caseId } = generatePllScramble({
-      caseId: 'T',
-      rng: seededRng(2),
-    });
-    expect(caseId).toBe('T');
-  });
-
-  it('picks a random case from PLL_CASES when caseId is "all"', () => {
-    const { caseId } = generatePllScramble({
-      caseId: 'all',
-      rng: seededRng(4),
-    });
-    expect(PLL_CASE_MAP[caseId]).toBeDefined();
-  });
-
-  it('throws on unknown caseId', () => {
-    expect(() =>
-      generatePllScramble({ caseId: 'nope', rng: seededRng(6) })
-    ).toThrow();
   });
 });
 

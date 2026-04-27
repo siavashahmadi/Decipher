@@ -43,8 +43,9 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): ReactE
         playerRef.current = null;
       }
     };
-    // mode and scramble are intentionally omitted: mode/scramble changes
-    // are handled by the separate effects in Task 5 without a remount.
+    // mode, scramble, and showHintFacelets are intentionally omitted: each
+    // has its own effect below that mutates the live player property directly,
+    // avoiding a full remount on every solve or settings change.
   }, [supported, twistyPuzzle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

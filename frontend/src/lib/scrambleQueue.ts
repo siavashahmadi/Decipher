@@ -3,7 +3,6 @@ import type { PuzzleType } from '../types';
 
 export interface ScrambleQueueSnapshot {
   currentScramble: string | null;
-  nextScramble: string | null;
 }
 
 type Listener = (snap: ScrambleQueueSnapshot) => void;
@@ -26,24 +25,13 @@ export class ScrambleQueue {
     }
   }
 
-  setPuzzleType(puzzleType: PuzzleType, initialScramble?: string): void {
-    if (puzzleType === this.puzzleType) {
-      if (initialScramble) this.override(initialScramble);
-      return;
-    }
+  setPuzzleType(puzzleType: PuzzleType): void {
+    if (puzzleType === this.puzzleType) return;
     this.puzzleType = puzzleType;
-    if (initialScramble) {
-      this.generationId += 1;
-      this.current = initialScramble;
-      this.next = null;
-      this.emit();
-      void this.fillNext(this.generationId);
-    } else {
-      this.current = null;
-      this.next = null;
-      this.emit();
-      this.refill();
-    }
+    this.current = null;
+    this.next = null;
+    this.emit();
+    this.refill();
   }
 
   advance(): void {
@@ -53,14 +41,8 @@ export class ScrambleQueue {
     void this.fillNext(this.generationId);
   }
 
-  override(scramble: string): void {
-    this.generationId += 1;
-    this.current = scramble;
-    this.emit();
-  }
-
   snapshot(): ScrambleQueueSnapshot {
-    return { currentScramble: this.current, nextScramble: this.next };
+    return { currentScramble: this.current };
   }
 
   subscribe(fn: Listener): () => void {

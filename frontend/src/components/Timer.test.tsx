@@ -23,7 +23,6 @@ vi.mock('../hooks/useSettings', () => ({
 vi.mock('../utils/sound', () => ({
   beep: vi.fn(),
   setSoundEnabled: vi.fn(),
-  isSoundEnabled: () => false,
   INSPECTION_START_HZ: 880,
   INSPECTION_START_MS: 80,
   INSPECTION_8S_WARNING_HZ: 440,

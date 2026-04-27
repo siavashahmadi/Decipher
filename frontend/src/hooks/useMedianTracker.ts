@@ -75,7 +75,6 @@ export interface MedianTracker {
   push: (val: number) => void;
   getMedian: () => number | null;
   reset: () => void;
-  getSize: () => number;
 }
 
 const useMedianTracker = (): MedianTracker => {
@@ -118,11 +117,9 @@ const useMedianTracker = (): MedianTracker => {
     hi.current.clear();
   }, []);
 
-  const getSize = useCallback((): number => lo.current.size + hi.current.size, []);
-
   return useMemo(
-    () => ({ push, getMedian, reset, getSize }),
-    [push, getMedian, reset, getSize],
+    () => ({ push, getMedian, reset }),
+    [push, getMedian, reset],
   );
 };
 

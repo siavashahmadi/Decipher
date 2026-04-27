@@ -20,7 +20,6 @@ vi.mock('../services/auth', () => ({
 vi.mock('../services/guestStorage', () => ({
   getGuestSolves: vi.fn(() => []),
   getAllGuestSolves: vi.fn(() => []),
-  clearAllGuestSolves: vi.fn(),
 }));
 
 const solves: Solve[] = [

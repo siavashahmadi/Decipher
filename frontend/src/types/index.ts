@@ -24,7 +24,6 @@ export interface Solve {
 
 export interface PersonalBest {
   puzzle_type: PuzzleType;
-  category: string;
   time: number;
   achieved_at: string;
 }

@@ -25,8 +25,6 @@ export const setSoundEnabled = (enabled: boolean): void => {
   soundEnabled = enabled;
 };
 
-export const isSoundEnabled = (): boolean => soundEnabled;
-
 export const beep = (freq: number, durationMs: number): void => {
   if (!soundEnabled) return;
   const ctx = getCtx();

@@ -4,10 +4,8 @@ import type { PuzzleType } from '../types';
 
 export interface UseScrambleQueueResult {
   currentScramble: string | null;
-  nextScramble: string | null;
   loading: boolean;
   advance: () => void;
-  override: (scramble: string) => void;
 }
 
 export interface UseScrambleQueueOptions {
@@ -39,16 +37,10 @@ const useScrambleQueue = (
     queueRef.current!.advance();
   }, []);
 
-  const override = useCallback((scramble: string) => {
-    queueRef.current!.override(scramble);
-  }, []);
-
   return {
     currentScramble: snap.currentScramble,
-    nextScramble: snap.nextScramble,
     loading: snap.currentScramble === null,
     advance,
-    override,
   };
 };
 

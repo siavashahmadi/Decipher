@@ -40,9 +40,9 @@ export const F2L_CASES: TrainerCase[] = validateTrainerCases(f2lData, 'f2l.json'
 const caseMap = (cases: TrainerCase[]): Record<string, TrainerCase> =>
   Object.fromEntries(cases.map((c) => [c.id, c]));
 
-export const PLL_CASE_MAP: Record<string, TrainerCase> = caseMap(PLL_CASES);
-export const OLL_CASE_MAP: Record<string, TrainerCase> = caseMap(OLL_CASES);
-export const F2L_CASE_MAP: Record<string, TrainerCase> = caseMap(F2L_CASES);
+const PLL_CASE_MAP: Record<string, TrainerCase> = caseMap(PLL_CASES);
+const OLL_CASE_MAP: Record<string, TrainerCase> = caseMap(OLL_CASES);
+const F2L_CASE_MAP: Record<string, TrainerCase> = caseMap(F2L_CASES);
 
 export const CASES_BY_TYPE: Record<TrainerType, TrainerCase[]> = {
   pll: PLL_CASES,
@@ -120,9 +120,3 @@ export function generateTrainerScramble(
   };
 }
 
-// Phase 8 compatibility shim. Prefer generateTrainerScramble in new code.
-export function generatePllScramble(
-  options: Omit<TrainerScrambleOptions, 'type'> = {}
-): TrainerScrambleResult {
-  return generateTrainerScramble({ ...options, type: 'pll' });
-}

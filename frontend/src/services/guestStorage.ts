@@ -80,12 +80,6 @@ export function getAllGuestSolves(): Solve[] {
   return getManifest().flatMap((pt) => getGuestSolves(pt));
 }
 
-export function clearAllGuestSolves(): void {
-  const manifest = getManifest();
-  manifest.forEach((pt) => localStorage.removeItem(SOLVES_KEY(pt)));
-  localStorage.removeItem(MANIFEST_KEY);
-}
-
 export function removeGuestSolves(solves: Solve[]): void {
   if (solves.length === 0) return;
   const idsToRemove = new Set(solves.map((s) => s.id));
