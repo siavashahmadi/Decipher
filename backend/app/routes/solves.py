@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import re
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, current_app, g
+from flask import Blueprint, Response, request, jsonify, current_app, g
 from functools import wraps
 from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
@@ -78,7 +78,7 @@ def _parse_positive_int(value, default, maximum):
     return min(parsed, maximum)
 
 
-def _internal_error(label: str):
+def _internal_error(label: str) -> tuple[Response, int]:
     """Log + 500 response shaped consistently across routes."""
     current_app.logger.exception(f"{label} failed")
     return jsonify({"error": "Internal server error"}), 500
