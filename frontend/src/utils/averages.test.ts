@@ -1,17 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { ao5, ao12, trimmedMean, trimmedMeanNumbers } from './averages';
-import type { Solve } from '../types';
+import { makeSolve } from '../test-utils/makeSolve';
 
-const mk = (overrides: Partial<Solve>): Solve => ({
-  id: Math.random().toString(),
-  puzzle_type: '333',
-  time: 10,
-  dnf: false,
-  plus_two: false,
-  scramble: '',
-  created_at: '2026-04-20T00:00:00Z',
-  ...overrides,
-});
+const mk = makeSolve;
 
 describe('ao5', () => {
   it('returns null for empty input', () => {

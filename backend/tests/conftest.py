@@ -142,3 +142,24 @@ def client(app):
 @pytest.fixture
 def auth_headers():
     return {"Authorization": "Bearer fake-token"}
+
+
+@pytest.fixture
+def make_solve():
+    counter = {"i": 0}
+
+    def _make(**overrides):
+        counter["i"] += 1
+        return {
+            "id": f"solve-{counter['i']}",
+            "user_id": "test-user",
+            "puzzle_type": "333",
+            "time": 10.0,
+            "dnf": False,
+            "plus_two": False,
+            "scramble": "",
+            "created_at": "2026-04-20T00:00:00Z",
+            **overrides,
+        }
+
+    return _make

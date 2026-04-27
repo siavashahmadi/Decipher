@@ -1,11 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { buildCsv } from './exportCsv';
-import type { Solve } from '../types';
+import { makeSolve } from '../test-utils/makeSolve';
 
-const mk = (p: Partial<Solve>): Solve => ({
-  id: 'x', puzzle_type: '333', time: 12.34, dnf: false, plus_two: false,
-  scramble: "R U R'", created_at: '2026-01-01T00:00:00.000Z', ...p,
-});
+const mk = (p: Parameters<typeof makeSolve>[0] = {}) =>
+  makeSolve({ time: 12.34, scramble: "R U R'", created_at: '2026-01-01T00:00:00.000Z', ...p });
 
 describe('buildCsv', () => {
   it('emits header row exactly', () => {

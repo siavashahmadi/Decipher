@@ -1,11 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getPresetBounds, filterSolvesByRange } from './dateRanges';
-import type { Solve } from '../types';
-
-const makeSolve = (created_at: string): Solve => ({
-  id: created_at, puzzle_type: '333', time: 10, dnf: false, plus_two: false,
-  scramble: '', created_at,
-});
+import { makeSolve } from '../test-utils/makeSolve';
 
 describe('getPresetBounds', () => {
   it('returns null bounds for "all"', () => {
@@ -26,14 +21,17 @@ describe('getPresetBounds', () => {
 
 describe('filterSolvesByRange', () => {
   it('returns all solves when bounds are null', () => {
-    const s = [makeSolve('2026-04-10T00:00:00Z'), makeSolve('2026-01-01T00:00:00Z')];
+    const s = [
+      makeSolve({ created_at: '2026-04-10T00:00:00Z' }),
+      makeSolve({ created_at: '2026-01-01T00:00:00Z' }),
+    ];
     expect(filterSolvesByRange(s, { start: null, end: null })).toEqual(s);
   });
   it('filters to inclusive start and end', () => {
     const s = [
-      makeSolve('2026-04-20T00:00:00Z'),
-      makeSolve('2026-04-13T00:00:00Z'),
-      makeSolve('2026-04-12T23:59:59Z'),
+      makeSolve({ id: '2026-04-20T00:00:00Z', created_at: '2026-04-20T00:00:00Z' }),
+      makeSolve({ id: '2026-04-13T00:00:00Z', created_at: '2026-04-13T00:00:00Z' }),
+      makeSolve({ id: '2026-04-12T23:59:59Z', created_at: '2026-04-12T23:59:59Z' }),
     ];
     const result = filterSolvesByRange(s, {
       start: new Date('2026-04-13T00:00:00Z'),

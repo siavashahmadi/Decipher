@@ -2,22 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import SolveDetailModal from './SolveDetailModal';
-import type { Solve } from '../types';
+import { makeSolve } from '../test-utils/makeSolve';
 
 vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(() => vi.fn()),
 }));
 
-const mkSolve = (overrides: Partial<Solve> = {}): Solve => ({
-  id: 'id-x',
-  puzzle_type: '333',
-  time: 23.45,
-  dnf: false,
-  plus_two: false,
-  scramble: "R U R' U' F2",
-  created_at: '2026-04-12T15:30:00.000Z',
-  ...overrides,
-});
+const mkSolve = (overrides: Parameters<typeof makeSolve>[0] = {}) =>
+  makeSolve({ time: 23.45, scramble: "R U R' U' F2", created_at: '2026-04-12T15:30:00.000Z', ...overrides });
 
 const five = [
   mkSolve({ id: '1', time: 21.10 }),

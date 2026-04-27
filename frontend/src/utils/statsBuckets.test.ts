@@ -1,11 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { buildHistogram, buildHeatmapData, computeSummary } from './statsBuckets';
-import type { Solve } from '../types';
+import { makeSolve } from '../test-utils/makeSolve';
 
-const mk = (overrides: Partial<Solve>): Solve => ({
-  id: Math.random().toString(), puzzle_type: '333', time: 10, dnf: false,
-  plus_two: false, scramble: '', created_at: '2026-04-20T00:00:00Z', ...overrides,
-});
+const mk = makeSolve;
 
 describe('buildHistogram', () => {
   it('returns empty bins for no solves', () => {
