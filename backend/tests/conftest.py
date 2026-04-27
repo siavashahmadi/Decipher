@@ -82,6 +82,15 @@ class FakeSupabase:
         self.queries.append(q)
         return q
 
+    def rpc(self, function_name, params=None):
+        # Reuse the FakeQuery scripted-response mechanism. Scripts for an RPC
+        # are queued under the key f"rpc:{function_name}".
+        key = f"rpc:{function_name}"
+        q = FakeQuery(key, self.scripts.setdefault(key, []))
+        q.calls.append(("rpc", (function_name,), {"params": params or {}}))
+        self.queries.append(q)
+        return q
+
 
 @pytest.fixture
 def fake_supabase_factory(monkeypatch):

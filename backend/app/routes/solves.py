@@ -188,30 +188,21 @@ def create_solve():
 
 
 def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solve_id):
-    """
-    Insert into personal_bests if new_time beats the current recorded PB.
-    Runs best-effort — the create_solve response is not affected by PB
-    tracking failures, but we log them so they aren't invisible.
+    """Atomic PB materialization via the record_pb_if_better RPC.
+
+    The RPC takes a per-(user, puzzle) advisory lock so concurrent solves
+    cannot both insert competing PB rows. Errors are non-fatal: the
+    create_solve response succeeds even if PB tracking fails, but the
+    failure is logged.
     """
     try:
-        pb_result = (supabase.table('personal_bests')
-                     .select('time')
-                     .eq('user_id', user_id)
-                     .eq('puzzle_type', puzzle_type)
-                     .order('time')
-                     .limit(1)
-                     .execute())
-
-        best_pb_time = float(pb_result.data[0]['time']) if pb_result.data else None
-
-        if best_pb_time is None or new_time < best_pb_time:
-            supabase.table('personal_bests').insert({
-                'user_id': user_id,
-                'puzzle_type': puzzle_type,
-                'time': new_time,
-                'achieved_at': achieved_at,
-                'solve_id': solve_id,
-            }).execute()
+        supabase.rpc('record_pb_if_better', {
+            'p_user_id':     user_id,
+            'p_puzzle_type': puzzle_type,
+            'p_solve_id':    solve_id,
+            'p_time':        new_time,
+            'p_achieved_at': achieved_at,
+        }).execute()
     except Exception:
         current_app.logger.exception("PB materialization failed (non-fatal)")
 

@@ -107,10 +107,7 @@ def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_
                 "created_at": "2026-04-20T00:00:00Z",
             }]},
         ],
-        "personal_bests": [
-            {"data": []},      # no existing PB
-            {"data": [{}]},    # insert acknowledged
-        ],
+        "rpc:record_pb_if_better": [{"data": [{"id": "pb1"}]}],
     })
 
     r = client.post(
@@ -119,12 +116,10 @@ def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_
         json={"puzzle_type": "333", "time": 10.5},
     )
     assert r.status_code == 200
-    # Two PB queries: one select + one insert
-    pb_queries = [q for q in fake.queries if q.table_name == "personal_bests"]
-    assert len(pb_queries) == 2
-    insert_call = pb_queries[1].calls[0]
-    assert insert_call[0] == "insert"
-    assert insert_call[1][0]["time"] == 10.5
+    rpc_queries = [q for q in fake.queries if q.table_name == "rpc:record_pb_if_better"]
+    assert len(rpc_queries) == 1
+    params = rpc_queries[0].calls[0][2]["params"]
+    assert params["p_time"] == 10.5
 
 
 def test_create_solve_skips_pb_on_dnf(fake_supabase_factory, client, auth_headers):
@@ -144,6 +139,7 @@ def test_create_solve_skips_pb_on_dnf(fake_supabase_factory, client, auth_header
     )
     assert r.status_code == 200
     assert not any(q.table_name == "personal_bests" for q in fake.queries)
+    assert not any(q.table_name == "rpc:record_pb_if_better" for q in fake.queries)
 
 
 def test_create_solve_422_on_validation(fake_supabase_factory, client, auth_headers):
@@ -630,3 +626,28 @@ def test_create_solve_treats_missing_user_stats_row_as_zero(client, fake_supabas
         "puzzle_type": "333", "time": 9.0, "dnf": False,
     })
     assert response.status_code == 200
+
+
+def test_create_solve_calls_record_pb_if_better_rpc(client, fake_supabase_factory, auth_headers):
+    fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 5}]}],
+        "solves": [{"data": [{
+            "id": "s1", "puzzle_type": "333", "time": 9.0,
+            "dnf": False, "plus_two": False, "scramble": "",
+            "created_at": "2026-04-25T12:00:00Z", "user_id": "user-123",
+        }]}],
+        "rpc:record_pb_if_better": [{"data": [{"id": "pb1"}]}],
+    })
+
+    response = client.post('/api/solves', headers=auth_headers, json={
+        "puzzle_type": "333", "time": 9.0, "dnf": False,
+    })
+    assert response.status_code == 200
+
+    rpc_queries = [q for q in fake.queries if q.table_name == "rpc:record_pb_if_better"]
+    assert rpc_queries, "expected one record_pb_if_better RPC call"
+    rpc_call = rpc_queries[0].calls[0]
+    params = rpc_call[2]["params"]
+    assert params["p_user_id"] == "user-123"
+    assert params["p_puzzle_type"] == "333"
+    assert params["p_time"] == 9.0
