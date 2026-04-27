@@ -19,7 +19,6 @@ const PBProgression = ({ puzzleType, isGuest }: { puzzleType: PuzzleType; isGues
 
   const data = useMemo(
     () => pbs.map(pb => ({
-      ts: new Date(pb.achieved_at).getTime(),
       label: new Date(pb.achieved_at).toLocaleDateString(),
       time: Number(pb.time),
     })),
