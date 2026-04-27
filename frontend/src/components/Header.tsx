@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +17,8 @@ interface HeaderProps {
 }
 
 const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => {
-  const { isGuest, showSignIn } = useAuth();
+  const navigate = useNavigate();
+  const { isGuest } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
   const isMobile = useMatchMedia('(max-width: 639px)');
@@ -69,7 +71,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
         {settingsOpen && <SettingsPanel />}
       </div>
       {isGuest ? (
-        <button className="sign-in-button" onClick={showSignIn}>
+        <button className="sign-in-button" onClick={() => navigate('/login')}>
           Sign In
         </button>
       ) : (

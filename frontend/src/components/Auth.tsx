@@ -1,15 +1,89 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import './Auth.css';
 
 type AuthMode = 'login' | 'signup' | 'reset' | 'update';
 
-interface AuthProps {
-  onBack: () => void;
+interface SubmitContext {
+  email: string;
+  password: string;
 }
 
-export default function Auth({ onBack }: AuthProps): React.ReactElement {
+interface ModeSpec {
+  title: string;
+  cta: string;
+  showEmail: boolean;
+  showPassword: boolean;
+  passwordPlaceholder?: string;
+  submit: (ctx: SubmitContext) => Promise<{ message?: string; nextMode?: AuthMode }>;
+  links?: AuthMode[];
+}
+
+const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
+  login: {
+    title: 'Login to Ao5',
+    cta: 'Login',
+    showEmail: true,
+    showPassword: true,
+    submit: async ({ email, password }) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      return {};
+    },
+    links: ['signup', 'reset'],
+  },
+  signup: {
+    title: 'Sign Up for Ao5',
+    cta: 'Sign Up',
+    showEmail: true,
+    showPassword: true,
+    submit: async ({ email, password }) => {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      return { message: 'Check your email for the confirmation link!' };
+    },
+    links: ['login'],
+  },
+  reset: {
+    title: 'Reset Password',
+    cta: 'Send Reset Link',
+    showEmail: true,
+    showPassword: false,
+    submit: async ({ email }) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      });
+      if (error) throw error;
+      return { message: 'Check your email for the password reset link.', nextMode: 'login' };
+    },
+    links: ['login'],
+  },
+  update: {
+    title: 'Update Password',
+    cta: 'Update Password',
+    showEmail: false,
+    showPassword: true,
+    passwordPlaceholder: 'New Password',
+    submit: async ({ password }) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      window.location.hash = '';
+      return { message: 'Password updated successfully!', nextMode: 'login' };
+    },
+  },
+};
+
+const LINK_LABELS: Record<AuthMode, string> = {
+  login: 'Already have an account? Login',
+  signup: "Don't have an account? Sign Up",
+  reset: 'Forgot your password?',
+  update: 'Update Password',
+};
+
+export default function Auth(): React.ReactElement {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,30 +96,18 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
     }
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const config = MODE_CONFIG[mode];
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      setLoading(true);
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        alert('Check your email for the confirmation link!');
-      } else if (mode === 'reset') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin,
-        });
-        if (error) throw error;
-        toast.success('Check your email for the password reset link.');
-        setMode('login');
-      } else if (mode === 'update') {
-        const { error } = await supabase.auth.updateUser({ password });
-        if (error) throw error;
-        alert('Password updated successfully!');
-        window.location.hash = '';
-        setMode('login');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+      const { message, nextMode } = await config.submit({ email, password });
+      if (message) toast.success(message);
+      if (nextMode) {
+        setMode(nextMode);
+      } else if (mode === 'login') {
+        navigate('/');
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -58,14 +120,9 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
     <div className="auth-container">
       <h1 className="auth-logo-text">Ao5</h1>
       <div className="auth-box">
-        <h2>
-          {mode === 'login' ? 'Login to Ao5' :
-           mode === 'signup' ? 'Sign Up for Ao5' :
-           mode === 'update' ? 'Update Password' :
-           'Reset Password'}
-        </h2>
+        <h2>{config.title}</h2>
         <form onSubmit={handleSubmit}>
-          {mode !== 'update' && (
+          {config.showEmail && (
             <div className="form-group">
               <input
                 type="email"
@@ -76,11 +133,11 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
               />
             </div>
           )}
-          {(mode !== 'reset') && (
+          {config.showPassword && (
             <div className="form-group">
               <input
                 type="password"
-                placeholder={mode === 'update' ? 'New Password' : 'Password'}
+                placeholder={config.passwordPlaceholder ?? 'Password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="auth-input"
@@ -92,42 +149,26 @@ export default function Auth({ onBack }: AuthProps): React.ReactElement {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Loading...' :
-             mode === 'login' ? 'Login' :
-             mode === 'signup' ? 'Sign Up' :
-             mode === 'update' ? 'Update Password' :
-             'Send Reset Link'}
+            {loading ? 'Loading...' : config.cta}
           </button>
         </form>
-        {mode !== 'update' && (
+        {config.links && config.links.length > 0 && (
           <div className="auth-links">
-            {mode === 'login' ? (
-              <>
-                <button
-                  className="auth-link-button"
-                  onClick={() => setMode('signup')}
-                >
-                  Don't have an account? Sign Up
-                </button>
-                <button
-                  className="auth-link-button"
-                  onClick={() => setMode('reset')}
-                >
-                  Forgot your password?
-                </button>
-                <button
-                  className="auth-link-button"
-                  onClick={onBack}
-                >
-                  Back to timer
-                </button>
-              </>
-            ) : (
+            {config.links.map((target) => (
+              <button
+                key={target}
+                className="auth-link-button"
+                onClick={() => setMode(target)}
+              >
+                {LINK_LABELS[target]}
+              </button>
+            ))}
+            {mode === 'login' && (
               <button
                 className="auth-link-button"
-                onClick={() => setMode('login')}
+                onClick={() => navigate('/')}
               >
-                {mode === 'signup' ? 'Already have an account? Login' : 'Back to Login'}
+                Back to timer
               </button>
             )}
           </div>

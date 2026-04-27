@@ -8,16 +8,12 @@ import api from '../services/api';
 interface AuthContextValue {
   session: Session | null;
   isGuest: boolean;
-  showSignIn: () => void;
-  hideSignIn: () => void;
-  signInVisible: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [session, setSession] = useState<Session | null>(null);
-  const [signInVisible, setSignInVisible] = useState(false);
   const migratingRef = useRef(false);
 
   useEffect(() => {
@@ -42,7 +38,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
         }
       }
       setSession(next);
-      setSignInVisible(false);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -50,10 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
   const value = useMemo<AuthContextValue>(() => ({
     session,
     isGuest: !session,
-    showSignIn: () => setSignInVisible(true),
-    hideSignIn: () => setSignInVisible(false),
-    signInVisible,
-  }), [session, signInVisible]);
+  }), [session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
