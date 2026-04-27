@@ -26,9 +26,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      window.location.reload();
-    } catch (error) {
-      console.error('Error signing out:', error);
+    } catch {
       toast.error('Could not sign out.');
     }
   };
