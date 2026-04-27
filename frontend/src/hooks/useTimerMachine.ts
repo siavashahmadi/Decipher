@@ -32,7 +32,7 @@ export interface TimerMachine {
   phase: Phase;
   time: number;
   inspectionCount: number;
-  inspectionBadge: '+2' | 'DNF' | null;
+  inspectionBadge: '+2' | null;
   holdMet: boolean;
   flashYellow: boolean;
   isWarning: boolean;
@@ -47,7 +47,7 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
   const [time, setTime] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
   const [inspectionCount, setInspectionCount] = useState(15);
-  const [inspectionBadge, setInspectionBadge] = useState<'+2' | 'DNF' | null>(null);
+  const [inspectionBadge, setInspectionBadge] = useState<'+2' | null>(null);
   const [holdMet, setHoldMet] = useState(false);
   const [flashYellow, setFlashYellow] = useState(false);
 
@@ -58,10 +58,8 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
   useEffect(() => { inspectionEnabledRef.current = inspectionEnabled; }, [inspectionEnabled]);
 
   const phaseRef = useRef<Phase>('idle');
-  const timeRef = useRef(0);
   const timerDivRef = useRef<HTMLDivElement>(null);
   const inspectionStartRef = useRef<number | null>(null);
-  const holdStartRef = useRef<number | null>(null);
   const holdMetRef = useRef(false);
   const holdMetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const penaltyFlagsRef = useRef<PenaltyFlags>({ plusTwo: false, dnf: false });
@@ -95,7 +93,6 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
   useEffect(() => clearIntervals, []);
 
   const beginHold = useCallback(() => {
-    holdStartRef.current = Date.now();
     holdMetRef.current = false;
     setHoldMet(false);
     if (holdMetTimeoutRef.current !== null) clearTimeout(holdMetTimeoutRef.current);
@@ -112,7 +109,6 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
   }, []);
 
   const clearHold = useCallback(() => {
-    holdStartRef.current = null;
     holdMetRef.current = false;
     setHoldMet(false);
     if (holdMetTimeoutRef.current !== null) {
@@ -207,12 +203,10 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
       penaltyFlagsRef.current = { plusTwo: false, dnf: false };
     }
     setTime(0);
-    timeRef.current = 0;
     timerStartRef.current = performance.now();
     const tick = () => {
       const elapsed = performance.now() - timerStartRef.current;
       const rounded = Math.floor(elapsed / 10) * 10;
-      timeRef.current = rounded;
       if (timerDivRef.current) {
         timerDivRef.current.textContent = formatTime(rounded / 1000);
       }
@@ -230,7 +224,6 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
     }
     const finalMs = performance.now() - timerStartRef.current;
     const rounded = Math.floor(finalMs / 10) * 10;
-    timeRef.current = rounded;
     setTime(rounded);
     phaseRef.current = 'idle';
     setPhase('idle');
@@ -243,7 +236,6 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
     setTime(0);
     setInspectionCount(15);
     setInspectionBadge(null);
-    timeRef.current = 0;
     inspectionStartRef.current = null;
     penaltyFlagsRef.current = { plusTwo: false, dnf: false };
     warning7FiredRef.current = false;
@@ -262,7 +254,6 @@ export function useTimerMachine({ onSolveComplete }: TimerMachineProps): TimerMa
     const p = phaseRef.current;
     if (p === 'idle') {
       setTime(0);
-      timeRef.current = 0;
       beginHold();
       phaseRef.current = 'ready';
       setPhase('ready');

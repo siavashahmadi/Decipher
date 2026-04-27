@@ -41,9 +41,7 @@ const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
           <span className="inspection-display">
             <span>{machine.inspectionCount}</span>
             {machine.inspectionBadge && (
-              <span
-                className={`timer-badge ${machine.inspectionBadge === '+2' ? 'plus-two' : 'dnf'}`}
-              >
+              <span className="timer-badge plus-two">
                 {machine.inspectionBadge}
               </span>
             )}
