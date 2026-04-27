@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, g
 from functools import wraps
 from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
@@ -44,11 +44,11 @@ def require_auth(f):
                 return jsonify({"error": "Invalid authentication token"}), 401
 
             user_id = user.user.id
-            request.supabase = supabase
+            g.supabase = supabase
         else:
-            request.supabase = get_supabase_client(token)
+            g.supabase = get_supabase_client(token)
 
-        request.user_id = user_id
+        g.user_id = user_id
         return f(*args, **kwargs)
     return decorated
 
@@ -89,9 +89,9 @@ def get_solves():
     cursor = request.args.get('cursor')  # ISO 8601 created_at of last seen row
 
     try:
-        query = (request.supabase.table('solves')
+        query = (g.supabase.table('solves')
                  .select('*')
-                 .eq('user_id', request.user_id)
+                 .eq('user_id', g.user_id)
                  .is_('deleted_at', None))
         if puzzle_type:
             query = query.eq('puzzle_type', puzzle_type)
@@ -131,9 +131,9 @@ def create_solve():
         # Cheap insurance against a malicious sign-up + mass-post spree.
         # Counts non-deleted solves only; soft-deleted rows still occupy
         # storage but do not block honest users.
-        count_result = (request.supabase.table('solves')
+        count_result = (g.supabase.table('solves')
                         .select('id', count='exact', head=True)
-                        .eq('user_id', request.user_id)
+                        .eq('user_id', g.user_id)
                         .is_('deleted_at', None)
                         .execute())
         existing = getattr(count_result, 'count', None) or 0
@@ -142,8 +142,8 @@ def create_solve():
                 "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
             }), 429
 
-        data['user_id'] = request.user_id
-        result = request.supabase.table('solves').insert(data).execute()
+        data['user_id'] = g.user_id
+        result = g.supabase.table('solves').insert(data).execute()
         saved_solve = result.data[0]
 
         # SD-3: Check if this solve is a personal best and record it.
@@ -151,8 +151,8 @@ def create_solve():
         # non-DNF insert to keep GET /personal-bests O(1) at read time.
         if not data.get('dnf', False):
             _maybe_record_pb(
-                request.supabase,
-                request.user_id,
+                g.supabase,
+                g.user_id,
                 data['puzzle_type'],
                 float(saved_solve['time']),
                 saved_solve['created_at'],
@@ -207,10 +207,10 @@ def update_solve(solve_id):
     allowed = {k: data[k] for k in ('dnf', 'plus_two') if k in data}
 
     try:
-        result = (request.supabase.table('solves')
+        result = (g.supabase.table('solves')
                   .update(allowed)
                   .eq('id', solve_id)
-                  .eq('user_id', request.user_id)
+                  .eq('user_id', g.user_id)
                   .is_('deleted_at', None)
                   .execute())
         if not result.data:
@@ -229,10 +229,10 @@ def delete_solve(solve_id):
         # Use an ISO UTC timestamp — the Supabase Python client sends JSON to
         # PostgREST, which does not interpret the literal string 'now()'.
         deleted_at = datetime.now(timezone.utc).isoformat()
-        result = (request.supabase.table('solves')
+        result = (g.supabase.table('solves')
                   .update({'deleted_at': deleted_at})
                   .eq('id', solve_id)
-                  .eq('user_id', request.user_id)
+                  .eq('user_id', g.user_id)
                   .is_('deleted_at', None)
                   .execute())
         if not result.data:
@@ -241,9 +241,9 @@ def delete_solve(solve_id):
         # was the current best, the next time the user beats their remaining
         # fastest a new PB will be inserted naturally.
         try:
-            (request.supabase.table('personal_bests')
+            (g.supabase.table('personal_bests')
              .delete()
-             .eq('user_id', request.user_id)
+             .eq('user_id', g.user_id)
              .eq('solve_id', solve_id)
              .execute())
         except Exception:
@@ -325,10 +325,10 @@ def _verify_token(token: str):
 @limiter.limit("30 per minute")
 def get_share_token(solve_id):
     try:
-        result = (request.supabase.table('solves')
+        result = (g.supabase.table('solves')
                   .select('id')
                   .eq('id', solve_id)
-                  .eq('user_id', request.user_id)
+                  .eq('user_id', g.user_id)
                   .is_('deleted_at', None)
                   .limit(1)
                   .execute())
@@ -372,9 +372,9 @@ def get_personal_bests():
     puzzle_type = request.args.get('puzzle_type')
 
     try:
-        query = (request.supabase.table('personal_bests')
+        query = (g.supabase.table('personal_bests')
                  .select('*')
-                 .eq('user_id', request.user_id))
+                 .eq('user_id', g.user_id))
         if puzzle_type:
             query = query.eq('puzzle_type', puzzle_type)
         query = query.order('achieved_at')

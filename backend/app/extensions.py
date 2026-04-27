@@ -18,7 +18,7 @@ def _user_or_ip_key() -> str:
 
     flask-limiter's per-route limit fires from a before_request hook,
     before the view's @require_auth decorator runs, so we cannot rely on
-    request.user_id being set. Instead, parse the bearer token here via
+    g.user_id being set. Instead, parse the bearer token here via
     the cached JWKS path. Cost is one HMAC verify per request (a few
     hundred microseconds, served from the in-process cache).
 
