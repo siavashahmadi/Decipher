@@ -32,10 +32,8 @@ vi.mock('../services/guestStorage', () => ({
 vi.mock('./useScrambleQueue', () => ({
   default: () => ({
     currentScramble: 'R U R\'',
-    nextScramble: null,
     loading: false,
     advance: vi.fn(),
-    override: vi.fn(),
   }),
 }));
 

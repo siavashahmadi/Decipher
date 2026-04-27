@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import useMedianTracker from './useMedianTracker';
 import useScrambleQueue from './useScrambleQueue';
 import useSolveStore from './useSolveStore';
+import { useSortedSolveStats } from './useSortedSolveStats';
+import { useReplayState } from './useReplayState';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import { mergeSortedAsc } from '../utils/mergeSortedAsc';
-import { effectiveTime } from '../utils/solveTime';
 import type { PersonalBest, PuzzleType, Solve } from '../types';
 
 export interface PenaltyFlags { plusTwo: boolean; dnf: boolean }
@@ -35,63 +33,23 @@ export interface UseSolveSessionResult {
   clearView: () => void;
 }
 
-// DSA-2: Binary search (bisect_left). Returns the leftmost index where `val`
-// can be inserted into sorted `arr` to keep it sorted. O(log n).
-const bisectLeft = (arr: number[], val: number): number => {
-  let lo = 0;
-  let hi = arr.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (arr[mid] < val) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-};
-
 export default function useSolveSession(): UseSolveSessionResult {
   const { isGuest } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const replay = useReplayState();
+  const stats = useSortedSolveStats();
 
-  // Read any replay payload carried in router state at mount time, so the
-  // scramble queue can be seeded directly with the replayed scramble and we
-  // do not need a post-mount override hop.
-  const [initialReplay] = useState(() => {
-    const state = location.state as
-      | { replayScramble?: string; replayPuzzle?: PuzzleType }
-      | null;
-    return {
-      scramble: state?.replayScramble,
-      puzzle: state?.replayPuzzle,
-    };
-  });
-
-  const [puzzleType, setPuzzleType] = useState<PuzzleType>(
-    initialReplay.puzzle ?? '333',
-  );
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>(replay.puzzle ?? '333');
   const store = useSolveStore(isGuest, puzzleType);
   const [solves, setSolves] = useState<Solve[]>([]);
   const {
     currentScramble,
     loading: scrambleLoading,
     advance: advanceScramble,
-  } = useScrambleQueue(puzzleType, { initialScramble: initialReplay.scramble });
-
-  // Clear the router state once after mount so a page refresh does not
-  // re-apply a stale replay.
-  useEffect(() => {
-    if (location.state) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, [location.state, location.pathname, navigate]);
+  } = useScrambleQueue(puzzleType, { initialScramble: replay.scramble });
 
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [lastPercentile, setLastPercentile] = useState<number | null>(null);
-  const sortedTimesRef = useRef<number[]>([]);
   const [pbHistory, setPbHistory] = useState<PersonalBest[]>([]);
-  const medianTracker = useMedianTracker();
-  const [currentMedian, setCurrentMedian] = useState<number | null>(null);
 
   // Mirror the latest solves into a ref so async handlers can capture a
   // snapshot for optimistic-update rollback without depending on `solves`
@@ -105,27 +63,14 @@ export default function useSolveSession(): UseSolveSessionResult {
         const { solves: data, next_cursor } = await store.fetchPage();
         setSolves(data);
         setNextCursor(next_cursor);
-        setLastPercentile(null);
-
-        const times = data
-          .filter(s => !s.dnf)
-          .map(effectiveTime)
-          .sort((a, b) => a - b);
-        sortedTimesRef.current = times;
-
-        medianTracker.reset();
-        times.forEach(t => medianTracker.push(t));
-        setCurrentMedian(medianTracker.getMedian());
+        stats.rebuildFrom(data);
       } catch (err) {
         console.error('Error fetching solves:', err);
         toast.error('Could not load solves.');
       }
     };
     fetchSolves();
-    // medianTracker omitted: A.8 made its identity stable so it never
-    // changes between renders. Including it would only re-fire this fetch
-    // if that contract regressed.
-  }, [puzzleType, store]);
+  }, [puzzleType, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isGuest) {
@@ -151,34 +96,20 @@ export default function useSolveSession(): UseSolveSessionResult {
       const { solves: moreData, next_cursor } = await store.fetchPage(nextCursor);
       setSolves(prev => [...prev, ...moreData]);
       setNextCursor(next_cursor);
-
-      const newTimes = moreData
-        .filter(s => !s.dnf)
-        .map(effectiveTime)
-        .sort((a, b) => a - b);
-      newTimes.forEach(t => medianTracker.push(t));
-      // Linear merge of the new page (already sorted) into the existing
-      // sorted ref. O(n + m) instead of the previous O((n + m) log (n + m)).
-      sortedTimesRef.current = mergeSortedAsc(sortedTimesRef.current, newTimes);
-      setCurrentMedian(medianTracker.getMedian());
+      stats.mergePageTimes(moreData);
     } catch (err) {
       console.error(err);
       toast.error('Could not load more solves.');
     } finally {
       setIsLoadingMore(false);
     }
-    // medianTracker omitted: identity stable since A.8.
-  }, [nextCursor, isLoadingMore, store]);
+  }, [nextCursor, isLoadingMore, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const recentSolves = useMemo(() => solves.slice(0, 12).reverse(), [solves]);
 
   const handleSolveComplete = useCallback(
     async (time: number, flags: PenaltyFlags) => {
       const { plusTwo, dnf } = flags;
-      const adjustedTime = plusTwo ? time + 2 : time;
-      const prev = sortedTimesRef.current;
-      const pos = bisectLeft(prev, adjustedTime);
-
       const payload = {
         puzzle_type: puzzleType,
         time,
@@ -193,15 +124,7 @@ export default function useSolveSession(): UseSolveSessionResult {
         const savedSolve = await store.create(payload);
         if (!savedSolve) return;
         setSolves(prevSolves => [savedSolve, ...prevSolves]);
-
-        if (!dnf) {
-          if (prev.length > 0) {
-            setLastPercentile(Math.round(((prev.length - pos) / prev.length) * 100));
-          }
-          sortedTimesRef.current = [...prev.slice(0, pos), adjustedTime, ...prev.slice(pos)];
-          medianTracker.push(adjustedTime);
-          setCurrentMedian(medianTracker.getMedian());
-        }
+        stats.applySolveAdded(savedSolve);
       } catch (err) {
         console.error('Error creating solve:', err);
         if (err instanceof Error && err.name === 'GuestStorageQuotaError') {
@@ -214,7 +137,7 @@ export default function useSolveSession(): UseSolveSessionResult {
         }
       }
     },
-    [puzzleType, currentScramble, advanceScramble, store, medianTracker],
+    [puzzleType, currentScramble, advanceScramble, store], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleSolveUpdate = useCallback(async (updatedSolve: Solve) => {
@@ -231,34 +154,19 @@ export default function useSolveSession(): UseSolveSessionResult {
 
   const handleSolveDelete = useCallback(async (solveToDelete: Solve) => {
     const snapshot = solvesRef.current;
-    const sortedSnapshot = sortedTimesRef.current;
 
     setSolves(prev => prev.filter(s => s.id !== solveToDelete.id));
-
-    if (!solveToDelete.dnf) {
-      const t = effectiveTime(solveToDelete);
-      const pos = bisectLeft(sortedSnapshot, t);
-      const newSorted = [...sortedSnapshot.slice(0, pos), ...sortedSnapshot.slice(pos + 1)];
-      sortedTimesRef.current = newSorted;
-
-      medianTracker.reset();
-      newSorted.forEach(v => medianTracker.push(v));
-      setCurrentMedian(medianTracker.getMedian());
-    }
+    stats.applySolveRemoved(solveToDelete);
 
     try {
       await store.remove(solveToDelete.id);
     } catch (err) {
       setSolves(snapshot);
-      sortedTimesRef.current = sortedSnapshot;
-      medianTracker.reset();
-      sortedSnapshot.forEach(v => medianTracker.push(v));
-      setCurrentMedian(medianTracker.getMedian());
+      stats.rebuildFrom(snapshot);
       console.error(err);
       toast.error('Could not delete solve.');
     }
-    // medianTracker omitted: identity stable since A.8.
-  }, [store]);
+  }, [store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>,
@@ -271,9 +179,9 @@ export default function useSolveSession(): UseSolveSessionResult {
   const clearView = useCallback(() => {
     if (window.confirm('Clear the current view? Your solves stay saved.')) {
       setSolves([]);
-      setLastPercentile(null);
+      stats.resetPercentile();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Block the default page-scroll on Space so the timer can own it.
   useEffect(() => {
@@ -293,8 +201,8 @@ export default function useSolveSession(): UseSolveSessionResult {
     mostRecent,
     recentSolves,
     pbHistory,
-    lastPercentile,
-    currentMedian,
+    lastPercentile: stats.lastPercentile,
+    currentMedian: stats.currentMedian,
     nextCursor,
     isLoadingMore,
     currentScramble,

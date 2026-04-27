@@ -1,13 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { MemoryRouter, useNavigate, useLocation } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useReplayState } from './useReplayState';
-
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
-  return { ...actual };
-});
 
 function makeWrapper(initialEntries: { pathname: string; state?: unknown }[]) {
   return function Wrapper({ children }: { children: ReactNode }) {
