@@ -1,4 +1,5 @@
-import { useEffect, type ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
+import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
 import './HotkeyHelp.css';
 
 interface HotkeyHelpProps {
@@ -17,21 +18,16 @@ const ENTRIES: Array<[string, string]> = [
 ];
 
 const HotkeyHelp = ({ onClose }: HotkeyHelpProps): ReactElement => {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useDismissOnOutsideClick(modalRef, onClose);
 
   return (
-    <div className="hotkey-help-backdrop" onClick={onClose}>
+    <div className="hotkey-help-backdrop">
       <div
+        ref={modalRef}
         className="hotkey-help-modal"
         role="dialog"
         aria-label="Keyboard shortcuts"
-        onClick={e => e.stopPropagation()}
       >
         <h2>Keyboard shortcuts</h2>
         <ul>

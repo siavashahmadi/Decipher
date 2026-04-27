@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
+import { createPersistedSettings } from './createPersistedSettings';
 
 export type PreviewMode = '3D' | '2D';
 
@@ -14,12 +15,6 @@ export interface ScramblePreviewSettings {
 }
 
 const STORAGE_KEY = 'decipher.scramble-preview';
-const DEFAULTS = {
-  mode: '3D' as PreviewMode,
-  collapsed: false,
-  enabled: true,
-  showHintFacelets: false,
-};
 
 type PersistedState = {
   mode: PreviewMode;
@@ -28,22 +23,28 @@ type PersistedState = {
   showHintFacelets: boolean;
 };
 
-const readInitial = (): PersistedState => {
-  if (typeof window === 'undefined') return DEFAULTS;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    return {
-      mode: parsed.mode === '2D' || parsed.mode === '3D' ? parsed.mode : DEFAULTS.mode,
-      collapsed: typeof parsed.collapsed === 'boolean' ? parsed.collapsed : DEFAULTS.collapsed,
-      enabled: typeof parsed.enabled === 'boolean' ? parsed.enabled : DEFAULTS.enabled,
-      showHintFacelets: typeof parsed.showHintFacelets === 'boolean' ? parsed.showHintFacelets : DEFAULTS.showHintFacelets,
-    };
-  } catch {
-    return DEFAULTS;
-  }
+const DEFAULTS: PersistedState = {
+  mode: '3D',
+  collapsed: false,
+  enabled: true,
+  showHintFacelets: false,
 };
+
+const { Provider: PersistedProvider, useHook: usePersistedHook } =
+  createPersistedSettings<PersistedState>({
+    storageKey: STORAGE_KEY,
+    defaults: DEFAULTS,
+    parse: (raw: unknown): Partial<PersistedState> => {
+      const out: Partial<PersistedState> = {};
+      if (!raw || typeof raw !== 'object') return out;
+      const r = raw as Record<string, unknown>;
+      if (r.mode === '2D' || r.mode === '3D') out.mode = r.mode;
+      if (typeof r.collapsed === 'boolean') out.collapsed = r.collapsed;
+      if (typeof r.enabled === 'boolean') out.enabled = r.enabled;
+      if (typeof r.showHintFacelets === 'boolean') out.showHintFacelets = r.showHintFacelets;
+      return out;
+    },
+  });
 
 const ScramblePreviewSettingsContext = createContext<ScramblePreviewSettings | null>(null);
 
@@ -51,30 +52,14 @@ interface ScramblePreviewSettingsProviderProps {
   children: ReactNode;
 }
 
-export const ScramblePreviewSettingsProvider = ({
-  children,
-}: ScramblePreviewSettingsProviderProps): ReactElement => {
-  const [state, setState] = useState(readInitial);
+const InnerProvider = ({ children }: ScramblePreviewSettingsProviderProps): ReactElement => {
+  const { value: state, update } = usePersistedHook();
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  const setMode = useCallback((mode: PreviewMode) => {
-    setState(prev => ({ ...prev, mode }));
-  }, []);
-
-  const setCollapsed = useCallback((collapsed: boolean) => {
-    setState(prev => ({ ...prev, collapsed }));
-  }, []);
-
-  const setEnabled = useCallback((enabled: boolean) => {
-    setState(prev => ({ ...prev, enabled }));
-  }, []);
-
-  const setShowHintFacelets = useCallback((showHintFacelets: boolean) => {
-    setState(prev => ({ ...prev, showHintFacelets }));
-  }, []);
+  const setMode = useCallback((mode: PreviewMode) => update({ mode }), [update]);
+  const setCollapsed = useCallback((collapsed: boolean) => update({ collapsed }), [update]);
+  const setEnabled = useCallback((enabled: boolean) => update({ enabled }), [update]);
+  const setShowHintFacelets = useCallback(
+    (showHintFacelets: boolean) => update({ showHintFacelets }), [update]);
 
   const value = useMemo<ScramblePreviewSettings>(
     () => ({
@@ -96,6 +81,14 @@ export const ScramblePreviewSettingsProvider = ({
     </ScramblePreviewSettingsContext.Provider>
   );
 };
+
+export const ScramblePreviewSettingsProvider = ({
+  children,
+}: ScramblePreviewSettingsProviderProps): ReactElement => (
+  <PersistedProvider>
+    <InnerProvider>{children}</InnerProvider>
+  </PersistedProvider>
+);
 
 const useScramblePreviewSettings = (): ScramblePreviewSettings => {
   const ctx = useContext(ScramblePreviewSettingsContext);

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { formatTime } from '../utils/formatTime';
@@ -6,6 +6,7 @@ import { ao5 } from '../utils/averages';
 import { formatSolveLabel } from '../utils/solveLabel';
 import api from '../services/api';
 import { useOptionalAuth } from '../contexts/AuthContext';
+import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
 import type { Solve } from '../types';
 import './SolveDetailModal.css';
 
@@ -23,6 +24,7 @@ const SolveDetailModal = ({
 }: SolveDetailModalProps): ReactElement => {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
   const windowAo5 = ao5(solveWindow);
   const navigate = useNavigate();
   const auth = useOptionalAuth();
@@ -36,13 +38,7 @@ const SolveDetailModal = ({
     onClose();
   };
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  useDismissOnOutsideClick(modalRef, onClose);
 
   const copyScramble = async (): Promise<void> => {
     try {
@@ -74,12 +70,12 @@ const SolveDetailModal = ({
   const dateStr = date.toLocaleString();
 
   return (
-    <div className="solve-detail-backdrop" onClick={onClose}>
+    <div className="solve-detail-backdrop">
       <div
+        ref={modalRef}
         className="solve-detail-modal"
         role="dialog"
         aria-label="Solve details"
-        onClick={e => e.stopPropagation()}
       >
         <button
           type="button"

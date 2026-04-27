@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 import useMatchMedia from '../hooks/useMatchMedia';
+import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
 import SettingsPanel from './SettingsPanel';
 import AppNav from './AppNav';
 import type { PuzzleType } from '../types';
@@ -38,26 +39,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => 
   const settingsWrapperRef = useRef<HTMLDivElement>(null);
   const isMobile = useMatchMedia('(max-width: 639px)');
 
-  useEffect(() => {
-    if (!settingsOpen) return;
-    const handlePointer = (event: MouseEvent) => {
-      if (
-        settingsWrapperRef.current &&
-        !settingsWrapperRef.current.contains(event.target as Node)
-      ) {
-        setSettingsOpen(false);
-      }
-    };
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSettingsOpen(false);
-    };
-    document.addEventListener('mousedown', handlePointer);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handlePointer);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [settingsOpen]);
+  useDismissOnOutsideClick(settingsWrapperRef, () => setSettingsOpen(false), settingsOpen);
 
   const handleLogout = async () => {
     try {
