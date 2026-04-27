@@ -18,6 +18,3 @@ class SolveLimitReached(SolveServiceError):
 class SolveNotFound(SolveServiceError):
     pass
 
-
-class ShareTokenInvalid(SolveServiceError):
-    pass

@@ -30,7 +30,15 @@ class SolvesService:
         """Insert a solve after checking the lifetime cap. Records PB if non-DNF."""
         if self.solves.user_solve_count(user_id) >= SOLVE_LIFETIME_CAP:
             raise SolveLimitReached(SOLVE_LIFETIME_CAP)
-        solve = self.solves.insert({**payload, "user_id": user_id})
+        record = {
+            "user_id":     user_id,
+            "puzzle_type": payload["puzzle_type"],
+            "time":        payload["time"],
+            "scramble":    payload.get("scramble", ""),
+            "dnf":         payload.get("dnf", False),
+            "plus_two":    payload.get("plus_two", False),
+        }
+        solve = self.solves.insert(record)
         if not payload.get("dnf", False):
             self.pbs.record_if_better(
                 user_id,
@@ -60,6 +68,8 @@ class SolvesService:
     def create_batch(self, user_id: str, rows: list) -> list:
         """Bulk-insert validated solve rows after a combined cap check. Recomputes PBs."""
         existing = self.solves.user_solve_count(user_id)
+        # Allow batch to land exactly at cap: existing+rows > cap blocks;
+        # existing+rows == cap is fine. Mirrors create's >= check on existing.
         if existing + len(rows) > SOLVE_LIFETIME_CAP:
             raise SolveLimitReached(SOLVE_LIFETIME_CAP)
         prepared = [

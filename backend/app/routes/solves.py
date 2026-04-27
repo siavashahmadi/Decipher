@@ -12,7 +12,7 @@ from ..extensions import limiter
 from ..repositories.solves_repo import SolvesRepository  # used in service factories
 from ..repositories.personal_bests_repo import PersonalBestsRepository
 from ..services.solves_service import SolvesService
-from ..services.solves_service import SOLVE_LIFETIME_CAP  # re-exported for backward compat
+from ..services.solves_service import SOLVE_LIFETIME_CAP  # re-exported; tests import from here
 from ..services.share_links_service import ShareLinksService
 from ..services.exceptions import SolveLimitReached, SolveNotFound
 
