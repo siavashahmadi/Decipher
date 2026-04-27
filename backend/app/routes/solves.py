@@ -78,6 +78,12 @@ def _parse_positive_int(value, default, maximum):
     return min(parsed, maximum)
 
 
+def _internal_error(label: str):
+    """Log + 500 response shaped consistently across routes."""
+    current_app.logger.exception(f"{label} failed")
+    return jsonify({"error": "Internal server error"}), 500
+
+
 # ---------------------------------------------------------------------------
 # SD-2: Cursor-based pagination
 #
@@ -127,8 +133,7 @@ def get_solves():
         )
         return jsonify({"solves": data, "next_cursor": next_cursor})
     except Exception:
-        current_app.logger.exception("get_solves failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("get_solves")
 
 
 SOLVE_LIFETIME_CAP = 100_000
@@ -183,8 +188,7 @@ def create_solve():
 
         return jsonify(saved_solve)
     except Exception:
-        current_app.logger.exception("create_solve failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("create_solve")
 
 
 def _maybe_record_pb(supabase, user_id, puzzle_type, new_time, achieved_at, solve_id):
@@ -230,8 +234,7 @@ def update_solve(solve_id):
             return jsonify({"error": "Solve not found"}), 404
         return jsonify(result.data[0])
     except Exception:
-        current_app.logger.exception("update_solve failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("update_solve")
 
 
 @solves.route('/solves/<solve_id>', methods=['DELETE'])
@@ -265,8 +268,7 @@ def delete_solve(solve_id):
                 current_app.logger.exception("PB cleanup on delete failed (non-fatal)")
         return jsonify(deleted_row)
     except Exception:
-        current_app.logger.exception("delete_solve failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("delete_solve")
 
 
 @solves.route('/solves/batch', methods=['POST'])
@@ -324,8 +326,7 @@ def create_solves_batch():
 
         return jsonify({"solves": inserted}), 200
     except Exception:
-        current_app.logger.exception("create_solves_batch failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("create_solves_batch")
 
 
 # ---------------------------------------------------------------------------
@@ -440,8 +441,7 @@ def get_share_token(solve_id):
             return jsonify({"error": "Solve not found"}), 404
         return jsonify({"token": _sign_solve_id(solve_id)})
     except Exception:
-        current_app.logger.exception("get_share_token failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("get_share_token")
 
 
 @solves.route('/solves/share/<token>', methods=['GET'])
@@ -462,8 +462,7 @@ def get_shared_solve(token):
             return jsonify({"error": "Invalid or expired share link"}), 404
         return jsonify(result.data[0])
     except Exception:
-        current_app.logger.exception("get_shared_solve failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("get_shared_solve")
 
 
 # ---------------------------------------------------------------------------
@@ -485,5 +484,4 @@ def get_personal_bests():
         result = query.execute()
         return jsonify(result.data)
     except Exception:
-        current_app.logger.exception("get_personal_bests failed")
-        return jsonify({"error": "Internal server error"}), 500
+        return _internal_error("get_personal_bests")
