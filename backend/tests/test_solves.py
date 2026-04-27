@@ -100,8 +100,8 @@ def test_get_solves_clamps_limit(fake_supabase_factory, client, auth_headers):
 
 def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_headers):
     fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 0}]}],
         "solves": [
-            {"data": [], "count": 0},
             {"data": [{
                 "id": "solve-1", "time": 10.5,
                 "created_at": "2026-04-20T00:00:00Z",
@@ -129,8 +129,8 @@ def test_create_solve_records_pb_on_non_dnf(fake_supabase_factory, client, auth_
 
 def test_create_solve_skips_pb_on_dnf(fake_supabase_factory, client, auth_headers):
     fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 0}]}],
         "solves": [
-            {"data": [], "count": 0},
             {"data": [{
                 "id": "s1", "time": 10.0,
                 "created_at": "2026-04-20T00:00:00Z",
@@ -234,7 +234,7 @@ def test_create_solve_returns_429_above_lifetime_cap(
     fake_supabase_factory, client, auth_headers
 ):
     fake_supabase_factory(scripts={
-        "solves": [{"data": [], "count": 100_001}],
+        "user_stats": [{"data": [{"solve_count": 100_001}]}],
     })
     r = client.post(
         "/api/solves",
@@ -249,8 +249,8 @@ def test_create_solve_under_cap_inserts_normally(
     fake_supabase_factory, client, auth_headers
 ):
     fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 5}]}],
         "solves": [
-            {"data": [], "count": 5},
             {"data": [{
                 "id": "solve-1", "time": 10.5,
                 "created_at": "2026-04-20T00:00:00Z",
@@ -267,11 +267,13 @@ def test_create_solve_under_cap_inserts_normally(
         json={"puzzle_type": "333", "time": 10.5},
     )
     assert r.status_code == 200
-    # First solves query is the count, second is the insert.
+    # Cap-check goes to user_stats; insert goes to solves.
+    user_stats_queries = [q for q in fake.queries if q.table_name == "user_stats"]
     solves_queries = [q for q in fake.queries if q.table_name == "solves"]
-    assert len(solves_queries) == 2
-    assert any(c[0] == "select" for c in solves_queries[0].calls)
-    assert any(c[0] == "insert" for c in solves_queries[1].calls)
+    assert len(user_stats_queries) == 1
+    assert len(solves_queries) == 1
+    assert any(c[0] == "select" for c in user_stats_queries[0].calls)
+    assert any(c[0] == "insert" for c in solves_queries[0].calls)
 
 
 def test_patch_solve_404_when_missing(fake_supabase_factory, client, auth_headers):
@@ -373,7 +375,7 @@ def test_share_token_404_on_soft_deleted(
 def test_create_solve_rejects_when_at_lifetime_cap(fake_supabase_factory, client, auth_headers):
     from app.routes.solves import SOLVE_LIFETIME_CAP
     fake_supabase_factory(scripts={
-        "solves": [{"data": [], "count": SOLVE_LIFETIME_CAP}],
+        "user_stats": [{"data": [{"solve_count": SOLVE_LIFETIME_CAP}]}],
     })
     r = client.post(
         "/api/solves",
@@ -387,8 +389,8 @@ def test_create_solve_rejects_when_at_lifetime_cap(fake_supabase_factory, client
 def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_headers):
     from app.routes.solves import SOLVE_LIFETIME_CAP
     fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": SOLVE_LIFETIME_CAP - 1}]}],
         "solves": [
-            {"data": [], "count": SOLVE_LIFETIME_CAP - 1},
             {"data": [{
                 "id": "s1", "time": 12.34, "puzzle_type": "333",
                 "scramble": "", "dnf": False, "plus_two": False,
@@ -573,3 +575,58 @@ def test_get_solves_accepts_legacy_timestamp_cursor(client, fake_supabase_factor
     client.get('/api/solves?cursor=2026-04-25T12:00:00Z', headers=auth_headers)
     lt_calls = [c for c in fake.queries[0].calls if c[0] == "lt"]
     assert any(c[1][0] == "created_at" and c[1][1] == "2026-04-25T12:00:00Z" for c in lt_calls)
+
+
+# D.4: user_stats counter table replaces COUNT(*) cap-check
+
+
+def test_create_solve_uses_user_stats_for_cap_check(client, fake_supabase_factory, auth_headers):
+    """Cap check should hit user_stats, not COUNT(*) on solves."""
+    fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 5}]}],
+        "solves": [{"data": [{
+            "id": "s1", "puzzle_type": "333", "time": 9.0,
+            "dnf": False, "plus_two": False, "scramble": "",
+            "created_at": "2026-04-25T12:00:00Z", "user_id": "user-123",
+        }]}],
+        "personal_bests": [{"data": []}, {"data": [{}]}],
+    })
+
+    response = client.post('/api/solves', headers=auth_headers, json={
+        "puzzle_type": "333", "time": 9.0, "dnf": False,
+    })
+    assert response.status_code == 200
+
+    user_stats_queries = [q for q in fake.queries if q.table_name == "user_stats"]
+    assert user_stats_queries, "expected a user_stats lookup"
+    solves_queries = [q for q in fake.queries if q.table_name == "solves"]
+    count_calls = [c for c in solves_queries[0].calls
+                   if c[0] == "select" and "count" in c[2]]
+    assert count_calls == [], "must not use count='exact' on solves anymore"
+
+
+def test_create_solve_returns_429_when_user_stats_at_cap(client, fake_supabase_factory, auth_headers):
+    fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 100_000}]}],
+    })
+    response = client.post('/api/solves', headers=auth_headers, json={
+        "puzzle_type": "333", "time": 9.0, "dnf": False,
+    })
+    assert response.status_code == 429
+
+
+def test_create_solve_treats_missing_user_stats_row_as_zero(client, fake_supabase_factory, auth_headers):
+    """First solve for a user — user_stats row may not exist yet."""
+    fake_supabase_factory(scripts={
+        "user_stats": [{"data": []}],
+        "solves": [{"data": [{
+            "id": "s1", "puzzle_type": "333", "time": 9.0,
+            "dnf": False, "plus_two": False, "scramble": "",
+            "created_at": "2026-04-25T12:00:00Z", "user_id": "user-123",
+        }]}],
+        "personal_bests": [{"data": []}, {"data": [{}]}],
+    })
+    response = client.post('/api/solves', headers=auth_headers, json={
+        "puzzle_type": "333", "time": 9.0, "dnf": False,
+    })
+    assert response.status_code == 200

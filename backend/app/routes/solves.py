@@ -153,12 +153,12 @@ def create_solve():
         # Cheap insurance against a malicious sign-up + mass-post spree.
         # Counts non-deleted solves only; soft-deleted rows still occupy
         # storage but do not block honest users.
-        count_result = (g.supabase.table('solves')
-                        .select('id', count='exact', head=True)
+        stats_result = (g.supabase.table('user_stats')
+                        .select('solve_count')
                         .eq('user_id', g.user_id)
-                        .is_('deleted_at', None)
+                        .limit(1)
                         .execute())
-        existing = getattr(count_result, 'count', None) or 0
+        existing = stats_result.data[0]['solve_count'] if stats_result.data else 0
         if existing >= SOLVE_LIFETIME_CAP:
             return jsonify({
                 "error": f"Lifetime solve limit of {SOLVE_LIFETIME_CAP} reached"
