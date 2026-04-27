@@ -100,8 +100,8 @@ describe('useDismissOnOutsideClick', () => {
     expect(removeSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function));
   });
 
-  it('removes keydown listener from window on unmount', () => {
-    const removeSpy = vi.spyOn(window, 'removeEventListener');
+  it('removes keydown listener from document on unmount', () => {
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
     const onClose = vi.fn();
     const { unmount } = renderHook(() => {
       const ref = useRef<HTMLDivElement>(null);
@@ -115,7 +115,6 @@ describe('useDismissOnOutsideClick', () => {
 
   it('removes listeners when enabled switches to false', () => {
     const docRemoveSpy = vi.spyOn(document, 'removeEventListener');
-    const winRemoveSpy = vi.spyOn(window, 'removeEventListener');
     const onClose = vi.fn();
     const { rerender } = renderHook(
       ({ enabled }: { enabled: boolean }) => {
@@ -128,12 +127,11 @@ describe('useDismissOnOutsideClick', () => {
 
     rerender({ enabled: false });
     expect(docRemoveSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(winRemoveSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+    expect(docRemoveSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
   it('registers listeners when enabled switches from false to true', () => {
     const docAddSpy = vi.spyOn(document, 'addEventListener');
-    const winAddSpy = vi.spyOn(window, 'addEventListener');
     const onClose = vi.fn();
     const { rerender } = renderHook(
       ({ enabled }: { enabled: boolean }) => {
@@ -145,9 +143,8 @@ describe('useDismissOnOutsideClick', () => {
     );
 
     docAddSpy.mockClear();
-    winAddSpy.mockClear();
     rerender({ enabled: true });
     expect(docAddSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function));
-    expect(winAddSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+    expect(docAddSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 });

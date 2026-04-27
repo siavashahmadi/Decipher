@@ -65,7 +65,7 @@ describe('SolveDetailModal', () => {
     const onClose = vi.fn();
     render(<SolveDetailModal solve={five[2]} window={five} index={2}
       onClose={onClose} onUpdate={vi.fn()} onDelete={vi.fn()} />);
-    fireEvent.keyDown(window, { key: 'Escape' });
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
   });
 

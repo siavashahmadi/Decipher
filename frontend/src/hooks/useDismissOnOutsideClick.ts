@@ -14,10 +14,10 @@ export function useDismissOnOutsideClick(
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('pointerdown', handlePointer);
-    window.addEventListener('keydown', handleKey);
+    document.addEventListener('keydown', handleKey);
     return () => {
       document.removeEventListener('pointerdown', handlePointer);
-      window.removeEventListener('keydown', handleKey);
+      document.removeEventListener('keydown', handleKey);
     };
   }, [ref, onClose, enabled]);
 }

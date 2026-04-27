@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 interface PersistedConfig<T> {
   storageKey: string;
@@ -43,11 +43,13 @@ export function createPersistedSettings<T extends object>({
       }
     }, [value]);
 
-    const update = (patch: Partial<T>): void => {
+    const update = useCallback((patch: Partial<T>): void => {
       setValue(prev => ({ ...prev, ...patch }));
-    };
+    }, []);
 
-    return <Context.Provider value={{ value, update }}>{children}</Context.Provider>;
+    const contextValue = useMemo(() => ({ value, update }), [value, update]);
+
+    return <Context.Provider value={contextValue}>{children}</Context.Provider>;
   };
 
   const useHook = (): HookResult<T> => {
