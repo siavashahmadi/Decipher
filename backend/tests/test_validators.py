@@ -106,3 +106,34 @@ def test_create_rejects_dropped_bld_oh_types():
             "scramble": "",
         })
         assert result is not None and "puzzle_type" in result, f"{dropped} should be rejected"
+
+
+from app.validators import validate_create_solves_batch
+
+
+def test_batch_validator_accepts_valid_rows():
+    err, rows = validate_create_solves_batch({"solves": [
+        {"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""},
+    ]})
+    assert err is None
+    assert len(rows) == 1
+
+
+def test_batch_validator_rejects_empty():
+    err, rows = validate_create_solves_batch({"solves": []})
+    assert err == {"solves": "Must not be empty"}
+    assert rows == []
+
+
+def test_batch_validator_rejects_too_many():
+    err, _ = validate_create_solves_batch({"solves": [{"puzzle_type": "333", "time": 9.0}] * 1001})
+    assert "at most 1000" in err["solves"]
+
+
+def test_batch_validator_rejects_invalid_row():
+    err, _ = validate_create_solves_batch({"solves": [
+        {"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""},
+        {"puzzle_type": "bad", "time": 9.0},
+    ]})
+    assert err["rows"][0]["index"] == 1
+    assert "puzzle_type" in err["rows"][0]["errors"]

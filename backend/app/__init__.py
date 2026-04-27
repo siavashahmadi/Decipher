@@ -25,7 +25,10 @@ def create_app(config_class=Config):
 
     # Load configuration
     app.config.from_object(config_class)
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024  # 16KB; solve payloads are sub-1KB
+    # 256KB lets the batch migration endpoint accept up to 1000 solves in
+    # one request (~85KB JSON). Single-solve routes are still validated
+    # against their own much smaller schema.
+    app.config['MAX_CONTENT_LENGTH'] = 256 * 1024
 
     # B.4: refuse to boot on any missing required config. Crashing here
     # produces a clear stack at deploy time rather than a 500 on first

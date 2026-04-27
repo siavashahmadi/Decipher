@@ -57,3 +57,33 @@ def validate_update_solve(data):
         errors['plus_two'] = "Must be a boolean"
 
     return errors if errors else None
+
+BATCH_MAX = 1000
+
+
+def validate_create_solves_batch(data):
+    """Validate POST /solves/batch payload. Returns (errors, valid_rows).
+
+    errors is a dict like {"body": "..."} for top-level issues, or
+    {"rows": [{idx, errors}, ...]} for per-row issues. valid_rows is
+    the list of rows that passed validation (empty when errors exist).
+    """
+    if not data or not isinstance(data, dict):
+        return {"body": "Request body is required"}, []
+    rows = data.get("solves")
+    if not isinstance(rows, list):
+        return {"solves": "Must be an array"}, []
+    if not rows:
+        return {"solves": "Must not be empty"}, []
+    if len(rows) > BATCH_MAX:
+        return {"solves": f"Must contain at most {BATCH_MAX} rows"}, []
+
+    row_errors = []
+    for idx, row in enumerate(rows):
+        err = validate_create_solve(row)
+        if err:
+            row_errors.append({"index": idx, "errors": err})
+
+    if row_errors:
+        return {"rows": row_errors}, []
+    return None, rows

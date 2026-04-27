@@ -651,3 +651,65 @@ def test_create_solve_calls_record_pb_if_better_rpc(client, fake_supabase_factor
     assert params["p_user_id"] == "user-123"
     assert params["p_puzzle_type"] == "333"
     assert params["p_time"] == 9.0
+
+
+# D.7: Batch endpoint POST /solves/batch
+
+
+def test_create_solves_batch_inserts_and_recomputes(client, fake_supabase_factory, auth_headers):
+    fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 0}]}],
+        "solves": [{"data": [
+            {"id": "s1", "puzzle_type": "333", "time": 9.0, "user_id": "user-123",
+             "dnf": False, "plus_two": False, "scramble": "",
+             "created_at": "2026-04-25T12:00:00Z"},
+            {"id": "s2", "puzzle_type": "333", "time": 8.5, "user_id": "user-123",
+             "dnf": False, "plus_two": False, "scramble": "",
+             "created_at": "2026-04-25T12:00:01Z"},
+        ]}],
+        "rpc:recompute_pbs_for_user": [{"data": []}],
+    })
+
+    response = client.post('/api/solves/batch', headers=auth_headers, json={
+        "solves": [
+            {"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""},
+            {"puzzle_type": "333", "time": 8.5, "dnf": False, "plus_two": False, "scramble": ""},
+        ],
+    })
+    assert response.status_code == 200
+    body = response.get_json()
+    assert len(body["solves"]) == 2
+
+    rpc_queries = [q for q in fake.queries if q.table_name == "rpc:recompute_pbs_for_user"]
+    assert rpc_queries, "expected one recompute call"
+    params = rpc_queries[0].calls[0][2]["params"]
+    assert params["p_user_id"] == "user-123"
+    assert params["p_puzzle_types"] == ["333"]
+
+
+def test_create_solves_batch_422_on_invalid_row(client, fake_supabase_factory, auth_headers):
+    fake_supabase_factory(scripts={"user_stats": [{"data": [{"solve_count": 0}]}]})
+    response = client.post('/api/solves/batch', headers=auth_headers, json={
+        "solves": [{"puzzle_type": "bad", "time": 9.0}],
+    })
+    assert response.status_code == 422
+
+
+def test_create_solves_batch_429_when_cap_would_be_exceeded(client, fake_supabase_factory, auth_headers):
+    fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 99_999}]}],
+    })
+    response = client.post('/api/solves/batch', headers=auth_headers, json={
+        "solves": [
+            {"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""},
+            {"puzzle_type": "333", "time": 8.5, "dnf": False, "plus_two": False, "scramble": ""},
+        ],
+    })
+    assert response.status_code == 429
+
+
+def test_create_solves_batch_rejects_too_many(client, fake_supabase_factory, auth_headers):
+    fake_supabase_factory(scripts={"user_stats": [{"data": [{"solve_count": 0}]}]})
+    rows = [{"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""}] * 1001
+    response = client.post('/api/solves/batch', headers=auth_headers, json={"solves": rows})
+    assert response.status_code == 422

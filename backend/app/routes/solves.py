@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify, current_app, g
 from functools import wraps
 from ..auth import verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
-from ..validators import validate_create_solve, validate_update_solve
+from ..validators import validate_create_solve, validate_update_solve, validate_create_solves_batch
 from ..extensions import limiter
 
 # Cursor pagination tokens are user-supplied; both halves get interpolated
@@ -269,9 +269,68 @@ def delete_solve(solve_id):
         return jsonify({"error": "Internal server error"}), 500
 
 
+@solves.route('/solves/batch', methods=['POST'])
+@require_auth
+@limiter.limit("5 per minute")
+def create_solves_batch():
+    """Bulk-insert up to 1000 validated solves in one transaction.
+
+    Used by the guest-to-authed migration flow: a guest with N solves can
+    sign up and migrate them in one request rather than looping per-solve
+    against the standard 30/min rate limit. PB rows are recomputed
+    server-side after the bulk insert via recompute_pbs_for_user.
+    """
+    payload = request.get_json(silent=True)
+    err, rows = validate_create_solves_batch(payload)
+    if err:
+        return jsonify({"errors": err}), 422
+
+    try:
+        stats_result = (g.supabase.table('user_stats')
+                        .select('solve_count')
+                        .eq('user_id', g.user_id)
+                        .limit(1)
+                        .execute())
+        existing = stats_result.data[0]['solve_count'] if stats_result.data else 0
+        if existing + len(rows) > SOLVE_LIFETIME_CAP:
+            return jsonify({
+                "error": f"Batch would exceed lifetime cap of {SOLVE_LIFETIME_CAP}"
+            }), 429
+
+        # Bulk insert. PostgREST sends this as one SQL statement (atomic).
+        prepared = [{
+            'user_id':     g.user_id,
+            'puzzle_type': row['puzzle_type'],
+            'time':        row['time'],
+            'dnf':         row.get('dnf', False),
+            'plus_two':    row.get('plus_two', False),
+            'scramble':    row.get('scramble', ''),
+        } for row in rows]
+        insert_result = (g.supabase.table('solves')
+                         .insert(prepared)
+                         .execute())
+        inserted = insert_result.data or []
+
+        # Recompute PBs for every distinct puzzle_type in the batch. Done
+        # server-side so the client doesn't have to know per-puzzle minima.
+        puzzle_types = sorted({row['puzzle_type'] for row in rows})
+        try:
+            g.supabase.rpc('recompute_pbs_for_user', {
+                'p_user_id': g.user_id,
+                'p_puzzle_types': puzzle_types,
+            }).execute()
+        except Exception:
+            current_app.logger.exception("Batch PB recompute failed (non-fatal)")
+
+        return jsonify({"solves": inserted}), 200
+    except Exception:
+        current_app.logger.exception("create_solves_batch failed")
+        return jsonify({"error": "Internal server error"}), 500
+
+
 # ---------------------------------------------------------------------------
 # Shareable solve links (signed token). The token is deterministic HMAC over
-# the solve id — no storage, no DB column. Verification is constant-time.
+# the solve id, no storage, no DB column. Verification is constant-time.
 # ---------------------------------------------------------------------------
 def _b64url(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')
