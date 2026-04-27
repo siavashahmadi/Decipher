@@ -476,3 +476,21 @@ def test_share_token_tampered_mac_returns_404(app, fake_service_supabase_factory
     bad_token = ".".join(parts)
     r = client.get(f"/api/solves/share/{bad_token}")
     assert r.status_code == 404
+
+
+def test_delete_dnf_solve_skips_pb_cleanup(client, fake_supabase_factory, auth_headers):
+    """A DNF solve was never a PB; deleting it should not touch personal_bests."""
+    fake = fake_supabase_factory(scripts={
+        "solves": [{"data": [{
+            "id": "solve-1",
+            "user_id": "user-123",
+            "dnf": True,
+            "deleted_at": "2026-04-26T00:00:00Z",
+        }]}],
+    })
+
+    response = client.delete('/api/solves/solve-1', headers=auth_headers)
+
+    assert response.status_code == 200
+    pb_queries = [q for q in fake.queries if q.table_name == "personal_bests"]
+    assert pb_queries == [], "DNF delete must not query personal_bests"

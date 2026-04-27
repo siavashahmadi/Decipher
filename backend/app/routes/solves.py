@@ -237,18 +237,20 @@ def delete_solve(solve_id):
                   .execute())
         if not result.data:
             return jsonify({"error": "Solve not found"}), 404
-        # Remove the matching PB row if this solve was a recorded PB. If this
-        # was the current best, the next time the user beats their remaining
-        # fastest a new PB will be inserted naturally.
-        try:
-            (g.supabase.table('personal_bests')
-             .delete()
-             .eq('user_id', g.user_id)
-             .eq('solve_id', solve_id)
-             .execute())
-        except Exception:
-            current_app.logger.exception("PB cleanup on delete failed (non-fatal)")
-        return jsonify(result.data[0])
+        deleted_row = result.data[0]
+        # Remove the matching PB row only if this solve could have been a PB.
+        # DNF solves are never recorded as PBs (see _maybe_record_pb gate in
+        # create_solve), so the cleanup is wasted work for them.
+        if not deleted_row.get('dnf'):
+            try:
+                (g.supabase.table('personal_bests')
+                 .delete()
+                 .eq('user_id', g.user_id)
+                 .eq('solve_id', solve_id)
+                 .execute())
+            except Exception:
+                current_app.logger.exception("PB cleanup on delete failed (non-fatal)")
+        return jsonify(deleted_row)
     except Exception:
         current_app.logger.exception("delete_solve failed")
         return jsonify({"error": "Internal server error"}), 500
