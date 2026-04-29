@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import useScrambleQueue from './useScrambleQueue';
 import useSolveStore from './useSolveStore';
 import { useSortedSolveStats } from './useSortedSolveStats';
 import { useReplayState } from './useReplayState';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import { invalidateSolveCaches } from '../queries/solves';
 import { isPuzzleType, type PenaltyFlags, type PersonalBest, type PuzzleType, type Solve } from '../types';
 
 export interface UseSolveSessionResult {
@@ -35,6 +37,7 @@ export default function useSolveSession(): UseSolveSessionResult {
   const { isGuest } = useAuth();
   const replay = useReplayState();
   const stats = useSortedSolveStats();
+  const queryClient = useQueryClient();
 
   const [puzzleType, setPuzzleType] = useState<PuzzleType>(replay.puzzle ?? '333');
   const store = useSolveStore(isGuest, puzzleType);
@@ -123,6 +126,9 @@ export default function useSolveSession(): UseSolveSessionResult {
         if (!savedSolve) return;
         setSolves(prevSolves => [savedSolve, ...prevSolves]);
         stats.applySolveAdded(savedSolve);
+        // H.3: tell other consumers (Stats useAllSolves) the cache for this
+        // puzzle is stale. They'll refetch on next render.
+        invalidateSolveCaches(queryClient, puzzleType);
       } catch (err) {
         console.error('Error creating solve:', err);
         if (err instanceof Error && err.name === 'GuestStorageQuotaError') {
@@ -143,12 +149,13 @@ export default function useSolveSession(): UseSolveSessionResult {
     setSolves(prev => prev.map(s => (s.id === updatedSolve.id ? updatedSolve : s)));
     try {
       await store.update(updatedSolve);
+      invalidateSolveCaches(queryClient, puzzleType);
     } catch (err) {
       setSolves(snapshot);
       console.error(err);
       toast.error('Could not update solve.');
     }
-  }, [store]);
+  }, [store, queryClient, puzzleType]);
 
   const handleSolveDelete = useCallback(async (solveToDelete: Solve) => {
     const snapshot = solvesRef.current;
@@ -158,13 +165,14 @@ export default function useSolveSession(): UseSolveSessionResult {
 
     try {
       await store.remove(solveToDelete.id);
+      invalidateSolveCaches(queryClient, puzzleType);
     } catch (err) {
       setSolves(snapshot);
       stats.rebuildFrom(snapshot);
       console.error(err);
       toast.error('Could not delete solve.');
     }
-  }, [store]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [store, queryClient, puzzleType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (
     event: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>,

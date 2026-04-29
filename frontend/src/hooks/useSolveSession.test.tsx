@@ -2,7 +2,9 @@ import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import useSolveSession from './useSolveSession';
+import { createTestQueryClient } from '../test-utils/renderWithProviders';
 import type { Solve } from '../types';
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -42,7 +44,9 @@ vi.mock('sonner', () => ({
 }));
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <MemoryRouter>{children}</MemoryRouter>
+  <QueryClientProvider client={createTestQueryClient()}>
+    <MemoryRouter>{children}</MemoryRouter>
+  </QueryClientProvider>
 );
 
 const makeMockSolve = (overrides: Partial<Solve> = {}): Solve => ({
