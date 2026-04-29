@@ -4,6 +4,15 @@ import { scrambleEventToTwisty } from '../utils/puzzleIds';
 import useScramblePreviewSettings from '../hooks/useScramblePreviewSettings';
 import './ScramblePreview.css';
 
+// Subset of cubing/twisty's TwistyPlayer surface we read/write. Declared
+// locally because the import is dynamic, so InstanceType<typeof TwistyPlayer>
+// isn't statically resolvable.
+interface TwistyPlayerEl extends HTMLElement {
+  alg?: string;
+  visualization?: string;
+  hintFacelets?: string;
+}
+
 interface ScramblePreviewProps {
   puzzleType: PuzzleType;
   scramble: string | null;
@@ -12,7 +21,7 @@ interface ScramblePreviewProps {
 const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): ReactElement => {
   const { mode, collapsed, setCollapsed, showHintFacelets } = useScramblePreviewSettings();
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const playerRef = useRef<HTMLElement | null>(null);
+  const playerRef = useRef<TwistyPlayerEl | null>(null);
   const twistyPuzzle = scrambleEventToTwisty(puzzleType);
   const supported = twistyPuzzle !== null;
 
@@ -31,8 +40,8 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): ReactE
         controlPanel: 'none',
         visualization: mode,
         hintFacelets: showHintFacelets ? 'floating' : 'none',
-      });
-      playerRef.current = player as unknown as HTMLElement;
+      }) as unknown as TwistyPlayerEl;
+      playerRef.current = player;
       stage.appendChild(player);
     })();
 
@@ -49,21 +58,21 @@ const ScramblePreview = ({ puzzleType, scramble }: ScramblePreviewProps): ReactE
   }, [supported, twistyPuzzle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const player = playerRef.current as unknown as { alg?: string } | null;
+    const player = playerRef.current;
     if (player && scramble !== null) {
       player.alg = scramble;
     }
   }, [scramble]);
 
   useEffect(() => {
-    const player = playerRef.current as unknown as { visualization?: string } | null;
+    const player = playerRef.current;
     if (player) {
       player.visualization = mode;
     }
   }, [mode]);
 
   useEffect(() => {
-    const player = playerRef.current as unknown as { hintFacelets?: string } | null;
+    const player = playerRef.current;
     if (player) {
       player.hintFacelets = showHintFacelets ? 'floating' : 'none';
     }
