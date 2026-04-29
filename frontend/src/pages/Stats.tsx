@@ -15,7 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
 import { computeRecentTrend } from '../utils/recentTrend';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
-import type { PuzzleType, Solve } from '../types';
+import { isPuzzleType, type PuzzleType, type Solve } from '../types';
 import './Stats.css';
 
 const DEFAULT_PUZZLE: PuzzleType = '333';
@@ -34,7 +34,8 @@ const computeHeatmapFrom = (boundsStart: Date | null, solves: Solve[]): Date => 
 const StatsPage = (): ReactElement => {
   const { isGuest } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const puzzleType = (searchParams.get('puzzle') as PuzzleType | null) ?? DEFAULT_PUZZLE;
+  const puzzleParam = searchParams.get('puzzle');
+  const puzzleType: PuzzleType = isPuzzleType(puzzleParam) ? puzzleParam : DEFAULT_PUZZLE;
 
   const { solves, loading, truncated } = useAllSolves(puzzleType, isGuest);
   const { preset, setPreset, customStart, setCustomStart, customEnd, setCustomEnd, bounds, filteredSolves } = useStatsFilters(solves);
@@ -54,7 +55,9 @@ const StatsPage = (): ReactElement => {
   const heatmapTo = bounds.end ?? new Date();
 
   const handlePuzzleChange = (e: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>) => {
-    const value = (e.currentTarget as HTMLSelectElement | HTMLButtonElement).value as PuzzleType;
+    const target = e.currentTarget as HTMLSelectElement | HTMLButtonElement;
+    if (!isPuzzleType(target.value)) return;
+    const value = target.value;
     setSearchParams(prev => { prev.set('puzzle', value); return prev; });
   };
 

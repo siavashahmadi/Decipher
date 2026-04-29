@@ -6,7 +6,7 @@ import { useSortedSolveStats } from './useSortedSolveStats';
 import { useReplayState } from './useReplayState';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import type { PersonalBest, PuzzleType, Solve } from '../types';
+import { isPuzzleType, type PersonalBest, type PuzzleType, type Solve } from '../types';
 
 export interface PenaltyFlags { plusTwo: boolean; dnf: boolean }
 
@@ -171,9 +171,8 @@ export default function useSolveSession(): UseSolveSessionResult {
   const handleTypeChange = (
     event: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>,
   ) => {
-    const value = (event.currentTarget as HTMLSelectElement | HTMLButtonElement)
-      .value as PuzzleType;
-    setPuzzleType(value);
+    const target = event.currentTarget as HTMLSelectElement | HTMLButtonElement;
+    if (isPuzzleType(target.value)) setPuzzleType(target.value);
   };
 
   const clearView = useCallback(() => {

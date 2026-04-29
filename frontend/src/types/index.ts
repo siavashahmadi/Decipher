@@ -11,6 +11,14 @@ export type PuzzleType =
   | 'sq1'
   | 'clock';
 
+const PUZZLE_TYPE_VALUES: ReadonlySet<string> = new Set([
+  '222', '333', '444', '555', '666', '777',
+  'pyram', 'mega', 'skewb', 'sq1', 'clock',
+]);
+
+export const isPuzzleType = (value: unknown): value is PuzzleType =>
+  typeof value === 'string' && PUZZLE_TYPE_VALUES.has(value);
+
 export interface Solve {
   id: string;
   user_id?: string;
