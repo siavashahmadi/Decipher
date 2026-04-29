@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { toast } from 'sonner';
 import useScrambleQueue from './useScrambleQueue';
 import useSolveStore from './useSolveStore';
@@ -27,7 +27,7 @@ export interface UseSolveSessionResult {
   handleSolveUpdate: (solve: Solve) => Promise<void>;
   handleSolveDelete: (solve: Solve) => Promise<void>;
   handleTypeChange: (
-    e: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>,
+    e: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>,
   ) => void;
   loadMore: () => Promise<void>;
   clearView: () => void;
@@ -169,7 +169,7 @@ export default function useSolveSession(): UseSolveSessionResult {
   }, [store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (
-    event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>,
+    event: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>,
   ) => {
     const value = (event.currentTarget as HTMLSelectElement | HTMLButtonElement)
       .value as PuzzleType;
