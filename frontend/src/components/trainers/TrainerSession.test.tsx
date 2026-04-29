@@ -15,6 +15,11 @@ vi.mock('../ScramblePreview', () => ({
 }));
 vi.mock('./TrainerCasePicker', () => ({
   default: () => null,
+  ALL_CASES: { kind: 'all' as const },
+  caseChoiceToValue: (choice: { kind: 'all' } | { kind: 'id'; id: string }) =>
+    choice.kind === 'all' ? 'all' : choice.id,
+  caseChoiceFromValue: (value: string) =>
+    value === 'all' ? { kind: 'all' as const } : { kind: 'id' as const, id: value },
 }));
 vi.mock('./TrainerRecentStrip', () => ({
   default: () => null,

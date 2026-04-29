@@ -2,8 +2,16 @@ import { useMemo, type ReactElement } from 'react';
 import type { TrainerCase } from '../../utils/trainerScramble';
 import './TrainerCasePicker.css';
 
-export type CaseChoice = 'all' | string;
+export type CaseChoice = { kind: 'all' } | { kind: 'id'; id: string };
 export type AlgChoice = 'any' | number;
+
+export const ALL_CASES: CaseChoice = { kind: 'all' };
+
+export const caseChoiceFromValue = (value: string): CaseChoice =>
+  value === 'all' ? ALL_CASES : { kind: 'id', id: value };
+
+export const caseChoiceToValue = (choice: CaseChoice): string =>
+  choice.kind === 'all' ? 'all' : choice.id;
 
 interface TrainerCasePickerProps {
   cases: TrainerCase[];
@@ -46,7 +54,7 @@ const TrainerCasePicker = ({
 }: TrainerCasePickerProps): ReactElement => {
   const grouped = useMemo(() => groupCases(cases), [cases]);
   const selectedCase =
-    caseChoice === 'all' ? null : cases.find((c) => c.id === caseChoice) ?? null;
+    caseChoice.kind === 'all' ? null : cases.find((c) => c.id === caseChoice.id) ?? null;
   const algs = selectedCase?.algs ?? [];
 
   return (
@@ -54,8 +62,8 @@ const TrainerCasePicker = ({
       <label className="trainer-case-picker-field">
         <span>Case</span>
         <select
-          value={caseChoice}
-          onChange={(e) => onCaseChange(e.target.value as CaseChoice)}
+          value={caseChoiceToValue(caseChoice)}
+          onChange={(e) => onCaseChange(caseChoiceFromValue(e.target.value))}
         >
           <option value="all">All</option>
           {grouped

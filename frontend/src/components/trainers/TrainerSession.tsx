@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactElement } from 're
 import Timer from '../Timer';
 import Scramble from '../Scramble';
 import ScramblePreview from '../ScramblePreview';
-import TrainerCasePicker from './TrainerCasePicker';
+import TrainerCasePicker, { ALL_CASES, caseChoiceToValue } from './TrainerCasePicker';
 import type { CaseChoice, AlgChoice } from './TrainerCasePicker';
 import TrainerRecentStrip from './TrainerRecentStrip';
 import type { RecentEntry } from './TrainerRecentStrip';
@@ -47,14 +47,14 @@ const buildScramble = (
 ): string => {
   const { scramble } = generateTrainerScramble({
     type,
-    caseId: caseChoice,
+    caseId: caseChoiceToValue(caseChoice),
     algIndex: algChoice === 'any' ? -1 : algChoice,
   });
   return scramble;
 };
 
 const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
-  const [caseChoice, setCaseChoice] = useState<CaseChoice>('all');
+  const [caseChoice, setCaseChoice] = useState<CaseChoice>(ALL_CASES);
   const [algChoice, setAlgChoice] = useState<AlgChoice>('any');
   const [recent, setRecent] = useState<RecentEntry[]>(() => loadRecent(type));
   // bumpCounter forces a fresh scramble on Skip / after-solve without
@@ -69,7 +69,7 @@ const TrainerSession = ({ type }: TrainerSessionProps): ReactElement => {
   const [prevType, setPrevType] = useState(type);
   if (prevType !== type) {
     setPrevType(type);
-    setCaseChoice('all');
+    setCaseChoice(ALL_CASES);
     setAlgChoice('any');
   }
 
