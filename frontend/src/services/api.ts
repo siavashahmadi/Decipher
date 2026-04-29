@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { supabase } from './auth';
+import { supabaseAuthClient } from './authClient';
 import type { PersonalBest, PuzzleType, Solve } from '../types';
 
 // H.1: backend mounts the API at /api/v1 (canonical) with /api as a
@@ -9,10 +9,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 type AuthHeader = { Authorization: string } | Record<string, never>;
 
 const getAuthHeader = async (): Promise<AuthHeader> => {
-	const { data: { session } } = await supabase.auth.getSession();
-	return session?.access_token
-		? { Authorization: `Bearer ${session.access_token}` }
-		: {};
+	const token = await supabaseAuthClient.getAccessToken();
+	return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 // H.2: standard wire shape for backend errors. Every 4xx/5xx body is

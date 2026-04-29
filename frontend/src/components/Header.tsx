@@ -1,7 +1,7 @@
 import { useRef, useState, type ChangeEvent, type MouseEvent, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '../services/auth';
+import { supabaseAuthClient } from '../services/authClient';
 import { useAuth } from '../contexts/AuthContext';
 import useMatchMedia from '../hooks/useMatchMedia';
 import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
@@ -26,11 +26,8 @@ const Header = ({ type, handleTypeChange }: HeaderProps): ReactElement => {
   useDismissOnOutsideClick(settingsWrapperRef, () => setSettingsOpen(false), settingsOpen);
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      toast.error('Could not sign out.');
-    }
+    const { error } = await supabaseAuthClient.signOut();
+    if (error) toast.error('Could not sign out.');
   };
 
   return (

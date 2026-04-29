@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { supabase } from '../services/auth';
+import { supabaseAuthClient } from '../services/authClient';
 import { getAllGuestSolves, removeGuestSolves } from '../services/guestStorage';
 import api from '../services/api';
 
@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
   const migratingRef = useRef(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, next) => {
+    supabaseAuthClient.getSession().then(setSession);
+    const unsubscribe = supabaseAuthClient.onAuthStateChange(async (event, next) => {
       if (event === 'SIGNED_IN' && !migratingRef.current) {
         migratingRef.current = true;
         try {
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       }
       setSession(next);
     });
-    return () => subscription.unsubscribe();
+    return unsubscribe;
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({

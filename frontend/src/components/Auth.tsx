@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '../services/auth';
+import { supabaseAuthClient } from '../services/authClient';
 import './Auth.css';
 
 type AuthMode = 'login' | 'signup' | 'reset' | 'update';
@@ -29,8 +29,8 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
     showEmail: true,
     showPassword: true,
     submit: async ({ email, password }) => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { error } = await supabaseAuthClient.signInWithPassword(email, password);
+      if (error) throw new Error(error);
       return {};
     },
     links: ['signup', 'reset'],
@@ -41,8 +41,8 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
     showEmail: true,
     showPassword: true,
     submit: async ({ email, password }) => {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
+      const { error } = await supabaseAuthClient.signUp(email, password);
+      if (error) throw new Error(error);
       return { message: 'Check your email for the confirmation link!' };
     },
     links: ['login'],
@@ -53,10 +53,11 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
     showEmail: true,
     showPassword: false,
     submit: async ({ email }) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
-      });
-      if (error) throw error;
+      const { error } = await supabaseAuthClient.resetPasswordForEmail(
+        email,
+        window.location.origin,
+      );
+      if (error) throw new Error(error);
       return { message: 'Check your email for the password reset link.', nextMode: 'login' };
     },
     links: ['login'],
@@ -69,8 +70,8 @@ const MODE_CONFIG: Record<AuthMode, ModeSpec> = {
     showPassword: true,
     passwordPlaceholder: 'New Password',
     submit: async ({ password }) => {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      const { error } = await supabaseAuthClient.updatePassword(password);
+      if (error) throw new Error(error);
       window.location.hash = '';
       return { message: 'Password updated successfully!', nextMode: 'login' };
     },
