@@ -47,8 +47,14 @@ The backend expects a `solves` table in your Supabase project with the following
 | `plus_two` | boolean | |
 | `scramble` | text | |
 | `created_at` | timestamptz | Auto-generated |
+| `deleted_at` | timestamptz | Null for active rows; set on soft delete |
+| `metadata` | jsonb | Forward-compat for enrichment fields. Default `{}` |
 
 Enable Row Level Security (RLS) on the `solves` table and add policies so users can only read/write their own rows.
+
+### Migrations
+
+The `migrations/` directory contains numbered SQL files (`NNN_<name>.sql`) plus matching `*.down.sql` rollbacks. Apply via the Supabase CLI (`supabase db push <file>`) or paste into the SQL editor in the Supabase dashboard. A managed migration runner is tracked in the deferred Cluster H plan.
 
 ## Running
 
