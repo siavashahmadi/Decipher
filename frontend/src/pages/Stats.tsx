@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ChangeEvent, type MouseEvent, type ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import DateRangeFilter from '../components/stats/DateRangeFilter';
@@ -31,7 +31,7 @@ const computeHeatmapFrom = (boundsStart: Date | null, solves: Solve[]): Date => 
   return new Date(Date.now() - ONE_YEAR_MS);
 };
 
-const StatsPage = (): React.ReactElement => {
+const StatsPage = (): ReactElement => {
   const { isGuest } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const puzzleType = (searchParams.get('puzzle') as PuzzleType | null) ?? DEFAULT_PUZZLE;
@@ -53,7 +53,7 @@ const StatsPage = (): React.ReactElement => {
   );
   const heatmapTo = bounds.end ?? new Date();
 
-  const handlePuzzleChange = (e: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => {
+  const handlePuzzleChange = (e: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>) => {
     const value = (e.currentTarget as HTMLSelectElement | HTMLButtonElement).value as PuzzleType;
     setSearchParams(prev => { prev.set('puzzle', value); return prev; });
   };
