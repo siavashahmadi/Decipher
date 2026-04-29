@@ -204,7 +204,7 @@ def _sign_solve_id(solve_id: str) -> str:
     ))
 
 
-def _verify_token(token: str):
+def _verify_share_token(token: str):
     try:
         id_part, iat_part, exp_part, mac_part = token.split(".", 3)
         solve_id = _b64url_decode(id_part).decode("utf-8")
@@ -364,7 +364,7 @@ def get_share_token(solve_id):
 @solves.route('/solves/share/<token>', methods=['GET'])
 @limiter.limit("60 per minute")
 def get_shared_solve(token):
-    solve_id = _verify_token(token)
+    solve_id = _verify_share_token(token)
     if solve_id is None:
         return jsonify({"error": "Invalid or expired share link"}), 404
     try:
