@@ -16,6 +16,8 @@ from .config import Config
 
 logger = logging.getLogger(__name__)
 
+BEARER_PREFIX = "Bearer "
+
 _jwks_client: Optional[jwt.PyJWKClient] = None
 _jwks_lock = threading.Lock()  # B.3: serialize first-call construction
 

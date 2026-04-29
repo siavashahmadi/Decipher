@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timezone
 from flask import Blueprint, Response, request, jsonify, current_app, g
 from functools import wraps
-from ..auth import verify_token_local
+from ..auth import BEARER_PREFIX, verify_token_local
 from ..db import get_supabase_client, get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve, validate_create_solves_batch
 from ..extensions import limiter
@@ -36,10 +36,10 @@ def require_auth(f):
     def decorated(*args, **kwargs):
         auth_header = request.headers.get('Authorization', '')
 
-        if not auth_header.startswith('Bearer '):
+        if not auth_header.startswith(BEARER_PREFIX):
             return jsonify({"error": "No authorization token provided"}), 401
 
-        token = auth_header[len('Bearer '):].strip()
+        token = auth_header.removeprefix(BEARER_PREFIX).strip()
         if not token:
             return jsonify({"error": "No authorization token provided"}), 401
 

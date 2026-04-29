@@ -4,7 +4,7 @@ from flask import request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from .auth import verify_token_local
+from .auth import BEARER_PREFIX, verify_token_local
 
 # B.11: allow swapping the limiter store via env. Default 'memory://'
 # keeps single-process deployments working unchanged. Production
@@ -27,8 +27,8 @@ def _user_or_ip_key() -> str:
     aggregate IP rate limit still protects against scraping.
     """
     auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        token = auth[len("Bearer "):].strip()
+    if auth.startswith(BEARER_PREFIX):
+        token = auth.removeprefix(BEARER_PREFIX).strip()
         if token:
             sub = verify_token_local(token)
             if sub:
