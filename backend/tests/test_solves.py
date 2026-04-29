@@ -820,3 +820,114 @@ def test_share_token_read_filtered_404_when_public_solve_is_soft_deleted(
     )
     r = client.get(f"/api/solves/share/{token}")
     assert r.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# G.7: get_solves filtering and cursor coverage.
+# ---------------------------------------------------------------------------
+
+
+def test_get_solves_filters_by_puzzle_type(fake_supabase_factory, client, auth_headers):
+    """`?puzzle_type=333` must restrict the response to that puzzle type."""
+    fake = fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [
+                {"id": "a", "user_id": "user-123", "puzzle_type": "333",
+                 "deleted_at": None, "created_at": "2026-04-25T00:00:00Z"},
+                {"id": "b", "user_id": "user-123", "puzzle_type": "222",
+                 "deleted_at": None, "created_at": "2026-04-24T00:00:00Z"},
+                {"id": "c", "user_id": "user-123", "puzzle_type": "333",
+                 "deleted_at": None, "created_at": "2026-04-23T00:00:00Z"},
+            ]}],
+        },
+    )
+    r = client.get("/api/solves?puzzle_type=333", headers=auth_headers)
+    assert r.status_code == 200
+    ids = [s["id"] for s in r.get_json()["solves"]]
+    assert ids == ["a", "c"]
+    eq_calls = [c for c in fake.queries[0].calls if c[0] == "eq"]
+    eq_pairs = {c[1][0]: c[1][1] for c in eq_calls}
+    assert eq_pairs.get("puzzle_type") == "333"
+
+
+def test_get_solves_filters_and_cursors_compose(fake_supabase_factory, client, auth_headers):
+    """puzzle_type filter + cursor must both apply and the response is correctly trimmed."""
+    cursor_id = "11111111-2222-3333-4444-555555555555"
+    cursor_ts = "2026-04-25T12:00:00Z"
+    fake = fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [
+                # Newer than cursor — must be excluded.
+                {"id": "newer-333", "user_id": "user-123", "puzzle_type": "333",
+                 "deleted_at": None, "created_at": "2026-04-26T00:00:00Z"},
+                # Older than cursor and matching puzzle — must appear.
+                {"id": "older-333", "user_id": "user-123", "puzzle_type": "333",
+                 "deleted_at": None, "created_at": "2026-04-24T00:00:00Z"},
+                # Older than cursor but wrong puzzle — must be excluded.
+                {"id": "older-222", "user_id": "user-123", "puzzle_type": "222",
+                 "deleted_at": None, "created_at": "2026-04-24T00:00:00Z"},
+            ]}],
+        },
+    )
+    cursor = _encode_cursor(cursor_ts, cursor_id)
+    r = client.get(
+        f"/api/solves?puzzle_type=333&cursor={cursor}", headers=auth_headers,
+    )
+    assert r.status_code == 200
+    ids = [s["id"] for s in r.get_json()["solves"]]
+    assert ids == ["older-333"]
+    or_calls = [c for c in fake.queries[0].calls if c[0] == "or_"]
+    assert or_calls, "cursor must emit a tiebreaker .or_() filter"
+
+
+# ---------------------------------------------------------------------------
+# G.8: PB materialization isolation.
+#
+# G.8a's "PB tie does not insert duplicate" case is intentionally omitted:
+# PB dedup happens inside the `record_pb_if_better` Postgres function via an
+# advisory lock; the Python repository unconditionally calls the RPC, so a
+# Python-level test of dedup would be testing the SQL function from outside,
+# which the RPC FakeSupabase cannot meaningfully do. Tie semantics live in
+# `migrations/004_record_pb_if_better.sql` and are exercised end-to-end.
+# ---------------------------------------------------------------------------
+
+
+def test_pb_rpc_failure_does_not_500_solve_create(
+    fake_supabase_factory, client, auth_headers
+):
+    """If the record_pb_if_better RPC raises, the solve insert still succeeds.
+
+    PersonalBestsRepository.record_if_better wraps the RPC in a try/except and
+    logs (non-fatal). This pins the route-level contract: PB materialization
+    failure must not surface as a 500 to the client.
+    """
+    fake = fake_supabase_factory(scripts={
+        "user_stats": [{"data": [{"solve_count": 0}]}],
+        "solves": [{"data": [{
+            "id": "s1", "time": 10.5, "puzzle_type": "333",
+            "scramble": "", "dnf": False, "plus_two": False,
+            "created_at": "2026-04-25T00:00:00Z",
+        }]}],
+    })
+
+    # Replace the RPC entry point with one whose .execute() raises. The
+    # production try/except inside record_if_better should swallow it.
+    class _BoomQuery:
+        def execute(self):
+            raise RuntimeError("PB RPC down")
+
+    def boom_rpc(function_name, params=None):
+        return _BoomQuery()
+
+    fake.rpc = boom_rpc
+
+    r = client.post(
+        "/api/solves",
+        headers=auth_headers,
+        json={"puzzle_type": "333", "time": 10.5},
+    )
+    assert r.status_code == 200, (
+        f"PB RPC failure must not 500 the solve insert; got {r.status_code}"
+    )
