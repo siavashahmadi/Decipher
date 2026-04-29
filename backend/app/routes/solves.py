@@ -1,4 +1,5 @@
 import base64
+import functools
 import hashlib
 import hmac
 import re
@@ -170,11 +171,16 @@ SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
 MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
 
 
+@functools.lru_cache(maxsize=4)
+def _encode_share_secret(secret: str) -> bytes:
+    return secret.encode()
+
+
 def _require_share_secret() -> bytes:
     secret = current_app.config.get('SHARE_SECRET')
     if not secret:
         raise RuntimeError("SHARE_SECRET is not configured")
-    return secret.encode()
+    return _encode_share_secret(secret)
 
 
 def _now_seconds() -> int:
