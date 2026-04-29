@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import functools
 import hashlib
@@ -77,7 +79,7 @@ def require_auth(f):
     return decorated
 
 
-def _parse_positive_int(value, default, maximum):
+def _parse_positive_int(value: str | None, default: int, maximum: int) -> int:
     """Parse a query-param int, clamp to [1, maximum], fall back to default."""
     if value is None:
         return default
@@ -211,7 +213,7 @@ def _sign_solve_id(solve_id: str) -> str:
     ))
 
 
-def _verify_share_token(token: str):
+def _verify_share_token(token: str) -> str | None:
     try:
         id_part, iat_part, exp_part, mac_part = token.split(".", 3)
         solve_id = _b64url_decode(id_part).decode("utf-8")

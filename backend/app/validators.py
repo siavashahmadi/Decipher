@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 VALID_PUZZLE_TYPES = {
     '333', '222', '444', '555', '666', '777',
     'clock', 'mega', 'pyram', 'skewb', 'sq1',
 }
 
 
-def validate_create_solve(data):
+def validate_create_solve(data) -> dict[str, str] | None:
     """Validate POST /solves payload. Returns dict of field errors or None."""
     if not data:
         return {"body": "Request body is required"}
@@ -40,7 +42,7 @@ def validate_create_solve(data):
     return errors if errors else None
 
 
-def validate_update_solve(data):
+def validate_update_solve(data) -> dict[str, str] | None:
     """Validate PATCH /solves/<id> payload. Returns dict of field errors or None."""
     if not data:
         return {"body": "Request body is required"}
@@ -61,7 +63,7 @@ def validate_update_solve(data):
 BATCH_MAX = 1000
 
 
-def validate_create_solves_batch(data):
+def validate_create_solves_batch(data) -> tuple[dict | None, list[dict]]:
     """Validate POST /solves/batch payload. Returns (errors, valid_rows).
 
     errors is a dict like {"body": "..."} for top-level issues, or

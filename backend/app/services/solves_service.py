@@ -4,13 +4,15 @@ This module is Flask-free. It depends on repository objects that implement
 the same interface as SolvesRepository and PersonalBestsRepository, making
 it straightforward to unit-test with fake repos.
 """
+from __future__ import annotations
+
 from .exceptions import SolveLimitReached, SolveNotFound
 
 SOLVE_LIFETIME_CAP = 100_000
 
 
 class SolvesService:
-    def __init__(self, solves_repo, pb_repo):
+    def __init__(self, solves_repo, pb_repo) -> None:
         self.solves = solves_repo
         self.pbs = pb_repo
 
@@ -18,10 +20,10 @@ class SolvesService:
         self,
         user_id: str,
         *,
-        puzzle_type=None,
+        puzzle_type: str | None = None,
         limit: int,
-        cursor=None,
-    ) -> list:
+        cursor: tuple[str, str | None] | None = None,
+    ) -> list[dict]:
         return self.solves.list_for_user(
             user_id, puzzle_type=puzzle_type, limit=limit, cursor=cursor
         )
@@ -65,7 +67,7 @@ class SolvesService:
             self.pbs.cleanup_for_solve(solve_id, user_id)
         return deleted
 
-    def create_batch(self, user_id: str, rows: list) -> list:
+    def create_batch(self, user_id: str, rows: list[dict]) -> list[dict]:
         """Bulk-insert validated solve rows after a combined cap check. Recomputes PBs."""
         existing = self.solves.user_solve_count(user_id)
         # Allow batch to land exactly at cap: existing+rows > cap blocks;
@@ -88,9 +90,9 @@ class SolvesService:
         self.pbs.recompute_for_user(user_id, puzzle_types)
         return inserted
 
-    def list_personal_bests(self, user_id: str, puzzle_type=None) -> list:
+    def list_personal_bests(self, user_id: str, puzzle_type: str | None = None) -> list[dict]:
         return self.pbs.list_for_user(user_id, puzzle_type)
 
-    def get_by_id(self, user_id: str, solve_id: str):
+    def get_by_id(self, user_id: str, solve_id: str) -> dict | None:
         """Return a solve row if it exists and belongs to user, else None."""
         return self.solves.get_by_id(solve_id, user_id)
