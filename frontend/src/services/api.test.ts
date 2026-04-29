@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import api from './api';
 import type { Solve } from '../types';
+import { makeSolve } from '../test-utils/makeSolve';
 
 vi.mock('axios');
 vi.mock('./auth', () => ({
@@ -14,16 +15,8 @@ vi.mock('./auth', () => ({
   },
 }));
 
-const mkSolve = (id: string, created_at: string, time: number): Solve => ({
-  id,
-  user_id: 'u',
-  puzzle_type: '333',
-  time,
-  scramble: '',
-  dnf: false,
-  plus_two: false,
-  created_at,
-});
+const mkSolve = (id: string, created_at: string, time: number): Solve =>
+  makeSolve({ id, user_id: 'u', created_at, time });
 
 describe('api.migrateSolves', () => {
   beforeEach(() => {

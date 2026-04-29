@@ -1,22 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { screen, waitFor } from '@testing-library/react';
 import StatsPage from './Stats';
 import api from '../services/api';
-import { SettingsProvider } from '../hooks/useSettings';
-import { ScramblePreviewSettingsProvider } from '../hooks/useScramblePreviewSettings';
-import { AuthProvider } from '../contexts/AuthContext';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
 import type { Solve } from '../types';
 
 vi.mock('../services/api');
-vi.mock('../services/auth', () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
-      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-    },
-  },
-}));
+vi.mock('../services/auth', async () => {
+  const { mockSupabaseAuthQuiet } = await import('../test-utils/mockSupabaseAuth');
+  return mockSupabaseAuthQuiet();
+});
 vi.mock('../services/guestStorage', () => ({
   getGuestSolves: vi.fn(() => []),
   getAllGuestSolves: vi.fn(() => []),
@@ -39,17 +32,7 @@ describe('StatsPage', () => {
   });
 
   it('renders summary, charts, and heatmap with fetched solves', async () => {
-    render(
-      <MemoryRouter initialEntries={['/stats']}>
-        <AuthProvider>
-          <SettingsProvider>
-            <ScramblePreviewSettingsProvider>
-              <StatsPage />
-            </ScramblePreviewSettingsProvider>
-          </SettingsProvider>
-        </AuthProvider>
-      </MemoryRouter>
-    );
+    renderWithProviders(<StatsPage />, { initialEntries: ['/stats'] });
     // Wait for the fully loaded state before asserting chart headers.
     await waitFor(() => expect(screen.getByText('Scramble history')).toBeInTheDocument());
     expect(screen.getByText('Summary')).toBeInTheDocument();

@@ -1,10 +1,22 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { resetMakeSolveCounter } from './src/test-utils/makeSolve';
 
 afterEach(() => {
   cleanup();
+  resetMakeSolveCounter();
 });
+
+// jsdom does not ship a clipboard API. Provide a no-op writeText so tests
+// that touch `navigator.clipboard` can spy on it without manual setup.
+if (!('clipboard' in navigator)) {
+  Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText: async (_text: string) => {} },
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Polyfill matchMedia for jsdom environment
 const mockMatchMedia = (query: string) => ({

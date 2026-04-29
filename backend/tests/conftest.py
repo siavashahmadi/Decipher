@@ -17,17 +17,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 os.environ.setdefault("SUPABASE_URL", "http://localhost")
 os.environ.setdefault("SUPABASE_ANON_KEY", "test-anon-key")
 os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
-# create_app() enforces a SHARE_SECRET length floor in production. Tests
-# satisfy the check with a deterministic 32-char value; individual tests
-# that exercise share-link signing override app.config['SHARE_SECRET'].
-os.environ.setdefault("SHARE_SECRET", "test-share-secret-padded-xxxxxxxx")
+# create_app() enforces a 32-byte SHARE_SECRET floor. Set a deterministic
+# value at module load so create_app() boots; the `_share_secret` autouse
+# fixture re-asserts it for every test in case a test mutates os.environ.
+TEST_SHARE_SECRET = "test-share-secret-padded-xxxxxxxx"
+os.environ.setdefault("SHARE_SECRET", TEST_SHARE_SECRET)
 
 import importlib  # noqa: E402
 from app import create_app  # noqa: E402
 
 # `app.routes` re-exports the `solves` Blueprint under the name `solves`,
-# which shadows the submodule on the package. Load the module explicitly.
-solves_module = importlib.import_module("app.routes.solves")
+# which shadows the submodule on the package. Load the module explicitly so
+# tests can monkeypatch its module-level functions (verify_token_local,
+# _now_seconds, get_supabase_client, etc.). Exposed as a fixture below.
+_solves_module = importlib.import_module("app.routes.solves")
 
 
 class FakeQuery:
@@ -92,6 +95,27 @@ class FakeSupabase:
         return q
 
 
+@pytest.fixture(autouse=True)
+def _share_secret(monkeypatch):
+    """Pins SHARE_SECRET to a known 32-byte value for every test.
+
+    Tests that previously set `app.config['SHARE_SECRET']` per-case can rely
+    on this fixture instead. Sign + verify both read this value through the
+    app config, which is loaded from the environment at create_app() time.
+    """
+    monkeypatch.setenv("SHARE_SECRET", TEST_SHARE_SECRET)
+
+
+@pytest.fixture
+def solves_module():
+    """The `app.routes.solves` module, importable for monkeypatch targets.
+
+    Hoisted from a duplicated `importlib.import_module(...)` block previously
+    repeated across test_solves.py.
+    """
+    return _solves_module
+
+
 @pytest.fixture
 def fake_supabase_factory(monkeypatch):
     """Returns a function to install a FakeSupabase into the solves module."""
@@ -100,7 +124,7 @@ def fake_supabase_factory(monkeypatch):
     def install(user_id="user-123", scripts=None):
         fake = FakeSupabase(user_id=user_id, scripts=scripts)
         monkeypatch.setattr(
-            solves_module,
+            _solves_module,
             "get_supabase_client",
             lambda access_token=None: fake,
         )
@@ -116,7 +140,7 @@ def fake_service_supabase_factory(monkeypatch):
     def install(scripts=None):
         fake = FakeSupabase(scripts=scripts)
         monkeypatch.setattr(
-            solves_module,
+            _solves_module,
             "get_supabase_service_client",
             lambda: fake,
         )

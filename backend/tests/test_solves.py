@@ -28,10 +28,7 @@ def test_bearer_with_empty_token_returns_401(client):
     assert r.status_code == 401
 
 
-def test_auth_service_failure_returns_503(client, monkeypatch, auth_headers):
-    import importlib
-    solves_module = importlib.import_module("app.routes.solves")
-
+def test_auth_service_failure_returns_503(client, monkeypatch, auth_headers, solves_module):
     def boom(access_token=None):
         raise RuntimeError("supabase down")
 
@@ -41,10 +38,8 @@ def test_auth_service_failure_returns_503(client, monkeypatch, auth_headers):
 
 
 def test_require_auth_skips_supabase_when_local_jwt_valid(
-    fake_supabase_factory, client, auth_headers, monkeypatch
+    fake_supabase_factory, client, auth_headers, monkeypatch, solves_module
 ):
-    import importlib
-    solves_module = importlib.import_module("app.routes.solves")
     monkeypatch.setattr(solves_module, "verify_token_local", lambda token: "user-123")
 
     fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
@@ -54,10 +49,8 @@ def test_require_auth_skips_supabase_when_local_jwt_valid(
 
 
 def test_require_auth_falls_back_when_local_verify_fails(
-    fake_supabase_factory, client, auth_headers, monkeypatch
+    fake_supabase_factory, client, auth_headers, monkeypatch, solves_module
 ):
-    import importlib
-    solves_module = importlib.import_module("app.routes.solves")
     monkeypatch.setattr(solves_module, "verify_token_local", lambda token: None)
 
     fake = fake_supabase_factory(scripts={"solves": [{"data": []}]})
@@ -297,17 +290,15 @@ def test_patch_solve_422_on_invalid_type(fake_supabase_factory, client, auth_hea
 # ---------------------------------------------------------------------------
 # Shareable solve tokens
 # ---------------------------------------------------------------------------
-def test_share_token_requires_owner(fake_supabase_factory, client, auth_headers, app):
-    app.config["SHARE_SECRET"] = "test-share-secret"
+def test_share_token_requires_owner(fake_supabase_factory, client, auth_headers):
     fake_supabase_factory(scripts={"solves": [{"data": []}]})
     r = client.get("/api/solves/abc/share-token", headers=auth_headers)
     assert r.status_code == 404
 
 
 def test_share_token_round_trip(
-    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers
 ):
-    app.config["SHARE_SECRET"] = "test-share-secret"
     fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     r = client.get("/api/solves/abc/share-token", headers=auth_headers)
     assert r.status_code == 200
@@ -334,9 +325,8 @@ def test_share_token_round_trip(
 
 
 def test_share_token_rejects_tampered(
-    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers
 ):
-    app.config["SHARE_SECRET"] = "test-share-secret"
     fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
 
@@ -357,9 +347,8 @@ def test_share_token_rejects_tampered(
 
 
 def test_share_token_404_on_soft_deleted(
-    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers, app
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers
 ):
-    app.config["SHARE_SECRET"] = "test-share-secret"
     fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
     token = client.get("/api/solves/abc/share-token", headers=auth_headers).get_json()["token"]
 
@@ -435,8 +424,7 @@ def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_he
     assert body.get("fields", {}).get("body") == "must include dnf or plus_two"
 
 
-def test_share_token_has_four_segments(app, fake_supabase_factory, client, auth_headers):
-    app.config["SHARE_SECRET"] = "x" * 32
+def test_share_token_has_four_segments(fake_supabase_factory, client, auth_headers):
     fake_supabase_factory(scripts={
         "solves": [{"data": [{"id": "abc-123"}]}],
     })
@@ -447,10 +435,9 @@ def test_share_token_has_four_segments(app, fake_supabase_factory, client, auth_
     assert token.count(".") == 3
 
 
-def test_share_token_expired_returns_404(app, monkeypatch, fake_service_supabase_factory, client):
-    import importlib
-    solves_module = importlib.import_module("app.routes.solves")
-    app.config["SHARE_SECRET"] = "x" * 32
+def test_share_token_expired_returns_404(
+    app, monkeypatch, fake_service_supabase_factory, client, solves_module
+):
     real_now = solves_module._now_seconds
     # Sign a token, then jump the clock past the TTL
     monkeypatch.setattr(
@@ -466,10 +453,9 @@ def test_share_token_expired_returns_404(app, monkeypatch, fake_service_supabase
     assert r.status_code == 404
 
 
-def test_share_token_tampered_mac_returns_404(app, fake_service_supabase_factory, client):
-    import importlib
-    solves_module = importlib.import_module("app.routes.solves")
-    app.config["SHARE_SECRET"] = "x" * 32
+def test_share_token_tampered_mac_returns_404(
+    app, fake_service_supabase_factory, client, solves_module
+):
     with app.app_context():
         token = solves_module._sign_solve_id("abc-123")
     # Flip the first char of the MAC segment. Flipping the last char is

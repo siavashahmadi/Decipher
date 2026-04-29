@@ -11,3 +11,7 @@ export const makeSolve = (overrides: Partial<Solve> = {}): Solve => ({
   created_at: '2026-04-20T00:00:00Z',
   ...overrides,
 });
+
+export const resetMakeSolveCounter = (): void => {
+  counter = 0;
+};
