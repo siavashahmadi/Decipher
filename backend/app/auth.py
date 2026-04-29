@@ -78,3 +78,8 @@ def verify_token_local(token: str) -> Optional[str]:
 
     sub = payload.get("sub")
     return sub if isinstance(sub, str) else None
+
+
+def jwks_cache_state() -> str:
+    """Return 'fresh' if the JWKS client has been initialized, 'cold' otherwise."""
+    return "fresh" if _jwks_client is not None else "cold"

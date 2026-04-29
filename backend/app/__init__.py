@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, current_app, jsonify
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .routes.solves import solves
@@ -63,6 +63,34 @@ def create_app(config_class=Config):
     @app.route('/api/health')
     def health_check():
         return {"status": "healthy"}
+
+    @app.route('/api/ready')
+    def readiness_check():
+        # Lazy imports so a Supabase outage at boot never breaks health.
+        from . import db as db_module
+        from .auth import jwks_cache_state
+
+        checks: dict[str, str] = {}
+        overall_ok = True
+
+        try:
+            client = db_module.get_supabase_client()
+            client.table('solves').select('id').limit(1).execute()
+            checks['supabase'] = 'ok'
+        except Exception:
+            current_app.logger.exception('readiness_supabase_failed')
+            checks['supabase'] = 'fail'
+            overall_ok = False
+
+        try:
+            checks['jwks'] = jwks_cache_state()
+        except Exception:
+            current_app.logger.exception('readiness_jwks_failed')
+            checks['jwks'] = 'fail'
+            overall_ok = False
+
+        status = 'ready' if overall_ok else 'not_ready'
+        return jsonify({"status": status, "checks": checks}), (200 if overall_ok else 503)
 
     # B.7 (phase 1, Report-Only). Once the report-only header has been
     # quiet in production for a burn-in window, swap the CSP header name
