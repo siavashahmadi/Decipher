@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent, type MouseEvent, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
@@ -13,10 +13,10 @@ import './Header.css';
 
 interface HeaderProps {
   type: PuzzleType;
-  handleTypeChange: (event: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => void;
+  handleTypeChange: (event: ChangeEvent<HTMLSelectElement> | MouseEvent<HTMLButtonElement>) => void;
 }
 
-const Header = ({ type, handleTypeChange }: HeaderProps): React.ReactElement => {
+const Header = ({ type, handleTypeChange }: HeaderProps): ReactElement => {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
