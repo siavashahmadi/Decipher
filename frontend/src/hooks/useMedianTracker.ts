@@ -39,8 +39,8 @@ class BinaryHeap<T> {
     let i = this._data.length - 1;
     while (i > 0) {
       const p = (i - 1) >> 1;
-      if (!this._cmp(this._data[i], this._data[p])) break;
-      [this._data[p], this._data[i]] = [this._data[i], this._data[p]];
+      if (!this._cmp(this._data[i]!, this._data[p]!)) break;
+      [this._data[p], this._data[i]] = [this._data[i]!, this._data[p]!];
       i = p;
     }
   }
@@ -56,10 +56,10 @@ class BinaryHeap<T> {
         let best = i;
         const l = 2 * i + 1;
         const r = 2 * i + 2;
-        if (l < n && this._cmp(this._data[l], this._data[best])) best = l;
-        if (r < n && this._cmp(this._data[r], this._data[best])) best = r;
+        if (l < n && this._cmp(this._data[l]!, this._data[best]!)) best = l;
+        if (r < n && this._cmp(this._data[r]!, this._data[best]!)) best = r;
         if (best === i) break;
-        [this._data[best], this._data[i]] = [this._data[i], this._data[best]];
+        [this._data[best], this._data[i]] = [this._data[i]!, this._data[best]!];
         i = best;
       }
     }

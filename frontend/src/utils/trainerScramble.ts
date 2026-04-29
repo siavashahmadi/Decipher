@@ -72,8 +72,11 @@ export interface TrainerScrambleResult {
   algIndex: number;
 }
 
-const pick = <T,>(arr: readonly T[], rng: () => number): T =>
-  arr[Math.floor(rng() * arr.length)];
+const pick = <T,>(arr: readonly T[], rng: () => number): T => {
+  const item = arr[Math.floor(rng() * arr.length)];
+  if (item === undefined) throw new Error('pick: array is empty');
+  return item;
+};
 
 const joinTokens = (tokens: string[]): string =>
   tokens.filter((t) => t.length > 0).join(' ');

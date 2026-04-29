@@ -7,13 +7,13 @@ export const mergeSortedAsc = (a: readonly number[], b: readonly number[]): numb
   let j = 0;
   let k = 0;
   while (i < a.length && j < b.length) {
-    if (a[i] <= b[j]) {
-      out[k++] = a[i++];
+    if (a[i]! <= b[j]!) {
+      out[k++] = a[i++]!;
     } else {
-      out[k++] = b[j++];
+      out[k++] = b[j++]!;
     }
   }
-  while (i < a.length) out[k++] = a[i++];
-  while (j < b.length) out[k++] = b[j++];
+  while (i < a.length) out[k++] = a[i++]!;
+  while (j < b.length) out[k++] = b[j++]!;
   return out;
 };

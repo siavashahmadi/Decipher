@@ -97,6 +97,7 @@ const SolveLog = ({
           {virtualItems.map(vi => {
             const solve = solves[vi.index];
             const itemAo5 = perSolveAo5[vi.index];
+            if (!solve || itemAo5 === undefined) return null;
             return (
               <li
                 key={solve.id}

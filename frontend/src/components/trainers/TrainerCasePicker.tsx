@@ -35,13 +35,15 @@ const groupCases = (cases: TrainerCase[]): Grouped[] | null => {
   const byGroup = new Map<string, TrainerCase[]>();
   for (const c of cases) {
     const label = c.group ?? 'Other';
-    if (!byGroup.has(label)) {
-      byGroup.set(label, []);
+    let bucket = byGroup.get(label);
+    if (bucket === undefined) {
+      bucket = [];
+      byGroup.set(label, bucket);
       order.push(label);
     }
-    byGroup.get(label)!.push(c);
+    bucket.push(c);
   }
-  return order.map((label) => ({ label, cases: byGroup.get(label)! }));
+  return order.map((label) => ({ label, cases: byGroup.get(label) ?? [] }));
 };
 
 const TrainerCasePicker = ({

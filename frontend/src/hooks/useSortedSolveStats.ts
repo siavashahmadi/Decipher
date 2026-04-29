@@ -22,7 +22,7 @@ const bisectLeft = (arr: number[], val: number): number => {
   let hi = arr.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if (arr[mid] < val) lo = mid + 1;
+    if (arr[mid]! < val) lo = mid + 1;
     else hi = mid;
   }
   return lo;

@@ -12,7 +12,7 @@ export interface HistogramBin {
 
 export function buildHistogram(times: number[], binCount: number): HistogramBin[] {
   if (!times.length || binCount <= 0) return [];
-  let min = times[0], max = times[0];
+  let min = times[0]!, max = times[0]!;
   for (const t of times) { if (t < min) min = t; if (t > max) max = t; }
   if (min === max) {
     return [{ min, max, count: times.length, label: min.toFixed(2) }];
@@ -28,7 +28,7 @@ export function buildHistogram(times: number[], binCount: number): HistogramBin[
   for (const t of times) {
     let idx = Math.floor((t - min) / width);
     if (idx >= binCount) idx = binCount - 1; // include the max in the last bin
-    bins[idx].count += 1;
+    bins[idx]!.count += 1;
   }
   return bins;
 }
@@ -78,7 +78,7 @@ export function computeSummary(solves: Solve[]): StatsSummary {
     validSolves: valid.length,
     totalSolveTimeSeconds: times.reduce((s, v) => s + v, 0),
     bestSingle: times.length ? (() => {
-      let min = times[0];
+      let min = times[0]!;
       for (const t of times) { if (t < min) min = t; }
       return min;
     })() : null,

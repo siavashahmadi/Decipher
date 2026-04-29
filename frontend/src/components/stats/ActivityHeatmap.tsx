@@ -21,9 +21,10 @@ const ActivityHeatmap = ({ solves, from, to }: Props): ReactElement => {
 
   const maxValue = useMemo(() => {
     if (data.length === 0) return 1;
-    let max = data[0].value;
+    let max = data[0]!.value;
     for (let i = 1; i < data.length; i++) {
-      if (data[i].value > max) max = data[i].value;
+      const v = data[i]!.value;
+      if (v > max) max = v;
     }
     return max;
   }, [data]);

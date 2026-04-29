@@ -18,7 +18,7 @@ const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
     const valid = chronological.filter(s => !s.dnf);
     if (!valid.length) return [];
     const times = valid.map(effectiveTime);
-    let pb = times[0], worst = times[0];
+    let pb = times[0]!, worst = times[0]!;
     for (const t of times) { if (t < pb) pb = t; if (t > worst) worst = t; }
     return valid.map((s, i) => {
       const t = effectiveTime(s);

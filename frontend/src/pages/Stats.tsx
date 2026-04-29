@@ -27,7 +27,7 @@ const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 // account still renders a sensibly-sized grid.
 const computeHeatmapFrom = (boundsStart: Date | null, solves: Solve[]): Date => {
   if (boundsStart) return boundsStart;
-  if (solves.length > 0) return new Date(solves[solves.length - 1].created_at);
+  if (solves.length > 0) return new Date(solves[solves.length - 1]!.created_at);
   return new Date(Date.now() - ONE_YEAR_MS);
 };
 
