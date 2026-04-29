@@ -5,6 +5,9 @@ export interface MockSupabaseAuthHandle {
   getSession: Mock;
   onAuthStateChange: Mock;
   unsubscribe: Mock;
+  // Returns the listener's promise; callers can `await` it to flush the
+  // listener's async work, or fire-and-forget when the test wants to
+  // observe intermediate state (e.g. mid-migration guard checks).
   fireAuthEvent: (event: string, session: Session | null) => Promise<void>;
 }
 
@@ -23,9 +26,9 @@ export const createMockSupabaseAuth = (
     return { data: { subscription: { unsubscribe } } };
   });
 
-  const fireAuthEvent = async (event: string, session: Session | null): Promise<void> => {
+  const fireAuthEvent = (event: string, session: Session | null): Promise<void> => {
     if (!listener) throw new Error('mockSupabaseAuth: no listener registered yet');
-    await listener(event, session);
+    return Promise.resolve(listener(event, session));
   };
 
   return { getSession, onAuthStateChange, unsubscribe, fireAuthEvent };
