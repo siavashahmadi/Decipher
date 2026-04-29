@@ -13,6 +13,29 @@ const getAuthHeader = async (): Promise<AuthHeader> => {
 		: {};
 };
 
+// H.2: standard wire shape for backend errors. Every 4xx/5xx body is
+// {"error": {"code": "...", "message": "...", "fields"?: {...}}}.
+export interface ApiErrorEnvelope {
+	code: string;
+	message: string;
+	fields?: Record<string, unknown>;
+}
+
+const parseApiError = (e: unknown): { envelope: ApiErrorEnvelope; status?: number } => {
+	if (axios.isAxiosError(e)) {
+		const status = e.response?.status;
+		const data = e.response?.data as { error?: ApiErrorEnvelope } | undefined;
+		if (data?.error?.code && typeof data.error.message === 'string') {
+			return { envelope: data.error, status };
+		}
+		return {
+			envelope: { code: 'NETWORK_ERROR', message: e.message || 'Network error' },
+			status,
+		};
+	}
+	return { envelope: { code: 'UNKNOWN', message: 'Unknown error' } };
+};
+
 export interface SolvesPage {
 	solves: Solve[];
 	next_cursor: string | null;
@@ -88,7 +111,12 @@ const api = {
 	// have to stay below the 30/min per-solve rate limit.
 	migrateSolves: async (
 		allGuestSolves: Solve[],
-	): Promise<{ migrated: Solve[]; failed: Solve[]; errorStatus?: number }> => {
+	): Promise<{
+		migrated: Solve[];
+		failed: Solve[];
+		errorStatus?: number;
+		errorCode?: string;
+	}> => {
 		if (allGuestSolves.length === 0) return { migrated: [], failed: [] };
 		// Sort ascending so the server's PB recompute receives them in the
 		// order they were earned. The batch endpoint also recomputes from
@@ -108,10 +136,16 @@ const api = {
 			return { migrated: response.data.solves, failed: [] };
 		} catch (err) {
 			console.error('Failed to migrate guest solves:', err);
-			// Surface the HTTP status so callers can pick a useful toast
-			// (429 vs 422 vs 500). Atomic batch -> all-or-nothing failure.
-			const status = axios.isAxiosError(err) ? err.response?.status : undefined;
-			return { migrated: [], failed: sorted, errorStatus: status };
+			// Surface the HTTP status and standardized error code so callers
+			// can pick a useful toast (429 vs 422 vs 500) and switch on the
+			// stable code (RATE_LIMITED, BATCH_VALIDATION_FAILED, etc.).
+			const { envelope, status } = parseApiError(err);
+			return {
+				migrated: [],
+				failed: sorted,
+				errorStatus: status,
+				errorCode: envelope.code,
+			};
 		}
 	},
 };

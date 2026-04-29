@@ -19,6 +19,19 @@ from ..services.solves_service import SolvesService
 from ..services.solves_service import SOLVE_LIFETIME_CAP  # re-exported; tests import from here
 from ..services.share_links_service import ShareLinksService
 from ..services.exceptions import SolveLimitReached, SolveNotFound
+from ..errors import (
+    AUTH_INVALID_TOKEN,
+    AUTH_MISSING_TOKEN,
+    AUTH_UNAVAILABLE,
+    BATCH_VALIDATION_FAILED,
+    INTERNAL_ERROR,
+    INVALID_QUERY_PARAM,
+    NOT_FOUND,
+    SHARE_LINK_INVALID,
+    SOLVE_LIMIT_REACHED,
+    VALIDATION_FAILED,
+    error_response,
+)
 
 # Cursor pagination tokens are user-supplied; both halves get interpolated
 # into a PostgREST .or_() filter, so unsafe characters could break out of
@@ -46,11 +59,15 @@ def require_auth(f):
         auth_header = request.headers.get('Authorization', '')
 
         if not auth_header.startswith(BEARER_PREFIX):
-            return jsonify({"error": "No authorization token provided"}), 401
+            return error_response(
+                AUTH_MISSING_TOKEN, "No authorization token provided", 401,
+            )
 
         token = auth_header.removeprefix(BEARER_PREFIX).strip()
         if not token:
-            return jsonify({"error": "No authorization token provided"}), 401
+            return error_response(
+                AUTH_MISSING_TOKEN, "No authorization token provided", 401,
+            )
 
         # Fast path: verify the JWT locally via cached JWKS so we skip a
         # per-request Supabase round-trip. Falls back to auth.get_user() only
@@ -65,10 +82,14 @@ def require_auth(f):
             except Exception:
                 # Auth provider unreachable or rejecting; don't leak which.
                 current_app.logger.exception("Supabase auth lookup failed")
-                return jsonify({"error": "Auth service unavailable"}), 503
+                return error_response(
+                    AUTH_UNAVAILABLE, "Auth service unavailable", 503,
+                )
 
             if not user or not getattr(user, 'user', None):
-                return jsonify({"error": "Invalid authentication token"}), 401
+                return error_response(
+                    AUTH_INVALID_TOKEN, "Invalid authentication token", 401,
+                )
 
             user_id = user.user.id
             g.supabase = supabase
@@ -96,7 +117,7 @@ def _parse_positive_int(value: str | None, default: int, maximum: int) -> int:
 def _internal_error(label: str) -> tuple[Response, int]:
     """Log + 500 response shaped consistently across routes."""
     current_app.logger.exception(f"{label} failed")
-    return jsonify({"error": "Internal server error"}), 500
+    return error_response(INTERNAL_ERROR, "Internal server error", 500)
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +266,7 @@ def get_solves():
     try:
         limit = _parse_positive_int(request.args.get('limit'), default=50, maximum=100)
     except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        return error_response(INVALID_QUERY_PARAM, str(e), 400)
 
     cursor_param = request.args.get('cursor')
     cursor = _decode_solve_cursor(cursor_param) if cursor_param else None
@@ -286,7 +307,7 @@ def delete_solve(solve_id):
         deleted = _solves_service().delete(g.user_id, solve_id)
         return jsonify(deleted)
     except SolveNotFound:
-        return jsonify({"error": "Solve not found"}), 404
+        return error_response(NOT_FOUND, "Solve not found", 404)
     except Exception:
         return _internal_error("delete_solve")
 
@@ -298,7 +319,9 @@ def update_solve(solve_id):
     data = request.json
     errors = validate_update_solve(data)
     if errors:
-        return jsonify({"error": "Validation failed", "fields": errors}), 422
+        return error_response(
+            VALIDATION_FAILED, "Validation failed", 422, fields=errors,
+        )
 
     # Only allow dnf and plus_two to be updated — strip everything else.
     allowed = {k: data[k] for k in ('dnf', 'plus_two') if k in data}
@@ -307,7 +330,7 @@ def update_solve(solve_id):
         result = _solves_service().update(g.user_id, solve_id, allowed)
         return jsonify(result)
     except SolveNotFound:
-        return jsonify({"error": "Solve not found"}), 404
+        return error_response(NOT_FOUND, "Solve not found", 404)
     except Exception:
         return _internal_error("update_solve")
 
@@ -320,13 +343,15 @@ def create_solve():
     data = request.json
     errors = validate_create_solve(data)
     if errors:
-        return jsonify({"error": "Validation failed", "fields": errors}), 422
+        return error_response(
+            VALIDATION_FAILED, "Validation failed", 422, fields=errors,
+        )
 
     try:
         solve = _solves_service().create(g.user_id, data)
         return jsonify(solve)
     except SolveLimitReached as e:
-        return jsonify({"error": str(e)}), 429
+        return error_response(SOLVE_LIMIT_REACHED, str(e), 429)
     except Exception:
         return _internal_error("create_solve")
 
@@ -345,15 +370,19 @@ def create_solves_batch():
     payload = request.get_json(silent=True)
     err, rows = validate_create_solves_batch(payload)
     if err:
-        return jsonify({"errors": err}), 422
+        return error_response(
+            BATCH_VALIDATION_FAILED, "Batch validation failed", 422, fields=err,
+        )
 
     try:
         inserted = _solves_service().create_batch(g.user_id, rows)
         return jsonify({"solves": inserted}), 200
     except SolveLimitReached:
-        return jsonify({
-            "error": f"Batch would exceed lifetime cap of {SOLVE_LIFETIME_CAP}"
-        }), 429
+        return error_response(
+            SOLVE_LIMIT_REACHED,
+            f"Batch would exceed lifetime cap of {SOLVE_LIFETIME_CAP}",
+            429,
+        )
     except Exception:
         return _internal_error("create_solves_batch")
 
@@ -365,7 +394,7 @@ def get_share_token(solve_id):
     try:
         row = _solves_service().get_by_id(g.user_id, solve_id)
         if not row:
-            return jsonify({"error": "Solve not found"}), 404
+            return error_response(NOT_FOUND, "Solve not found", 404)
         return jsonify({"token": _sign_solve_id(solve_id)})
     except Exception:
         return _internal_error("get_share_token")
@@ -376,11 +405,15 @@ def get_share_token(solve_id):
 def get_shared_solve(token):
     solve_id = _verify_share_token(token)
     if solve_id is None:
-        return jsonify({"error": "Invalid or expired share link"}), 404
+        return error_response(
+            SHARE_LINK_INVALID, "Invalid or expired share link", 404,
+        )
     try:
         solve = _share_links_service().get_public_solve(solve_id)
         if solve is None:
-            return jsonify({"error": "Invalid or expired share link"}), 404
+            return error_response(
+                SHARE_LINK_INVALID, "Invalid or expired share link", 404,
+            )
         return jsonify(solve)
     except Exception:
         return _internal_error("get_shared_solve")

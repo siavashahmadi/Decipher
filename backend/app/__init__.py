@@ -5,6 +5,12 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from .routes.solves import solves
 from .config import Config
 from .extensions import limiter
+from .errors import (
+    INTERNAL_ERROR,
+    NOT_FOUND,
+    RATE_LIMITED,
+    error_response,
+)
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -108,6 +114,24 @@ def create_app(config_class=Config):
         "base-uri 'self'; "
         "form-action 'self'"
     )
+
+    # H.2: standardize error envelope on framework-emitted errors too.
+    # Per-route 4xx errors already use error_response; these handlers cover
+    # the framework defaults (rate limiter 429, missing routes 404, generic
+    # 500s) so every error response on the wire matches the same shape.
+    @app.errorhandler(429)
+    def _handle_rate_limit(_e):
+        return error_response(
+            RATE_LIMITED, "Too many requests, please slow down", 429,
+        )
+
+    @app.errorhandler(404)
+    def _handle_not_found(_e):
+        return error_response(NOT_FOUND, "Resource not found", 404)
+
+    @app.errorhandler(500)
+    def _handle_internal_error(_e):
+        return error_response(INTERNAL_ERROR, "Internal server error", 500)
 
     @app.after_request
     def _security_headers(response):

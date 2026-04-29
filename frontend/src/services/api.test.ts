@@ -154,6 +154,31 @@ describe('api.migrateSolves errorStatus capture', () => {
     const { errorStatus } = await api.migrateSolves(input);
     expect(errorStatus).toBeUndefined();
   });
+
+  it('captures the standardized error.code from the H.2 envelope', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          error: {
+            code: 'BATCH_VALIDATION_FAILED',
+            message: 'Batch validation failed',
+            fields: { rows: [] },
+          },
+        },
+      },
+      message: 'Request failed with status code 422',
+    });
+    const input = [
+      { id: 'a', user_id: 'u', puzzle_type: '333' as const, time: 9, scramble: '',
+        dnf: false, plus_two: false, created_at: '2026-04-25T08:00:00Z' },
+    ];
+    const { errorStatus, errorCode } = await api.migrateSolves(input);
+    expect(errorStatus).toBe(422);
+    expect(errorCode).toBe('BATCH_VALIDATION_FAILED');
+  });
 });
 
 describe('api.getSolves AbortSignal', () => {

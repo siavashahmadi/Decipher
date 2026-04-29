@@ -216,7 +216,7 @@ def test_create_solve_rejects_tiny_time(fake_supabase_factory, client, auth_head
     )
     assert r.status_code == 422
     body = r.get_json()
-    assert "time" in body.get("fields", {})
+    assert "time" in body["error"].get("fields", {})
 
 
 def test_create_solve_returns_429_above_lifetime_cap(
@@ -231,7 +231,9 @@ def test_create_solve_returns_429_above_lifetime_cap(
         json={"puzzle_type": "333", "time": 10.0},
     )
     assert r.status_code == 429
-    assert "limit" in r.get_json().get("error", "").lower()
+    body = r.get_json()
+    assert body["error"]["code"] == "SOLVE_LIMIT_REACHED"
+    assert "limit" in body["error"]["message"].lower()
 
 
 def test_create_solve_under_cap_inserts_normally(
@@ -284,7 +286,7 @@ def test_patch_solve_422_on_invalid_type(fake_supabase_factory, client, auth_hea
     )
     assert r.status_code == 422
     body = r.get_json()
-    assert "dnf" in body.get("fields", {})
+    assert "dnf" in body["error"].get("fields", {})
 
 
 # ---------------------------------------------------------------------------
@@ -368,7 +370,9 @@ def test_create_solve_rejects_when_at_lifetime_cap(fake_supabase_factory, client
         json={"puzzle_type": "333", "time": 12.34, "scramble": ""},
     )
     assert r.status_code == 429
-    assert "limit" in r.get_json()["error"].lower()
+    body = r.get_json()
+    assert body["error"]["code"] == "SOLVE_LIMIT_REACHED"
+    assert "limit" in body["error"]["message"].lower()
 
 
 def test_create_solve_allows_one_under_cap(fake_supabase_factory, client, auth_headers):
@@ -421,7 +425,7 @@ def test_patch_rejects_empty_allowed_body(fake_supabase_factory, client, auth_he
     )
     assert r.status_code == 422
     body = r.get_json()
-    assert body.get("fields", {}).get("body") == "must include dnf or plus_two"
+    assert body["error"].get("fields", {}).get("body") == "must include dnf or plus_two"
 
 
 def test_share_token_has_four_segments(fake_supabase_factory, client, auth_headers):
