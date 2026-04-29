@@ -94,6 +94,68 @@ describe('api.migrateSolves', () => {
   });
 });
 
+describe('api.migrateSolves errorStatus capture', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (axios.isAxiosError as unknown as ReturnType<typeof vi.fn>) = vi.fn(
+      (e: unknown): e is { response?: { status?: number } } =>
+        typeof e === 'object' && e !== null && 'response' in e,
+    );
+  });
+
+  const axiosError = (status: number) => ({
+    isAxiosError: true,
+    response: { status },
+    message: `request failed with ${status}`,
+  });
+
+  it('captures HTTP 429 in result.errorStatus on rate-limit rejection', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue(axiosError(429));
+    const input = [
+      { id: 'a', user_id: 'u', puzzle_type: '333' as const, time: 9, scramble: '',
+        dnf: false, plus_two: false, created_at: '2026-04-25T08:00:00Z' },
+    ];
+    const result = await api.migrateSolves(input);
+    expect(result.errorStatus).toBe(429);
+    expect(result.migrated).toEqual([]);
+    expect(result.failed.map(s => s.id)).toEqual(['a']);
+  });
+
+  it('captures HTTP 422 in result.errorStatus on validation rejection', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue(axiosError(422));
+    const input = [
+      { id: 'a', user_id: 'u', puzzle_type: '333' as const, time: 9, scramble: '',
+        dnf: false, plus_two: false, created_at: '2026-04-25T08:00:00Z' },
+    ];
+    const { errorStatus } = await api.migrateSolves(input);
+    expect(errorStatus).toBe(422);
+  });
+
+  it('captures HTTP 500 in result.errorStatus on server error', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue(axiosError(500));
+    const input = [
+      { id: 'a', user_id: 'u', puzzle_type: '333' as const, time: 9, scramble: '',
+        dnf: false, plus_two: false, created_at: '2026-04-25T08:00:00Z' },
+    ];
+    const { errorStatus } = await api.migrateSolves(input);
+    expect(errorStatus).toBe(500);
+  });
+
+  it('leaves errorStatus undefined when the failure is not an axios error', async () => {
+    const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+    post.mockRejectedValue(new Error('plain network failure'));
+    const input = [
+      { id: 'a', user_id: 'u', puzzle_type: '333' as const, time: 9, scramble: '',
+        dnf: false, plus_two: false, created_at: '2026-04-25T08:00:00Z' },
+    ];
+    const { errorStatus } = await api.migrateSolves(input);
+    expect(errorStatus).toBeUndefined();
+  });
+});
+
 describe('api.getSolves AbortSignal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
