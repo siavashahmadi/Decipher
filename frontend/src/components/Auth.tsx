@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../services/auth';
@@ -85,7 +85,7 @@ const LINK_LABELS: Record<AuthMode, string> = {
   update: 'Update Password',
 };
 
-export default function Auth(): React.ReactElement {
+export default function Auth(): ReactElement {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
