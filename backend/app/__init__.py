@@ -1,5 +1,5 @@
 import os
-from flask import Flask, current_app, jsonify
+from flask import Flask, current_app, g, jsonify, request
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .routes.solves import solves
@@ -63,8 +63,26 @@ def create_app(config_class=Config):
     # SD-5: Token bucket rate limiter (in-memory, no Redis required)
     limiter.init_app(app)
 
-    # Register blueprints
-    app.register_blueprint(solves, url_prefix='/api')
+    # H.1: register the same blueprint at /api/v1 (canonical) and /api
+    # (transitional). Frontend points at /api/v1; existing share links and
+    # external clients keep working under /api with a Deprecation header.
+    # The `name=` kwarg is required because Flask refuses to register the
+    # same blueprint twice under one default name.
+    app.register_blueprint(solves, url_prefix='/api/v1')
+    app.register_blueprint(solves, url_prefix='/api', name='solves_legacy')
+
+    @app.before_request
+    def _legacy_api_deprecation():
+        path = request.path
+        # Mark unversioned /api/* requests, except the operational liveness
+        # /readiness routes which are not part of the versioned API surface.
+        if (
+            path.startswith('/api/')
+            and not path.startswith('/api/v1/')
+            and not path.startswith('/api/health')
+            and not path.startswith('/api/ready')
+        ):
+            g.legacy_api = True
 
     @app.route('/api/health')
     def health_check():
@@ -143,6 +161,21 @@ def create_app(config_class=Config):
             "Strict-Transport-Security",
             "max-age=31536000; includeSubDomains",
         )
+        return response
+
+    @app.after_request
+    def _legacy_api_headers(response):
+        # H.1: legacy /api/* paths get RFC 8594 Sunset signals so external
+        # clients (notably saved share links) can be discovered and migrated
+        # before the un-versioned mount is removed.
+        if getattr(g, 'legacy_api', False):
+            response.headers.setdefault('Deprecation', 'true')
+            response.headers.setdefault(
+                'Sunset', 'Wed, 01 Jul 2026 00:00:00 GMT',
+            )
+            response.headers.setdefault(
+                'Link', '</api/v1>; rel="successor-version"',
+            )
         return response
 
     return app

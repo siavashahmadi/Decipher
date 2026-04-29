@@ -2,7 +2,9 @@ import axios from 'axios';
 import { supabase } from './auth';
 import type { PersonalBest, PuzzleType, Solve } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// H.1: backend mounts the API at /api/v1 (canonical) with /api as a
+// transitional alias. The frontend always points at /api/v1.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 type AuthHeader = { Authorization: string } | Record<string, never>;
 

@@ -79,7 +79,12 @@ pytest tests/test_solves.py
 
 ## API Reference
 
-All endpoints (except `/api/health`) require:
+The canonical API is mounted at `/api/v1`. The unversioned `/api` alias
+remains as a transitional path for in-the-wild clients (notably saved
+share links); responses on the legacy mount include a `Deprecation: true`
+header and an RFC 8594 `Sunset` header. New work should target `/api/v1`.
+
+All endpoints except `/api/health` and `/api/ready` require:
 
 ```
 Authorization: Bearer <supabase_access_token>
@@ -87,11 +92,29 @@ Authorization: Bearer <supabase_access_token>
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/health` | Health check |
-| GET | `/api/solves` | Get all solves for the authenticated user. Optional query param: `?puzzle_type=333` |
-| POST | `/api/solves` | Create a solve. `user_id` is set server-side from the token. |
-| PATCH | `/api/solves/<id>` | Update a solve (e.g. toggle DNF or +2) |
-| DELETE | `/api/solves/<id>` | Delete a solve |
+| GET | `/api/health` | Liveness probe (always 200; not versioned) |
+| GET | `/api/ready` | Readiness probe; checks Supabase + JWKS, 503 on failure (not versioned) |
+| GET | `/api/v1/solves` | Get solves for the authenticated user (cursor-paginated). Query: `?puzzle_type=333&cursor=<token>&limit=<n>` |
+| POST | `/api/v1/solves` | Create a solve. `user_id` is set server-side from the token. |
+| POST | `/api/v1/solves/batch` | Bulk-insert up to 1000 validated solves in one transaction (used by guest-to-auth migration) |
+| PATCH | `/api/v1/solves/<id>` | Update a solve (whitelist: `dnf`, `plus_two`) |
+| DELETE | `/api/v1/solves/<id>` | Soft-delete a solve |
+| GET | `/api/v1/solves/<id>/share-token` | Mint a signed share token for the solve |
+| GET | `/api/v1/solves/share/<token>` | Public share endpoint; no auth |
+| GET | `/api/v1/personal-bests` | List PB rows for the authenticated user. Query: `?puzzle_type=333` |
+
+### Error envelope
+
+Every 4xx/5xx response uses the same shape:
+
+```json
+{ "error": { "code": "AUTH_MISSING_TOKEN", "message": "...", "fields": { "...": "..." } } }
+```
+
+`code` is a stable upper-snake-case identifier; switch on `code` for
+branching. `message` is human-readable; surface it in the UI on unknown
+codes. `fields` is omitted when empty. Codes are catalogued in
+`backend/app/errors.py`.
 
 ## Tech
 
