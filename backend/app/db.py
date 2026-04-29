@@ -42,15 +42,6 @@ def get_supabase_client(access_token=None) -> Client:
     return client
 
 
-def get_supabase_service_client() -> Client:
-    """Service-role client that bypasses RLS.
-
-    Only use on narrow, server-verified paths (e.g. signed share tokens)
-    where the request is authorized by something other than the end-user's
-    JWT.
-    """
-    url = Config.SUPABASE_URL
-    service_key = Config.SUPABASE_SERVICE_ROLE_KEY
-    if not service_key:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY is not configured")
-    return create_client(url, service_key, options=_client_options())
+# H.8: get_supabase_service_client lives in app.dangerous_admin.
+# That module's name is loud at every call site, and its docstring
+# states the contract.

@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 from flask import Blueprint, Response, request, jsonify, current_app, g
 from functools import wraps
 from ..auth import BEARER_PREFIX, verify_token_local
-from ..db import get_supabase_client, get_supabase_service_client
+from ..db import get_supabase_client
+from ..dangerous_admin import get_supabase_service_client
 from ..validators import validate_create_solve, validate_update_solve, validate_create_solves_batch
 from ..extensions import limiter
 from ..repositories.solves_repo import SolvesRepository  # used in service factories

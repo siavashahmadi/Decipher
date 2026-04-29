@@ -2,7 +2,6 @@
 from unittest.mock import MagicMock, patch
 
 import httpx
-import pytest
 
 from app import db
 from app.config import Config
@@ -52,19 +51,5 @@ def test_get_supabase_client_attaches_token(monkeypatch):
         fake.postgrest.auth.assert_called_once_with("user-jwt")
 
 
-def test_get_supabase_service_client_passes_timeout(monkeypatch):
-    monkeypatch.setattr(Config, "SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setattr(Config, "SUPABASE_SERVICE_ROLE_KEY", "service-key")
-    with patch("app.db.create_client") as mock_create:
-        _patched_create_client(mock_create)
-        db.get_supabase_service_client()
-    options = mock_create.call_args.kwargs.get("options")
-    assert options is not None
-    assert isinstance(options.postgrest_client_timeout, httpx.Timeout)
-
-
-def test_get_supabase_service_client_raises_without_service_key(monkeypatch):
-    monkeypatch.setattr(Config, "SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setattr(Config, "SUPABASE_SERVICE_ROLE_KEY", None)
-    with pytest.raises(RuntimeError):
-        db.get_supabase_service_client()
+# Service-role client moved to app.dangerous_admin (H.8).
+# Tests for it live in test_dangerous_admin.py.
