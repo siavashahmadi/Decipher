@@ -28,6 +28,10 @@ const Timer = ({ onSolveComplete }: TimerProps): ReactElement => {
     <div>
       <div
         id="timer"
+        data-testid="timer-display"
+        data-state={machine.phase}
+        data-hold-met={machine.isHoldReady ? 'true' : 'false'}
+        data-warning={machine.isWarning ? 'true' : 'false'}
         ref={machine.timerDivRef}
         className={timerClass}
         onTouchStart={machine.onTouchStart}

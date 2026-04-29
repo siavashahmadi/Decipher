@@ -54,13 +54,14 @@ const advance = async (ms: number): Promise<void> => {
     vi.advanceTimersByTime(ms);
   });
 };
-const timerClass = (): string => document.querySelector('#timer')?.className ?? '';
+const timerNode = (): HTMLElement => screen.getByTestId('timer-display');
+const phase = (): string => timerNode().getAttribute('data-state') ?? '';
 
 describe('Timer state machine', () => {
   it('idle → ready on space keydown', () => {
     render(<Timer onSolveComplete={vi.fn()} />);
     spaceDown();
-    expect(timerClass()).toContain('ready');
+    expect(phase()).toBe('ready');
   });
 
   it('ready → idle on keyup before hold met (no solve recorded)', async () => {
@@ -69,8 +70,7 @@ describe('Timer state machine', () => {
     spaceDown();
     await advance(100);
     spaceUp();
-    expect(timerClass()).not.toContain('ready');
-    expect(timerClass()).not.toContain('inspection');
+    expect(phase()).toBe('idle');
     expect(onComplete).not.toHaveBeenCalled();
   });
 
@@ -79,7 +79,7 @@ describe('Timer state machine', () => {
     spaceDown();
     await advance(400);
     spaceUp();
-    expect(timerClass()).toContain('inspection');
+    expect(phase()).toBe('inspection');
   });
 
   it('ready → idle on Escape', () => {
@@ -87,8 +87,7 @@ describe('Timer state machine', () => {
     render(<Timer onSolveComplete={onComplete} />);
     spaceDown();
     escape();
-    expect(timerClass()).not.toContain('ready');
-    expect(timerClass()).not.toContain('inspection');
+    expect(phase()).toBe('idle');
     expect(onComplete).not.toHaveBeenCalled();
   });
 
@@ -98,7 +97,7 @@ describe('Timer state machine', () => {
     await advance(400);
     spaceUp();
     spaceDown();
-    expect(timerClass()).toContain('armed');
+    expect(phase()).toBe('armed');
   });
 
   it('armed → running on keyup after hold met (solve recorded on next press)', async () => {
@@ -110,7 +109,7 @@ describe('Timer state machine', () => {
     spaceDown();
     await advance(400);
     spaceUp();
-    expect(timerClass()).toContain('running');
+    expect(phase()).toBe('running');
     await advance(1000);
     spaceDown();
     expect(onComplete).toHaveBeenCalledTimes(1);
@@ -142,8 +141,7 @@ describe('Timer state machine', () => {
     // within ~250ms of the 17s mark; advance enough to span a tick.
     await advance(17500);
     expect(onComplete).toHaveBeenCalledWith(0, { plusTwo: false, dnf: true });
-    expect(timerClass()).not.toContain('inspection');
-    expect(timerClass()).not.toContain('running');
+    expect(phase()).toBe('idle');
   });
 
   it('running → idle on space keydown; time is rounded to 10ms', async () => {
@@ -174,7 +172,7 @@ describe('Timer state machine', () => {
     await advance(2000);
     escape();
     expect(onComplete).not.toHaveBeenCalled();
-    expect(timerClass()).not.toContain('running');
+    expect(phase()).not.toBe('running');
   });
 
   it('inspectionEnabled: false → idle → ready → running', async () => {
@@ -183,7 +181,7 @@ describe('Timer state machine', () => {
     spaceDown();
     await advance(400);
     spaceUp();
-    expect(timerClass()).toContain('running');
+    expect(phase()).toBe('running');
   });
 
   it('shows +2 badge once inspection passes 15s', async () => {
