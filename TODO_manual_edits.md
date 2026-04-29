@@ -292,3 +292,63 @@ These were flagged by the cluster review but deliberately not done in this round
 - **SQL-level integration tests for the trigger and RPCs.** All cluster D backend tests use the FakeSupabase mock. The trigger logic in `update_user_solve_count` and the function bodies of `record_pb_if_better` and `recompute_pbs_for_user` have no direct test coverage. A Postgres-backed integration test (Docker Compose Supabase or testcontainers) would catch trigger drift before deploy.
 - **Drop the legacy timestamp-only cursor fallback.** See D.9 note above.
 - **`MAX_CONTENT_LENGTH` per-route override** is also tracked in `backend/app/__init__.py`. The current 256KB only matters because the batch endpoint exists.
+
+## Audit Cluster H (2026-04-29)
+
+10 of the 13 Cluster H items shipped as 10 commits between `ecd68ca` and `4e801ec`, plus a docs commit `2c3962b`. Tests pass: backend 192/192, frontend 457/457, tsc clean. The remaining work is one SQL apply and three deferred vendor picks.
+
+### H.12 Apply migration 012 (solves.metadata)
+
+Migration file: `backend/migrations/012_solves_metadata.sql`
+
+Adds a `metadata jsonb NOT NULL DEFAULT '{}'` column to `solves`. Forward-compat for future enrichment fields (device, app version, comp tags). No code reads the column today, so there is no rush, but apply the migration before any feature that depends on it ships.
+
+To apply:
+
+1. If the Supabase project is paused (see Cluster A note), unpause first.
+2. Supabase dashboard, SQL editor: paste the contents of `backend/migrations/012_solves_metadata.sql` and run.
+3. Verify:
+   ```sql
+   SELECT column_name, data_type, column_default
+   FROM information_schema.columns
+   WHERE table_name = 'solves' AND column_name = 'metadata';
+   ```
+   Expected: one row, `jsonb`, default `'{}'::jsonb`.
+
+### H.1 /api/v1 versioning, post-deploy check
+
+The frontend now hits `/api/v1`. The legacy `/api` mount remains as a transitional alias so saved share links keep working. After deploying:
+
+1. Hit `https://<your-host>/api/v1/health` and `https://<your-host>/api/v1/ready`. The `ready` endpoint should return 200 with `supabase: ok` plus a JWKS state (`fresh` or `cold`).
+2. Hit a legacy `https://<your-host>/api/solves/...` path. Confirm the response carries `Deprecation: true`, `Sunset`, and `Link: </api/v1>; rel="successor-version"` headers.
+3. The Sunset header advertises 2026-07-01. Plan to drop the un-versioned `/api` mount after external clients have migrated past that date (see Deferred follow-ups below).
+
+### H.13 Auth route already at /login (verified, no action)
+
+The audit called for mounting Auth at `/login`. Confirmed during Cluster H execution that this already shipped as part of Cluster E (E.13 Auth refactor). No further action.
+
+### H.6, H.10, H.11 deferred (vendor picks required)
+
+Three Cluster H items are blocked on vendor decisions:
+
+- **H.6** error reporting: Sentry vs PostHog vs Highlight vs GlitchTip vs no-op.
+- **H.10** backend host: Render vs Fly vs Railway vs Cloud Run vs Vercel functions.
+- **H.11** migration runner: yoyo-migrations vs Supabase CLI vs sqitch vs hand-rolled.
+
+A placeholder plan with full step outlines per item lives at `docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md`. Fill in the "Decision log" section at the top of that file when you pick vendors, then ask Claude to execute the matching task.
+
+### H.3 cross-page invalidation, post-deploy check
+
+Claim: creating a solve on the timer page makes Stats see the new solve without a manual reload, because both pages share a TanStack Query cache.
+
+1. Open the deployed app in two tabs at the same account: tab A on `/`, tab B on `/stats`.
+2. In tab A, record one solve.
+3. Switch to tab B (no reload). Within a second the new solve should appear in the Stats summary, scramble history, and charts. If it does not, the `invalidateSolveCaches` call in `useSolveSession` regressed or the `QueryClientProvider` in `main.tsx` is missing.
+
+### Deferred follow-ups (open tickets when convenient)
+
+These were considered during Cluster H but intentionally not done:
+
+- **Drop the un-versioned `/api` legacy mount.** Currently advertised for removal on 2026-07-01 via the `Sunset` header. After that date, the second `app.register_blueprint(solves, url_prefix='/api', name='solves_legacy')` line in `backend/app/__init__.py` plus the `_legacy_api_deprecation` and `_legacy_api_headers` hooks can be deleted. Existing share links will 404 if regenerated under the legacy path; mint new ones from `/api/v1/solves/<id>/share-token`.
+- **Lift optimistic-update boilerplate into react-query mutations.** `useSolveSession`'s manual snapshot/rollback pattern was preserved in H.3 to keep the timer hot path stable. Future work can replace it with react-query's `onMutate` and `onError` lifecycle. Not urgent: behavior is correct, code is just a bit longer than necessary.
+- **Migrate personal_bests reads to react-query.** `useSolveSession` still fetches PBs via a `useEffect`. Putting it in the shared cache (key `['personalBests', puzzleType]`) plus invalidation on mutations would close the same cross-page consistency gap H.3 closed for solves.
