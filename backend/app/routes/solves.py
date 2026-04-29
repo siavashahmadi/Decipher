@@ -28,6 +28,11 @@ _UUID_RE = re.compile(
     r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 )
 
+# Share-link signing parameters. Tests monkeypatch SHARE_TOKEN_TTL_SECONDS
+# at the module level, so keep these as plain top-level constants.
+SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
+MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
+
 solves = Blueprint('solves', __name__)
 solves.strict_slashes = False
 
@@ -166,10 +171,6 @@ def _decode_solve_cursor(raw: str) -> tuple[str, str | None]:
 # ---------------------------------------------------------------------------
 # Share-link token helpers (stay here: tests monkeypatch these module-level names)
 # ---------------------------------------------------------------------------
-
-SHARE_TOKEN_TTL_SECONDS = 30 * 24 * 3600  # 30 days
-MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
-
 
 @functools.lru_cache(maxsize=4)
 def _encode_share_secret(secret: str) -> bytes:
