@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { formatTime } from '../utils/formatTime';
 import { useTimerMachine } from '../hooks/useTimerMachine';
 import './Timer.css';
@@ -12,7 +12,7 @@ interface TimerProps {
   onSolveComplete: (time: number, flags: PenaltyFlags) => void;
 }
 
-const Timer = ({ onSolveComplete }: TimerProps): React.ReactElement => {
+const Timer = ({ onSolveComplete }: TimerProps): ReactElement => {
   const machine = useTimerMachine({ onSolveComplete });
 
   const timerClass = useMemo(
