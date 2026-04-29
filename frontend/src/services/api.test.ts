@@ -42,7 +42,7 @@ describe('api.migrateSolves', () => {
     ];
     await api.migrateSolves(input);
     expect(post).toHaveBeenCalledTimes(1);
-    expect(post.mock.calls[0][0]).toMatch(/\/solves\/batch$/);
+    expect(post.mock.calls[0]![0]).toMatch(/\/solves\/batch$/);
   });
 
   it('posts solves in ascending created_at order inside the batch body', async () => {
@@ -53,7 +53,7 @@ describe('api.migrateSolves', () => {
       mkSolve('b', '2026-04-25T10:00:00Z', 20),
     ];
     await api.migrateSolves(input);
-    const body = post.mock.calls[0][1] as { solves: { time: number }[] };
+    const body = post.mock.calls[0]![1] as { solves: { time: number }[] };
     expect(body.solves.map((s) => s.time)).toEqual([10, 20, 30]);
   });
 
@@ -72,7 +72,7 @@ describe('api.migrateSolves', () => {
     const ts = '2026-04-25T08:00:00Z';
     const input = [mkSolve('first', ts, 1), mkSolve('second', ts, 2)];
     await api.migrateSolves(input);
-    const body = post.mock.calls[0][1] as { solves: { time: number }[] };
+    const body = post.mock.calls[0]![1] as { solves: { time: number }[] };
     expect(body.solves.map((s) => s.time)).toEqual([1, 2]);
   });
 
@@ -114,7 +114,7 @@ describe('api.getSolves AbortSignal', () => {
     await api.getSolves('333', null, controller.signal);
 
     expect(get).toHaveBeenCalledTimes(1);
-    const opts = get.mock.calls[0][1] as { signal?: AbortSignal };
+    const opts = get.mock.calls[0]![1] as { signal?: AbortSignal };
     expect(opts.signal).toBe(controller.signal);
   });
 
@@ -124,7 +124,7 @@ describe('api.getSolves AbortSignal', () => {
 
     await api.getSolves('333');
 
-    const opts = get.mock.calls[0][1] as { signal?: AbortSignal };
+    const opts = get.mock.calls[0]![1] as { signal?: AbortSignal };
     expect(opts.signal).toBeUndefined();
   });
 });

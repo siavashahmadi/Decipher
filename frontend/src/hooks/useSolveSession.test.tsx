@@ -56,8 +56,8 @@ describe('useSolveSession', () => {
     });
 
     expect(result.current.solves).toHaveLength(1);
-    expect(result.current.solves[0].time).toBe(10.5);
-    expect(result.current.solves[0].scramble).toBe('R U R\'');
+    expect(result.current.solves[0]!.time).toBe(10.5);
+    expect(result.current.solves[0]!.scramble).toBe('R U R\'');
     expect(result.current.mostRecent?.time).toBe(10.5);
   });
 });

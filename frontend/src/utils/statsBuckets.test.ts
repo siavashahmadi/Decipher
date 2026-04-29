@@ -12,8 +12,8 @@ describe('buildHistogram', () => {
     const bins = buildHistogram([10, 12, 14, 16, 20], 5);
     expect(bins).toHaveLength(5);
     expect(bins.reduce((s, b) => s + b.count, 0)).toBe(5);
-    expect(bins[0].min).toBe(10);
-    expect(bins[bins.length - 1].max).toBe(20);
+    expect(bins[0]!.min).toBe(10);
+    expect(bins[bins.length - 1]!.max).toBe(20);
   });
 });
 
@@ -47,7 +47,7 @@ describe('buildHeatmapData', () => {
     // is the NEXT day; we want the cell on the LOCAL day.
     const lateLocal = new Date(2026, 3, 20, 23, 30);
     const data = buildHeatmapData([mk({ created_at: lateLocal.toISOString() })]);
-    expect(data[0].day).toBe(localKey(lateLocal));
+    expect(data[0]!.day).toBe(localKey(lateLocal));
   });
 
   it('excludes dnf solves from the count', () => {
@@ -56,7 +56,7 @@ describe('buildHeatmapData', () => {
       mk({ created_at: t.toISOString(), dnf: true }),
       mk({ created_at: new Date(2026, 3, 20, 2, 0).toISOString() }),
     ];
-    expect(buildHeatmapData(solves)[0].value).toBe(1);
+    expect(buildHeatmapData(solves)[0]!.value).toBe(1);
   });
 });
 

@@ -38,7 +38,7 @@ describe('useAllSolves (auth)', () => {
     const { unmount } = renderHook(() => useAllSolves('333', false));
     await waitFor(() => expect(api.getSolves).toHaveBeenCalled());
 
-    const call = (api.getSolves as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    const call = (api.getSolves as unknown as ReturnType<typeof vi.fn>).mock.calls[0]!;
     const signal = call[2] as AbortSignal;
     expect(signal).toBeInstanceOf(AbortSignal);
     expect(signal.aborted).toBe(false);

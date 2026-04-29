@@ -129,7 +129,7 @@ describe('Timer state machine', () => {
     await advance(500);
     spaceDown();
     expect(onComplete).toHaveBeenCalledTimes(1);
-    expect(onComplete.mock.calls[0][1]).toEqual({ plusTwo: true, dnf: false });
+    expect(onComplete.mock.calls[0]![1]).toEqual({ plusTwo: true, dnf: false });
   });
 
   it('inspection elapsed > 17s auto-finalizes as DNF with time 0', async () => {
@@ -158,7 +158,7 @@ describe('Timer state machine', () => {
     await advance(5237);
     spaceDown();
     expect(onComplete).toHaveBeenCalledTimes(1);
-    const timeSec = onComplete.mock.calls[0][0] as number;
+    const timeSec = onComplete.mock.calls[0]![0] as number;
     expect(Math.round(timeSec * 1000) % 10).toBe(0);
   });
 

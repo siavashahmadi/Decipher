@@ -257,7 +257,7 @@ describe('useTimerMachine', () => {
       await advance(500);
       spaceDown();
       expect(onComplete).toHaveBeenCalledTimes(1);
-      expect(onComplete.mock.calls[0][1]).toEqual({ plusTwo: true, dnf: false });
+      expect(onComplete.mock.calls[0]![1]).toEqual({ plusTwo: true, dnf: false });
     });
   });
 
@@ -394,7 +394,7 @@ describe('useTimerMachine', () => {
       spaceUp();
       await advance(5237);
       spaceDown();
-      const timeSec = onComplete.mock.calls[0][0] as number;
+      const timeSec = onComplete.mock.calls[0]![0] as number;
       expect(Math.round(timeSec * 1000) % 10).toBe(0);
     });
   });
