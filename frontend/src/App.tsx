@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './components/Auth';
 import TimerPage from './pages/Timer';
 import { AuthProvider } from './contexts/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabaseConfigMissing } from './services/auth';
 import './App.css';
 
@@ -33,16 +34,18 @@ const AppRoutes = (): ReactElement => {
   return (
     <BrowserRouter>
       <div className="app-wrapper">
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path="/" element={<TimerPage />} />
-            <Route path="/login" element={<Auth />} />
-            <Route path="/stats" element={<StatsPage />} />
-            <Route path="/trainers/*" element={<TrainersPage />} />
-            <Route path="/s/:token" element={<SharedSolve />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<TimerPage />} />
+              <Route path="/login" element={<Auth />} />
+              <Route path="/stats" element={<StatsPage />} />
+              <Route path="/trainers/*" element={<TrainersPage />} />
+              <Route path="/s/:token" element={<SharedSolve />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </div>
     </BrowserRouter>
   );

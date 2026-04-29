@@ -16,3 +16,18 @@ body {
 .route-loading {
   min-height: 100vh;
 }
+
+.error-boundary {
+  max-width: 480px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 8px;
+}
+
+.error-boundary button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
