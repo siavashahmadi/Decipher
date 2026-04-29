@@ -33,21 +33,106 @@ from app import create_app  # noqa: E402
 _solves_module = importlib.import_module("app.routes.solves")
 
 
+def _split_top_level(expr):
+    """Split a PostgREST OR expression on top-level commas, respecting parens."""
+    parts = []
+    depth = 0
+    start = 0
+    for i, ch in enumerate(expr):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(expr[start:i])
+            start = i + 1
+    parts.append(expr[start:])
+    return parts
+
+
+def _eval_postgrest_cond(row, cond):
+    """Evaluate a PostgREST condition string against a row dict.
+
+    Supports `field.op.value` and nested `and(...)` / `or(...)`. Comparisons
+    are string-based, which is sufficient for the cursor tiebreaker (ISO
+    timestamps and UUIDs both sort lexicographically).
+    """
+    if cond.startswith("and(") and cond.endswith(")"):
+        return all(_eval_postgrest_cond(row, p) for p in _split_top_level(cond[4:-1]))
+    if cond.startswith("or(") and cond.endswith(")"):
+        return any(_eval_postgrest_cond(row, p) for p in _split_top_level(cond[3:-1]))
+    parts = cond.split(".", 2)
+    if len(parts) != 3:
+        return True  # malformed: pass through rather than mask production bugs
+    col, op, val = parts
+    rv = row.get(col)
+    if rv is None:
+        return False
+    sv = str(rv)
+    if op == "lt":
+        return sv < val
+    if op == "gt":
+        return sv > val
+    if op == "eq":
+        return sv == val
+    return True  # unknown op
+
+
+def _matches_filter(row, op, args):
+    if op == "eq":
+        return row.get(args[0]) == args[1]
+    if op == "is_":
+        return row.get(args[0]) is args[1]
+    if op == "lt":
+        rv = row.get(args[0])
+        return rv is not None and rv < args[1]
+    if op == "gt":
+        rv = row.get(args[0])
+        return rv is not None and rv > args[1]
+    if op == "or_":
+        return any(_eval_postgrest_cond(row, p) for p in _split_top_level(args[0]))
+    return True  # unrecognised filter passes through
+
+
+_FILTER_OPS = {"eq", "is_", "lt", "gt", "or_"}
+
+
+def _apply_filters_to_data(data, calls):
+    """Apply recorded SELECT-style filters to a list of dict rows."""
+    rows = list(data)
+    for op, args, _kwargs in calls:
+        if op in _FILTER_OPS:
+            rows = [r for r in rows if _matches_filter(r, op, args)]
+    for op, args, kwargs in calls:
+        if op == "order":
+            col = args[0]
+            desc = kwargs.get("desc", False)
+            rows.sort(key=lambda r: (r.get(col) is None, r.get(col)), reverse=desc)
+        elif op == "limit":
+            rows = rows[: args[0]]
+    return rows
+
+
 class FakeQuery:
     """Fluent stub that records filters and returns a scripted `execute` value.
 
-    IMPORTANT: FakeQuery records every filter call (.eq, .is_, .lt, etc) but does
-    NOT apply them to the scripted response. Tests that depend on a production
-    query actually applying a filter must assert the call's presence explicitly,
-    e.g. `[c for c in query.calls if c[0] == "is_"]`. See the G.17 follow-up in
-    docs/audits/2026-04-25-full-stack-audit.md for the long-term fix (path 2: teach
-    FakeQuery to apply filters to scripted data).
+    With `apply_filters=True`, recorded `.eq()`, `.is_()`, `.lt()`, `.gt()`,
+    `.or_()`, `.order()`, and `.limit()` calls are applied to the scripted
+    `data` before it is returned. This lets tests script realistic rows
+    (including soft-deleted ones) and verify that production filters actually
+    drop them.
+
+    Default is `False` for backwards compatibility: most existing tests
+    script contrived rows that omit `user_id` and would be incorrectly
+    dropped by `.eq("user_id", ...)`. New tests that want to verify filter
+    behaviour should opt in via `fake_supabase_factory(filtered=True)`.
     """
 
-    def __init__(self, table_name, script):
+    def __init__(self, table_name, script, apply_filters=False):
         self.table_name = table_name
-        self.script = script  # list of {"op": ..., "result": {"data": [...]}}
+        self.script = script  # list of {"data": [...]} queued responses
         self.calls = []
+        self.apply_filters = apply_filters
 
     def _record(self, op, *args, **kwargs):
         self.calls.append((op, args, kwargs))
@@ -60,17 +145,22 @@ class FakeQuery:
 
     def execute(self):
         self.calls.append(("execute", (), {}))
-        if self.script:
-            return SimpleNamespace(**self.script.pop(0))
-        return SimpleNamespace(data=[])
+        if not self.script:
+            return SimpleNamespace(data=[])
+        result = self.script.pop(0)
+        if self.apply_filters and isinstance(result.get("data"), list):
+            filtered = _apply_filters_to_data(result["data"], self.calls)
+            return SimpleNamespace(**{**result, "data": filtered})
+        return SimpleNamespace(**result)
 
 
 class FakeSupabase:
-    def __init__(self, user_id="user-123", scripts=None):
+    def __init__(self, user_id="user-123", scripts=None, apply_filters=False):
         self.user_id = user_id
         # scripts: dict[table_name] -> list of {"data": [...]} queued responses
         self.scripts = scripts or {}
         self.queries = []  # all FakeQuery instances created
+        self.apply_filters = apply_filters
         self.auth = MagicMock()
         self.auth.get_user.return_value = SimpleNamespace(
             user=SimpleNamespace(id=self.user_id)
@@ -81,15 +171,20 @@ class FakeSupabase:
         # Share the script list across table() calls on the same name so
         # sequential queries (e.g. SELECT count then INSERT) drain the queue
         # in order. A fresh list per call would reset the cursor.
-        q = FakeQuery(name, self.scripts.setdefault(name, []))
+        q = FakeQuery(
+            name,
+            self.scripts.setdefault(name, []),
+            apply_filters=self.apply_filters,
+        )
         self.queries.append(q)
         return q
 
     def rpc(self, function_name, params=None):
         # Reuse the FakeQuery scripted-response mechanism. Scripts for an RPC
-        # are queued under the key f"rpc:{function_name}".
+        # are queued under the key f"rpc:{function_name}". RPC results are
+        # always returned raw (no filter application).
         key = f"rpc:{function_name}"
-        q = FakeQuery(key, self.scripts.setdefault(key, []))
+        q = FakeQuery(key, self.scripts.setdefault(key, []), apply_filters=False)
         q.calls.append(("rpc", (function_name,), {"params": params or {}}))
         self.queries.append(q)
         return q
@@ -118,11 +213,17 @@ def solves_module():
 
 @pytest.fixture
 def fake_supabase_factory(monkeypatch):
-    """Returns a function to install a FakeSupabase into the solves module."""
+    """Returns a function to install a FakeSupabase into the solves module.
+
+    Pass `filtered=True` to enable filter-aware mode (FakeQuery applies the
+    recorded `.eq()`, `.is_()`, etc. calls to scripted rows). Default is off
+    to preserve historical script behaviour; new soft-delete / cursor /
+    filter tests should opt in.
+    """
     created = {}
 
-    def install(user_id="user-123", scripts=None):
-        fake = FakeSupabase(user_id=user_id, scripts=scripts)
+    def install(user_id="user-123", scripts=None, filtered=False):
+        fake = FakeSupabase(user_id=user_id, scripts=scripts, apply_filters=filtered)
         monkeypatch.setattr(
             _solves_module,
             "get_supabase_client",
@@ -137,8 +238,8 @@ def fake_supabase_factory(monkeypatch):
 @pytest.fixture
 def fake_service_supabase_factory(monkeypatch):
     """Installs a FakeSupabase for the service-role client used by share routes."""
-    def install(scripts=None):
-        fake = FakeSupabase(scripts=scripts)
+    def install(scripts=None, filtered=False):
+        fake = FakeSupabase(scripts=scripts, apply_filters=filtered)
         monkeypatch.setattr(
             _solves_module,
             "get_supabase_service_client",

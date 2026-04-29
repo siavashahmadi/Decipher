@@ -699,3 +699,124 @@ def test_create_solves_batch_rejects_too_many(client, fake_supabase_factory, aut
     rows = [{"puzzle_type": "333", "time": 9.0, "dnf": False, "plus_two": False, "scramble": ""}] * 1001
     response = client.post('/api/solves/batch', headers=auth_headers, json={"solves": rows})
     assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# G.17: Soft-delete filter coverage via filter-aware FakeQuery.
+#
+# These tests script realistic rows (some with `deleted_at` set) and rely on
+# the filter-aware FakeQuery (`filtered=True`) to drop them exactly the way
+# PostgREST would. Each test pins one production `.is_("deleted_at", None)`
+# call: stripping that filter from solves_repo.py makes the corresponding
+# test fail, which is the property the previous (call-counting) tests could
+# not provide.
+# ---------------------------------------------------------------------------
+
+
+def test_get_solves_filtered_excludes_soft_deleted_rows(
+    fake_supabase_factory, client, auth_headers
+):
+    """list_for_user must apply .is_('deleted_at', None) — repo line 28."""
+    fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [
+                {
+                    "id": "active-1",
+                    "user_id": "user-123",
+                    "puzzle_type": "333",
+                    "deleted_at": None,
+                    "created_at": "2026-04-25T00:00:00Z",
+                },
+                {
+                    "id": "trashed-1",
+                    "user_id": "user-123",
+                    "puzzle_type": "333",
+                    "deleted_at": "2026-04-26T00:00:00Z",
+                    "created_at": "2026-04-24T00:00:00Z",
+                },
+            ]}],
+        },
+    )
+    r = client.get("/api/solves?puzzle_type=333", headers=auth_headers)
+    assert r.status_code == 200
+    ids = [s["id"] for s in r.get_json()["solves"]]
+    assert ids == ["active-1"], "soft-deleted row must not appear in the response"
+
+
+def test_patch_filtered_returns_404_when_row_is_soft_deleted(
+    fake_supabase_factory, client, auth_headers
+):
+    """update() must apply .is_('deleted_at', None) — repo line 70."""
+    fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [{
+                "id": "abc",
+                "user_id": "user-123",
+                "deleted_at": "2026-04-26T00:00:00Z",
+            }]}],
+        },
+    )
+    r = client.patch("/api/solves/abc", headers=auth_headers, json={"dnf": True})
+    assert r.status_code == 404
+
+
+def test_delete_filtered_returns_404_when_row_is_soft_deleted(
+    fake_supabase_factory, client, auth_headers
+):
+    """soft_delete() must apply .is_('deleted_at', None) — repo line 83."""
+    fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [{
+                "id": "abc",
+                "user_id": "user-123",
+                "deleted_at": "2026-04-26T00:00:00Z",
+            }]}],
+        },
+    )
+    r = client.delete("/api/solves/abc", headers=auth_headers)
+    assert r.status_code == 404
+
+
+def test_share_token_sign_filtered_404_when_owner_solve_is_soft_deleted(
+    fake_supabase_factory, client, auth_headers
+):
+    """get_by_id() must apply .is_('deleted_at', None) — repo line 52."""
+    fake_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [{
+                "id": "abc",
+                "user_id": "user-123",
+                "deleted_at": "2026-04-26T00:00:00Z",
+            }]}],
+        },
+    )
+    r = client.get("/api/solves/abc/share-token", headers=auth_headers)
+    assert r.status_code == 404
+
+
+def test_share_token_read_filtered_404_when_public_solve_is_soft_deleted(
+    fake_supabase_factory, fake_service_supabase_factory, client, auth_headers
+):
+    """get_public_by_id() must apply .is_('deleted_at', None) — repo line 102."""
+    fake_supabase_factory(scripts={"solves": [{"data": [{"id": "abc"}]}]})
+    token = client.get(
+        "/api/solves/abc/share-token", headers=auth_headers
+    ).get_json()["token"]
+    fake_service_supabase_factory(
+        filtered=True,
+        scripts={
+            "solves": [{"data": [{
+                "id": "abc",
+                "puzzle_type": "333",
+                "time": 9.87,
+                "deleted_at": "2026-04-26T00:00:00Z",
+                "created_at": "2026-04-20T00:00:00Z",
+            }]}],
+        },
+    )
+    r = client.get(f"/api/solves/share/{token}")
+    assert r.status_code == 404
