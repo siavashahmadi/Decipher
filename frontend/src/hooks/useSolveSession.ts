@@ -6,9 +6,7 @@ import { useSortedSolveStats } from './useSortedSolveStats';
 import { useReplayState } from './useReplayState';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import { isPuzzleType, type PersonalBest, type PuzzleType, type Solve } from '../types';
-
-export interface PenaltyFlags { plusTwo: boolean; dnf: boolean }
+import { isPuzzleType, type PenaltyFlags, type PersonalBest, type PuzzleType, type Solve } from '../types';
 
 export interface UseSolveSessionResult {
   puzzleType: PuzzleType;

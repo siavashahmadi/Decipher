@@ -1,12 +1,8 @@
 import { useMemo, type ReactElement } from 'react';
 import { formatTime } from '../utils/formatTime';
 import { useTimerMachine } from '../hooks/useTimerMachine';
+import type { PenaltyFlags } from '../types';
 import './Timer.css';
-
-interface PenaltyFlags {
-  plusTwo: boolean;
-  dnf: boolean;
-}
 
 interface TimerProps {
   onSolveComplete: (time: number, flags: PenaltyFlags) => void;

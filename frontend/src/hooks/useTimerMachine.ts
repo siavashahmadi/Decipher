@@ -16,13 +16,9 @@ import {
 } from '../utils/inspectionConstants';
 import { tickInspection } from '../utils/inspectionTick';
 import { useSettings } from './useSettings';
+import type { PenaltyFlags } from '../types';
 
 export type Phase = 'idle' | 'ready' | 'inspection' | 'armed' | 'running';
-
-interface PenaltyFlags {
-  plusTwo: boolean;
-  dnf: boolean;
-}
 
 interface TimerMachineProps {
   onSolveComplete: (time: number, flags: PenaltyFlags) => void;

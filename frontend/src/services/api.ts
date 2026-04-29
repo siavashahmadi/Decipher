@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { supabase } from './auth';
-import type { PuzzleType, Solve, PersonalBest } from '../types';
+import type { PersonalBest, PuzzleType, Solve } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,15 +20,7 @@ export interface SolvesPage {
 
 export type SolvePayload = Omit<Solve, 'id' | 'user_id' | 'created_at'>;
 
-export interface PublicSolve {
-	id: string;
-	puzzle_type: PuzzleType;
-	time: number;
-	dnf: boolean;
-	plus_two: boolean;
-	scramble: string;
-	created_at: string;
-}
+export type PublicSolve = Omit<Solve, 'user_id'>;
 
 const api = {
 	// SD-2: cursor-based pagination. Pass cursor=null for the first page;

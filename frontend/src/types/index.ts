@@ -35,3 +35,8 @@ export interface PersonalBest {
   time: number;
   achieved_at: string;
 }
+
+export interface PenaltyFlags {
+  plusTwo: boolean;
+  dnf: boolean;
+}
