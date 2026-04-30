@@ -62,16 +62,22 @@ Output goes to the `build/` directory.
 
 | Component | Role |
 |---|---|
-| `App` | Auth gate — shows `Auth` or `SolveSession` based on session state |
+| `App` | Routing shell with top-level error boundary; mounts the timer, Stats, Trainers, and SharedSolve routes |
 | `SolveSession` | Main orchestrator; owns solve state and passes handlers to children |
 | `Timer` | Spacebar and touch timer; 10ms resolution |
 | `Scramble` | Generates and displays WCA scrambles via cubing.js |
+| `ScramblePreview` | 3D preview of the current scramble (twisty player) |
 | `SolveHub` | Stats grid (Ao5, best, average) + line chart |
 | `SolveLog` | Scrollable solve list with DNF/+2 toggles and delete; computes Ao5, Ao12, mean, best |
 | `Header` | Puzzle type selector and sign-out |
-| `Auth` | Sign in, sign up, and password reset forms |
+| `Auth` | Sign in, sign up, password reset, and password update forms |
+| `Trainers` | OLL/PLL/F2L/CMLL trainer; per-case scramble generation and recent strip |
+| `Stats` | Full-history view with date filtering, distribution charts, PB progression, and CSV export |
+| `SharedSolve` | Read-only public view of a solve via `/s/<token>` (no auth required) |
 
 ## Services
 
-- `src/services/auth` — Supabase client instance and auth helpers (signIn, signUp, signOut, resetPassword)
-- `src/services/api` — Axios wrapper; automatically attaches the current session's Bearer token to every request
+- `src/services/authClient` — `AuthClient` interface wrapping the Supabase JS SDK (`getAccessToken`, `signInWithPassword`, `signUp`, `signOut`, `resetPasswordForEmail`, `updatePassword`, `onSignIn`). Imported as `supabaseAuthClient`; the rest of the app talks to this seam, not Supabase directly.
+- `src/services/auth` — Lazy Supabase JS client instance (`supabase`) used by `authClient`. Renders a configuration-error screen if `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are unset.
+- `src/services/api` — Axios wrapper; automatically attaches the current session's Bearer token to every request and parses the standardized `{ "error": { "code", "message", "fields" } }` envelope.
+- `src/services/guestStorage` — localStorage-backed solve store used in guest mode.
