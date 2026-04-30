@@ -4,6 +4,7 @@ import base64
 import functools
 import hashlib
 import hmac
+import logging
 import re
 from datetime import datetime, timezone
 from flask import Blueprint, Response, request, jsonify, current_app, g
@@ -52,6 +53,8 @@ MAC_LENGTH = 16  # truncated SHA-256 output, 128-bit MAC
 solves = Blueprint('solves', __name__)
 solves.strict_slashes = False
 
+logger = logging.getLogger(__name__)
+
 
 def require_auth(f):
     @wraps(f)
@@ -76,6 +79,9 @@ def require_auth(f):
         user_id = verify_token_local(token)
 
         if user_id is None:
+            # I.5: operators aggregate event=auth_slow_path to track fallback
+            # rate. A spike usually means JWKS unreachable or recent rotation.
+            logger.info("auth_slow_path event=auth_slow_path")
             try:
                 supabase = get_supabase_client(token)
                 user = supabase.auth.get_user(jwt=token)
