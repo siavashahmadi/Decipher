@@ -1,10 +1,13 @@
+import logging
 import os
+import uuid
 from flask import Flask, current_app, g, jsonify, request
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .routes.solves import solves
 from .config import Config
 from .extensions import limiter
+from .logging_config import configure_logging
 from .errors import (
     INTERNAL_ERROR,
     NOT_FOUND,
@@ -13,6 +16,9 @@ from .errors import (
 )
 
 def create_app(config_class=Config):
+    configure_logging(os.environ.get("LOG_LEVEL", "INFO"))
+    access_logger = logging.getLogger("app.access")
+
     app = Flask(__name__)
 
     # Trust X-Forwarded-* from a single upstream proxy so flask-limiter sees
@@ -70,6 +76,13 @@ def create_app(config_class=Config):
     # same blueprint twice under one default name.
     app.register_blueprint(solves, url_prefix='/api/v1')
     app.register_blueprint(solves, url_prefix='/api', name='solves_legacy')
+
+    @app.before_request
+    def _attach_request_id():
+        # I.6: every request gets a uuid available on g.request_id; the
+        # JSON formatter pulls it onto every log line emitted during the
+        # request.
+        g.request_id = uuid.uuid4().hex
 
     @app.before_request
     def _legacy_api_deprecation():
@@ -150,6 +163,15 @@ def create_app(config_class=Config):
     @app.errorhandler(500)
     def _handle_internal_error(_e):
         return error_response(INTERNAL_ERROR, "Internal server error", 500)
+
+    @app.after_request
+    def _access_log(response):
+        # I.6: one structured access log per request. Method, path, status.
+        # request_id and user_id are folded in by the JSON formatter.
+        access_logger.info(
+            f"{request.method} {request.path} {response.status_code}"
+        )
+        return response
 
     @app.after_request
     def _security_headers(response):
