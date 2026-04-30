@@ -10,6 +10,7 @@ import PBProgression from '../components/stats/PBProgression';
 import ActivityHeatmap from '../components/stats/ActivityHeatmap';
 import ScrambleHistory from '../components/stats/ScrambleHistory';
 import useAllSolves from '../hooks/useAllSolves';
+import { MAX_SOLVES } from '../queries/solves';
 import { useStatsFilters } from '../hooks/useStatsFilters';
 import { useAuth } from '../contexts/AuthContext';
 import { computeSummary } from '../utils/statsBuckets';
@@ -97,7 +98,7 @@ const StatsPage = (): ReactElement => {
           <div className="stats-grid">
             {truncated && (
               <p className="stats-truncation-notice">
-                Showing your most recent 10,000 solves. Use the date range filter to see older ranges.
+                Showing your most recent {MAX_SOLVES.toLocaleString()} solves. Use the date range filter to see older ranges.
               </p>
             )}
             {trend && (

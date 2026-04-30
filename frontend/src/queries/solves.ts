@@ -20,7 +20,9 @@ export interface UseAllSolvesQueryResult {
   truncated: boolean;
 }
 
+const DEFAULT_PAGE_SIZE = 50; // matches backend `_parse_positive_int` default in routes/solves.py
 const MAX_PAGES = 200;
+export const MAX_SOLVES = MAX_PAGES * DEFAULT_PAGE_SIZE;
 
 const fetchAllAuthSolves = async (
   puzzleType: PuzzleType,
