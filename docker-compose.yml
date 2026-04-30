@@ -2,7 +2,7 @@
 #
 # The container exposes the app on host port 5000 (loopback only by default;
 # remove the 127.0.0.1: prefix below if you want the LAN to reach it directly).
-# Nginx Proxy Manager (NPM) on this host points sia.sia-server.duckdns.org
+# Nginx Proxy Manager (NPM) on this host points sia-server.duckdns.org
 # at this port via a proxy host entry.
 #
 # Quick reference:

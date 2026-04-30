@@ -1,6 +1,6 @@
 # Deployment runbook (home server)
 
-Single-container deploy to `sia-server.duckdns.org`, fronted by Nginx Proxy Manager (NPM) at `https://sia.sia-server.duckdns.org`.
+Single-container deploy to the home server (DuckDNS hostname `sia-server.duckdns.org`), fronted by Nginx Proxy Manager (NPM) and reachable at `https://sia-server.duckdns.org`.
 
 ## Architecture
 
@@ -24,8 +24,9 @@ Already installed per `home_server.md`:
 
 - Docker 29.x + Docker Compose v2 (the `docker compose` plugin)
 - Nginx Proxy Manager running and reachable at `http://sia-server.duckdns.org:81`
-- DuckDNS subdomain `sia.sia-server.duckdns.org` configured to resolve to the public IP
+- DuckDNS hostname `sia-server.duckdns.org` configured to resolve to the public IP
 - Router port-forwarding: 80 and 443 forward to the server's LAN IP (NPM needs both — 80 for the Let's Encrypt HTTP-01 challenge, 443 for serving)
+- DuckDNS A record for `sia-server.duckdns.org` updates automatically (via the duckdns updater, cron, or your router) to your home's public IP
 
 If port forwarding isn't already in place, the cert request will fail.
 
@@ -54,7 +55,7 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 SHARE_SECRET=<paste output of: python3 -c "import secrets; print(secrets.token_urlsafe(48))">
 
 # CORS origin = the public HTTPS URL
-FRONTEND_URL=https://sia.sia-server.duckdns.org
+FRONTEND_URL=https://sia-server.duckdns.org
 
 # Optional
 LOG_LEVEL=INFO
@@ -69,7 +70,7 @@ VITE_SUPABASE_ANON_KEY=<your-anon-key>
 VITE_API_URL=/api/v1
 ```
 
-`VITE_API_URL` is `/api/v1` (a relative path) because Flask serves both the static assets and the API on the same origin behind NPM, so the frontend talks to `https://sia.sia-server.duckdns.org/api/v1` automatically.
+`VITE_API_URL` is `/api/v1` (a relative path) because Flask serves both the static assets and the API on the same origin behind NPM, so the frontend talks to `https://sia-server.duckdns.org/api/v1` automatically.
 
 ### 3. Build and start
 
@@ -106,7 +107,7 @@ If `/api/ready` returns 503 with `"supabase":"fail"`, the env vars are wrong or 
 2. Log in.
 3. **Hosts → Proxy Hosts → Add Proxy Host**.
 4. **Details tab:**
-   - Domain Names: `sia.sia-server.duckdns.org`
+   - Domain Names: `sia-server.duckdns.org`
    - Scheme: `http`
    - Forward Hostname / IP: `172.17.0.1` (the Docker bridge gateway = the host as seen from NPM's container). Alternative: your host's LAN IP from `hostname -I`.
    - Forward Port: `5000`
@@ -126,7 +127,7 @@ NPM will hit the Let's Encrypt HTTP-01 challenge on port 80, get the cert, and s
 
 ### 6. Browser smoke test
 
-Visit `https://sia.sia-server.duckdns.org` from any device. You should land on the timer. Sign in, record a solve, navigate to `/stats`, hit a share link.
+Visit `https://sia-server.duckdns.org` from any device. You should land on the timer. Sign in, record a solve, navigate to `/stats`, hit a share link.
 
 ## Updates
 
