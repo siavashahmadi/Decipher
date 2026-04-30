@@ -20,7 +20,7 @@ const Scramble = ({ type, scramble, loading }: ScrambleProps): ReactElement => {
   const scrambleSize = getScrambleSize(type);
   const text = loading || !scramble ? 'Generating scramble...' : scramble;
   return (
-    <div className="scramble-container">
+    <div className="scramble-container" aria-busy={loading} aria-live="polite">
       <div className={`scramble-text ${scrambleSize}`}>{text}</div>
     </div>
   );

@@ -152,6 +152,7 @@ export default function Auth(): ReactElement {
             type="submit"
             className="auth-button"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Loading...' : config.cta}
           </button>

@@ -93,7 +93,7 @@ const StatsPage = (): ReactElement => {
         </div>
 
         {loading ? (
-          <p className="stats-loading">Loading solves...</p>
+          <p className="stats-loading" role="status" aria-busy="true">Loading solves...</p>
         ) : (
           <div className="stats-grid">
             {truncated && (
