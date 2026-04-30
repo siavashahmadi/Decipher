@@ -7,6 +7,7 @@ import { formatSolveLabel } from '../utils/solveLabel';
 import api from '../services/api';
 import { useOptionalAuth } from '../contexts/AuthContext';
 import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import type { Solve } from '../types';
 import './SolveDetailModal.css';
 
@@ -39,6 +40,7 @@ const SolveDetailModal = ({
   };
 
   useDismissOnOutsideClick(modalRef, onClose);
+  useFocusTrap(modalRef);
 
   const copyScramble = async (): Promise<void> => {
     try {
@@ -75,6 +77,7 @@ const SolveDetailModal = ({
         ref={modalRef}
         className="solve-detail-modal"
         role="dialog"
+        aria-modal="true"
         aria-label="Solve details"
       >
         <button

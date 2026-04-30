@@ -1,5 +1,6 @@
 import { useRef, type ReactElement } from 'react';
 import { useDismissOnOutsideClick } from '../hooks/useDismissOnOutsideClick';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import './HotkeyHelp.css';
 
 interface HotkeyHelpProps {
@@ -20,6 +21,7 @@ const ENTRIES: Array<[string, string]> = [
 const HotkeyHelp = ({ onClose }: HotkeyHelpProps): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
   useDismissOnOutsideClick(modalRef, onClose);
+  useFocusTrap(modalRef);
 
   return (
     <div className="hotkey-help-backdrop">
@@ -27,6 +29,7 @@ const HotkeyHelp = ({ onClose }: HotkeyHelpProps): ReactElement => {
         ref={modalRef}
         className="hotkey-help-modal"
         role="dialog"
+        aria-modal="true"
         aria-label="Keyboard shortcuts"
       >
         <h2>Keyboard shortcuts</h2>
