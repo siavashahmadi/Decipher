@@ -32,7 +32,10 @@ const TrainerRecentStrip = ({
       <span className="trainer-recent-empty">No solves yet</span>
     ) : (
       entries.map((entry, idx) => (
-        <span key={idx} className="trainer-recent-entry">
+        <span
+          key={`${idx}-${entry.time}-${entry.plusTwo}-${entry.dnf}`}
+          className="trainer-recent-entry"
+        >
           {renderEntry(entry)}
         </span>
       ))
