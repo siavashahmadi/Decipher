@@ -19,6 +19,7 @@
       --yellow: #fbbf24;
       --purple: #a78bfa;
       --pink: #f472b6;
+      --teal: #2dd4bf;
       --code-bg: #111827;
       --keyword: #f472b6;
       --string: #86efac;
@@ -37,14 +38,12 @@
       font-size: 16px;
     }
 
-    /* ── Layout ── */
     .page-wrapper {
       max-width: 900px;
       margin: 0 auto;
       padding: 2rem 1.5rem 6rem;
     }
 
-    /* ── Hero ── */
     .hero {
       text-align: center;
       padding: 3rem 0 2rem;
@@ -84,8 +83,8 @@
     .tag-sd   { background: #1e3a5f; color: var(--blue);  border: 1px solid #1d4ed8; }
     .tag-sec  { background: #3b1f1f; color: var(--red);   border: 1px solid #991b1b; }
     .tag-perf { background: #3b2f00; color: var(--yellow); border: 1px solid #92400e; }
+    .tag-ux   { background: #2d1f47; color: var(--purple); border: 1px solid #7c3aed; }
 
-    /* ── TOC ── */
     .toc {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -113,7 +112,6 @@
     }
     .toc li a:hover { text-decoration: underline; }
 
-    /* ── Section card ── */
     .section {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -143,6 +141,7 @@
     .badge-dsa  { background: #14532d; color: var(--green); border: 1px solid #166534; }
     .badge-sd   { background: #1e3a5f; color: var(--blue);  border: 1px solid #1d4ed8; }
     .badge-ux   { background: #2d1f47; color: var(--purple); border: 1px solid #7c3aed; }
+    .badge-sec  { background: #3b1f1f; color: var(--red);   border: 1px solid #991b1b; }
     .section-header-text h2 {
       font-size: 1.3rem;
       font-weight: 700;
@@ -166,7 +165,6 @@
     p { margin-bottom: 0.9rem; }
     p:last-of-type { margin-bottom: 0; }
 
-    /* ── Code blocks ── */
     .code-block {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -189,7 +187,6 @@
     .code-block .add  { color: var(--green); background: rgba(61,201,66,0.08); display: block; }
     .code-block .hl   { background: rgba(96,165,250,0.08); display: block; }
 
-    /* ── Diagrams ── */
     .diagram {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -207,8 +204,8 @@
     .diagram .ok  { color: var(--green); }
     .diagram .bad { color: var(--red); }
     .diagram .warn { color: var(--yellow); }
+    .diagram .info { color: var(--teal); }
 
-    /* ── Callout boxes ── */
     .callout {
       border-left: 3px solid;
       border-radius: 0 8px 8px 0;
@@ -216,13 +213,13 @@
       margin: 1rem 0;
       font-size: 0.9rem;
     }
-    .callout-blue  { border-color: var(--blue);   background: rgba(96,165,250,0.07); }
-    .callout-green { border-color: var(--green);  background: rgba(61,201,66,0.07);  }
-    .callout-orange{ border-color: var(--orange); background: rgba(245,166,35,0.07); }
-    .callout-red   { border-color: var(--red);    background: rgba(239,68,68,0.07);  }
+    .callout-blue   { border-color: var(--blue);   background: rgba(96,165,250,0.07);  }
+    .callout-green  { border-color: var(--green);  background: rgba(61,201,66,0.07);   }
+    .callout-orange { border-color: var(--orange); background: rgba(245,166,35,0.07);  }
+    .callout-red    { border-color: var(--red);    background: rgba(239,68,68,0.07);   }
+    .callout-purple { border-color: var(--purple); background: rgba(167,139,250,0.07); }
     .callout strong { color: #fff; }
 
-    /* ── Complexity table ── */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -248,7 +245,6 @@
     .good { color: var(--green); font-weight: 600; }
     .bad  { color: var(--red);   font-weight: 600; }
 
-    /* ── Interview tip ── */
     .interview-tip {
       background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(96,165,250,0.08));
       border: 1px solid rgba(167,139,250,0.3);
@@ -266,7 +262,16 @@
       margin-bottom: 0.4rem;
     }
 
-    /* ── Footer ── */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85em;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      color: var(--teal);
+    }
+
     .footer {
       text-align: center;
       color: var(--muted);
@@ -284,196 +289,186 @@
 <body>
 <div class="page-wrapper">
 
-  <!-- ── Hero ── -->
+  <!-- Hero -->
   <div class="hero">
     <h1>Ao5 <span>Engineering Notes</span></h1>
-    <p>A deep-dive into the DSA and system design improvements built into this speedcubing timer — written so you can explain every decision in an interview.</p>
+    <p>A deep-dive into the DSA, system-design, security, and UX decisions in this speedcubing timer. Reflects the post-audit codebase as of April 2026.</p>
     <div class="tag-row">
       <span class="tag tag-dsa">DSA</span>
       <span class="tag tag-sd">System Design</span>
       <span class="tag tag-sec">Security</span>
+      <span class="tag tag-ux">UX</span>
       <span class="tag tag-perf">Performance</span>
     </div>
   </div>
 
-  <!-- ── TOC ── -->
+  <!-- TOC -->
   <div class="toc">
     <h2>Table of Contents</h2>
     <ol>
-      <li><a href="#sd4">SD-4 &mdash; Input Validation</a></li>
-      <li><a href="#dsa1">DSA-1 &mdash; Sliding Window O(n&sup2;) &rarr; O(n)</a></li>
-      <li><a href="#sd2">SD-2 &mdash; Cursor-Based Pagination</a></li>
-      <li><a href="#dsa2">DSA-2 &mdash; Binary Search Percentile</a></li>
-      <li><a href="#sd3">SD-3 &mdash; PB History (Write-Time Materialization)</a></li>
-      <li><a href="#dsa3">DSA-3 &mdash; Circular Buffer Hook</a></li>
-      <li><a href="#sd5">SD-5 &mdash; Token Bucket Rate Limiting</a></li>
-      <li><a href="#ux1">UX-1 &mdash; WCA Inspection Timer (State Machine)</a></li>
-      <li><a href="#dsa4">DSA-4 &mdash; Two-Heap Running Median O(log n)</a></li>
-      <li><a href="#sd6">SD-6 &mdash; Optimistic Updates with Rollback</a></li>
+      <li><a href="#sd4">SD-4 — Input Validation</a></li>
+      <li><a href="#dsa1">DSA-1 — Sliding Window O(n²) → O(n)</a></li>
+      <li><a href="#sd2">SD-2 — Cursor Pagination + Tiebreaker</a></li>
+      <li><a href="#dsa2">DSA-2 — Binary Search Percentile</a></li>
+      <li><a href="#sd3">SD-3 — PB History via Atomic RPC</a></li>
+      <li><a href="#dsa3">DSA-3 — Circular Buffer Hook</a></li>
+      <li><a href="#sd5">SD-5 — Per-User Token Bucket Rate Limiting</a></li>
+      <li><a href="#ux1">UX-1 — Inspection Timer (State Machine)</a></li>
+      <li><a href="#dsa4">DSA-4 — Two-Heap Running Median</a></li>
+      <li><a href="#sd6">SD-6 — Optimistic Updates with Rollback</a></li>
+      <li><a href="#sd7">SD-7 — Standardized Error Envelope</a></li>
+      <li><a href="#sd8">SD-8 — Structured JSON Logging</a></li>
+      <li><a href="#sd9">SD-9 — HMAC Share-Link Signing</a></li>
+      <li><a href="#sd10">SD-10 — Local JWKS Verification</a></li>
+      <li><a href="#sd11">SD-11 — Atomic Solve-Lifetime Cap</a></li>
+      <li><a href="#sd12">SD-12 — Service + Repository Layers</a></li>
+      <li><a href="#sd13">SD-13 — TanStack Query Cross-Page Cache</a></li>
+      <li><a href="#sd14">SD-14 — AuthClient Seam</a></li>
+      <li><a href="#dsa5">DSA-5 — Virtualized SolveLog</a></li>
+      <li><a href="#ux2">UX-2 — Focus Trap on Modals</a></li>
+      <li><a href="#ux3">UX-3 — Top-Level Error Boundary</a></li>
+      <li><a href="#sec1">SEC-1 — Defense-in-Depth Headers + RLS</a></li>
     </ol>
   </div>
 
 
-  <!-- ═══════════════════════════════════════════════════════ SD-4 ══ -->
+  <!-- SD-4 -->
   <div class="section" id="sd4">
     <div class="section-header">
       <div class="section-badge badge-sd">SD-4</div>
       <div class="section-header-text">
         <h2>Input Validation — Defense at the System Boundary</h2>
-        <div class="subtitle">backend/app/validators.py &middot; Security &middot; Small scope</div>
+        <div class="subtitle">backend/app/validators.py · Security · Small scope</div>
       </div>
     </div>
 
-    <h3>The Problem</h3>
-    <p>The original <code>POST /api/solves</code> blindly took whatever JSON arrived and inserted it straight into the database. Any authenticated user could send:</p>
-    <div class="code-block">{ <span class="str">"puzzle_type"</span>: <span class="str">"DROP TABLE solves"</span>, <span class="str">"time"</span>: <span class="num">-999</span>, <span class="str">"dnf"</span>: <span class="str">"maybe"</span>, <span class="str">"scramble"</span>: <span class="str">"A"</span>.repeat(<span class="num">100000</span>) }</div>
-    <p>This won't cause SQL injection (Supabase uses parameterized queries), but it corrupts the user's own data, can break client-side stat computation, and wastes database storage.</p>
-
-    <h3>The Principle: Validate at System Boundaries</h3>
-    <p>A system boundary is any point where data crosses from an untrusted source into your controlled system — HTTP request bodies, file uploads, message queue payloads, webhook bodies. <strong>Internal function calls between your own code don't need defensive validation</strong> — you trust your own code. But the HTTP layer is a boundary: you can't trust what arrives there, even if the request is authenticated.</p>
+    <h3>The principle: validate at system boundaries</h3>
+    <p>A system boundary is any point where data crosses from an untrusted source into your controlled system: HTTP request bodies, file uploads, message-queue payloads, webhook bodies. Internal function calls between your own code do not need defensive validation. The HTTP layer is a boundary; you cannot trust what arrives there even if the request is authenticated.</p>
 
     <div class="callout callout-blue">
-      <strong>Why authenticated doesn't mean trusted:</strong> Authentication answers "who are you?" — not "is your payload valid?" A logged-in user can still send malformed data accidentally (a client bug) or deliberately (API abuse).
+      <strong>Why authenticated does not mean trusted:</strong> Authentication answers "who are you?" not "is your payload valid?" A logged-in user can still send malformed data accidentally (a client bug) or deliberately (API abuse).
     </div>
 
-    <h3>What Was Built</h3>
-    <p><code>validators.py</code> exports two pure functions — no framework, no dependencies, just Python:</p>
-
-    <div class="code-block"><span class="kw">def</span> <span class="fn">validate_create_solve</span>(data):
+    <h3>What was built</h3>
+    <p><code>validators.py</code> exports pure functions with zero framework dependencies:</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">validate_create_solve</span>(data: dict) -&gt; dict | <span class="kw">None</span>:
     errors = {}
 
-    puzzle_type = data.get(<span class="str">'puzzle_type'</span>)
-    <span class="kw">if</span> puzzle_type <span class="kw">not in</span> VALID_PUZZLE_TYPES:             <span class="cmt"># allowlist, not blocklist</span>
-        errors[<span class="str">'puzzle_type'</span>] = <span class="str">"Must be one of: 222, 333, 444..."</span>
+    puzzle_type = data.<span class="fn">get</span>(<span class="str">'puzzle_type'</span>)
+    <span class="kw">if</span> puzzle_type <span class="kw">not in</span> VALID_PUZZLE_TYPES:        <span class="cmt"># allowlist</span>
+        errors[<span class="str">'puzzle_type'</span>] = <span class="str">"Must be one of: 222, 333, ..."</span>
 
-    time = data.get(<span class="str">'time'</span>)
-    <span class="kw">if</span> <span class="kw">isinstance</span>(time, bool) <span class="kw">or not isinstance</span>(time, (int, float)):
+    time = data.<span class="fn">get</span>(<span class="str">'time'</span>)
+    <span class="kw">if</span> <span class="fn">isinstance</span>(time, bool) <span class="kw">or not</span> <span class="fn">isinstance</span>(time, (int, float)):
         errors[<span class="str">'time'</span>] = <span class="str">"Must be a number"</span>
-    <span class="kw">elif</span> time &lt;= <span class="num">0</span> <span class="kw">or</span> time &gt; <span class="num">3600</span>:                          <span class="cmt"># no 1-hour solves</span>
-        errors[<span class="str">'time'</span>] = <span class="str">"Must be between 0 and 3600 seconds"</span>
+    <span class="kw">elif</span> time &lt; <span class="num">0.1</span> <span class="kw">or</span> time &gt; <span class="num">3600</span>:
+        errors[<span class="str">'time'</span>] = <span class="str">"Must be between 0.1 and 3600 seconds"</span>
 
-    <span class="kw">if</span> <span class="kw">len</span>(data.get(<span class="str">'scramble'</span>, <span class="str">''</span>)) &gt; <span class="num">500</span>:
+    <span class="kw">if</span> <span class="fn">len</span>(data.<span class="fn">get</span>(<span class="str">'scramble'</span>, <span class="str">''</span>)) &gt; <span class="num">500</span>:
         errors[<span class="str">'scramble'</span>] = <span class="str">"Must be 500 characters or fewer"</span>
 
-    <span class="kw">return</span> errors <span class="kw">if</span> errors <span class="kw">else None</span>     <span class="cmt"># None means valid</span></div>
+    <span class="kw">return</span> errors <span class="kw">if</span> errors <span class="kw">else None</span></div>
 
-    <p>The route calls it before touching the database and returns a structured <code>422 Unprocessable Entity</code> with field-level errors — the same pattern used by APIs like Stripe and GitHub:</p>
+    <h3>The PATCH allowlist</h3>
+    <p><code>validate_update_solve</code> accepts <code>dnf</code> and <code>plus_two</code> only. The route then strips the payload to those two fields before passing to Supabase, so even a malicious client cannot overwrite immutable fields like <code>user_id</code> or <code>time</code>:</p>
+    <div class="code-block">allowed = {k: data[k] <span class="kw">for</span> k <span class="kw">in</span> (<span class="str">'dnf'</span>, <span class="str">'plus_two'</span>) <span class="kw">if</span> k <span class="kw">in</span> data}
+<span class="cmt"># Audit A.6: empty PATCH bodies return 400 to close an existence-oracle</span>
+<span class="kw">if not</span> allowed:
+    <span class="kw">return</span> <span class="fn">error_response</span>(VALIDATION_FAILED, <span class="str">"Body must include dnf or plus_two"</span>, <span class="num">400</span>)
+result = supabase.<span class="fn">table</span>(<span class="str">'solves'</span>).<span class="fn">update</span>(allowed)...</div>
 
-    <div class="code-block">{
-  <span class="str">"error"</span>: <span class="str">"Validation failed"</span>,
-  <span class="str">"fields"</span>: {
-    <span class="str">"time"</span>: <span class="str">"Must be between 0 and 3600 seconds"</span>,
-    <span class="str">"puzzle_type"</span>: <span class="str">"Must be one of: 222, 333, 444..."</span>
-  }
-}</div>
+    <h3>The bool subclass trap</h3>
+    <p>In Python, <code>bool</code> is a subclass of <code>int</code>: <code>isinstance(True, int)</code> is <code>True</code>. Without the explicit bool check first, <code>True</code> would pass as a valid time value of 1 and <code>False</code> as 0.</p>
 
-    <p>The PATCH route uses a second function <code>validate_update_solve</code> and then <strong>strips the payload</strong> to only the allowed fields before passing it to Supabase — so even if a client sends <code>user_id</code> or <code>time</code> in a PATCH, they're silently ignored:</p>
-
-    <div class="code-block"><span class="cmt"># Only let dnf and plus_two through — strip everything else</span>
-allowed = {k: data[k] <span class="kw">for</span> k <span class="kw">in</span> (<span class="str">'dnf'</span>, <span class="str">'plus_two'</span>) <span class="kw">if</span> k <span class="kw">in</span> data}
-result = supabase.table(<span class="str">'solves'</span>).update(allowed)...</div>
-
-    <h3>Why isinstance(time, bool) check?</h3>
-    <p>In Python, <code>bool</code> is a subclass of <code>int</code>. So <code>isinstance(True, int)</code> returns <code>True</code>. Without the explicit bool check first, <code>True</code> would pass as a valid time value of 1 and <code>False</code> as 0. This is a subtle Python trap.</p>
+    <h3>Cursor format validation</h3>
+    <p>The cursor parameter is user-supplied and gets interpolated into a PostgREST <code>.or_()</code> filter. Strict regex validation in <code>_decode_solve_cursor</code> (audit B-era hardening) rejects anything that is not a plain ISO-8601 timestamp plus UUID, preventing any chance of breaking out of the intended filter shape.</p>
 
     <div class="interview-tip">
       <div class="tip-label">Resume Talking Point</div>
-      "I implemented input validation at the HTTP boundary — the only point where data crosses from untrusted external sources into the system. I chose an allowlist approach for puzzle types (explicitly enumerate valid values) over a blocklist, and returned 422 with field-level error messages following the same convention as Stripe's API. The PATCH handler also strips the payload to only the fields that are allowed to change, preventing clients from overwriting immutable fields like user_id or time."
+      "I implemented input validation at the HTTP boundary using an allowlist approach (explicitly enumerate valid puzzle types) over a blocklist. Returns 422 with field-level error messages following the same convention as Stripe's API. The PATCH handler strips the payload to only the fields allowed to change, preventing clients from overwriting immutable fields. Empty PATCH bodies return 400 to close an existence-oracle vulnerability."
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ DSA-1 ══ -->
+  <!-- DSA-1 -->
   <div class="section" id="dsa1">
     <div class="section-header">
       <div class="section-badge badge-dsa">DSA-1</div>
       <div class="section-header-text">
-        <h2>Sliding Window — O(n&sup2;) &rarr; O(n) Rolling Averages</h2>
-        <div class="subtitle">frontend/src/components/SolveLog.js &middot; Algorithms &middot; Small scope</div>
+        <h2>Sliding Window — O(n²) → O(n) Rolling Averages</h2>
+        <div class="subtitle">frontend/src/utils/averages.ts · Algorithms · Small scope</div>
       </div>
     </div>
 
-    <h3>The Original Bug</h3>
-    <p>The solve log shows an Ao5 next to every solve in the list. The original code computed this with a <code>.map()</code> loop:</p>
+    <h3>The original bug</h3>
+    <p>The solve log shows an Ao5 next to every solve in the list. The original code computed this with a <code>.map()</code> loop that sliced the entire remaining array on each iteration:</p>
 
     <div class="code-block"><span class="del">// OLD — O(n²)</span>
 <span class="del">solves.map((_, index) =></span>
-<span class="del">  calculateAverage(solves.slice(index), 5)  // slice creates O(n-i) array every time!</span>
+<span class="del">  calculateAverage(solves.slice(index), 5)  // slice copies (n-i) elements</span>
 <span class="del">)</span></div>
 
-    <p>Why is this O(n&sup2;)? <code>Array.slice(i)</code> copies every element from position <code>i</code> to the end — that's <code>n-i</code> elements. Summed across the entire loop:</p>
+    <p>Why O(n²)? <code>Array.slice(i)</code> copies <code>n-i</code> elements. Summed across the loop:</p>
 
     <div class="diagram"><span class="bad">n + (n-1) + (n-2) + ... + 1  =  n(n+1)/2  =  O(n²)</span>
 
 With 500 solves:  500 × 501 / 2  =  <span class="bad">125,250 element copies</span>
 With 1000 solves: 1000 × 1001 / 2 = <span class="bad">500,500 element copies</span></div>
 
-    <h3>The Fix: Fixed-Size Window Slicing</h3>
-    <p>Inside <code>calculateAverage</code>, the first thing it does is <code>times.slice(0, 5)</code> — it only ever uses 5 elements. So we were copying potentially thousands of elements to use exactly 5 of them. The fix is trivial:</p>
+    <h3>The fix: fixed-size window</h3>
+    <p><code>calculateAverage</code> only ever uses 5 elements. Slice exactly that many:</p>
 
     <div class="code-block"><span class="add">// NEW — O(n)</span>
 <span class="add">solves.map((_, index) =></span>
 <span class="add">  calculateAverage(solves.slice(index, index + 5), 5)  // always copies exactly 5</span>
 <span class="add">)</span></div>
 
-    <p>Now each iteration does O(5) = O(1) work. The entire <code>.map()</code> is O(n).</p>
+    <p>Each iteration does O(5) = O(1) work. The entire <code>.map()</code> is O(n).</p>
 
-    <h3>What is a Sliding Window?</h3>
-    <p>A sliding window is an algorithmic pattern where you maintain a "window" of fixed size that moves across an array one step at a time, reusing computation from the previous position instead of recomputing from scratch.</p>
-
+    <h3>Sliding window concept</h3>
     <div class="diagram">Solves array (newest first): [8.2, 9.1, 7.5, 10.2, 8.8, 9.3, 7.9, ...]
                                   └──────────────────┘
                                    window at index 0 (Ao5 for solve #1)
                                          └──────────────────┘
-                                          window at index 1 (Ao5 for solve #2)
-                                               └──────────────────┘
-                                                window at index 2 ...</div>
-
-    <p>Each window step: slide right by 1. Old element exits, new element enters. For the Ao5 window (size 5), this could be made even more efficient with a running sum and a monotonic deque (to track the min/max that Ao5 drops). The current fix is already a massive improvement — a deque-based approach would go further for very large N but adds significant complexity for a window of size 5.</p>
+                                          window at index 1 (Ao5 for solve #2)</div>
 
     <table>
       <tr><th>Approach</th><th>Time per render</th><th>500 solves</th><th>Notes</th></tr>
-      <tr><td>Original (slice tail)</td><td class="bad">O(n&sup2;)</td><td class="bad">~125K ops</td><td>Copies grow with n</td></tr>
-      <tr><td>Fixed window slice (current)</td><td class="good">O(n)</td><td class="good">~2,500 ops</td><td>Always copies 5 elements</td></tr>
-      <tr><td>Sum + monotonic deque</td><td class="good">O(n)</td><td class="good">~500 ops</td><td>O(1) per step, reuses sum</td></tr>
+      <tr><td>Original (slice tail)</td><td class="bad">O(n²)</td><td class="bad">~125K ops</td><td>Copies grow with n</td></tr>
+      <tr><td>Fixed window slice (current)</td><td class="good">O(n)</td><td class="good">~2,500 ops</td><td>Always copies 5</td></tr>
+      <tr><td>Sum + monotonic deque</td><td class="good">O(n)</td><td class="good">~500 ops</td><td>O(1) per step; complexity not worth it for window of 5</td></tr>
     </table>
+
+    <h3>Memoization layer</h3>
+    <p>The result is wrapped in <code>useMemo</code> in <code>SolveLog</code> (and now precomputed in <code>useSortedSolveStats</code> when the audit's C.5 virtualizer landed). It only recomputes when <code>solves</code> changes, not on every render caused by unrelated state updates.</p>
 
     <div class="interview-tip">
       <div class="tip-label">Resume Talking Point</div>
-      "I identified an O(n²) bug in the rolling average computation — for each of n solves, it was slicing the entire remaining array to extract just 5 elements. Fixed it to a sliding window that slices exactly the 5-element window at each position, reducing total allocations from O(n²) to O(n). The React useMemo wrapping it means this only runs when the solves array changes, not on every render."
+      "I identified an O(n²) bug in the rolling-average computation: for each of n solves, it was slicing the entire remaining array to extract just 5 elements. Fixed to a sliding window that slices exactly the 5-element window at each position, reducing total allocations from O(n²) to O(n). The useMemo wrapper means it only runs when solves changes."
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ SD-2 ══ -->
+  <!-- SD-2 -->
   <div class="section" id="sd2">
     <div class="section-header">
       <div class="section-badge badge-sd">SD-2</div>
       <div class="section-header-text">
-        <h2>Cursor-Based Pagination — Scalable Data Loading</h2>
-        <div class="subtitle">backend/app/routes/solves.py &middot; SolveSession.js &middot; Medium scope</div>
+        <h2>Cursor-Based Pagination + (created_at, id) Tiebreaker</h2>
+        <div class="subtitle">backend/app/routes/solves.py · queries/solves.ts · Medium scope</div>
       </div>
     </div>
 
-    <h3>The Problem with Loading Everything</h3>
-    <p>The original <code>GET /api/solves</code> returned every single solve for a user. A dedicated speedcuber can easily accumulate 10,000+ solves. Returning all of them on every page load means:</p>
-    <ul style="padding-left:1.5rem; margin-bottom:0.9rem; color:var(--muted);">
-      <li>Large JSON payloads over the network</li>
-      <li>Supabase scanning and returning every row</li>
-      <li>React holding the entire dataset in memory</li>
-      <li>The O(n) and O(n²) operations above getting worse over time</li>
-    </ul>
+    <h3>Why not load everything</h3>
+    <p>The original <code>GET /api/solves</code> returned every solve for a user. A dedicated speedcuber accumulates 10,000+ solves easily. Returning all of them on every page load means large JSON payloads, full-table scans, React holding the entire dataset in memory, and the O(n) and O(n²) operations getting worse over time.</p>
 
-    <h3>Offset Pagination — and Why It's Wrong</h3>
-    <p>The naive solution is offset pagination: <code>LIMIT 50 OFFSET 100</code>. This is how most beginners implement pagination — and it has two serious problems:</p>
+    <h3>Why not offset pagination</h3>
 
     <div class="diagram"><span class="bad">Problem 1: Offset re-scans rows</span>
 
 <span class="warn">SELECT * FROM solves ORDER BY created_at DESC LIMIT 50 OFFSET 500</span>
 
-Postgres must scan and discard <span class="bad">500 rows</span> to reach row 501.
-At OFFSET 5000, it discards <span class="bad">5000 rows</span>. Gets slower as you page deeper.
-
+Postgres scans and discards <span class="bad">500 rows</span> to reach row 501. Gets slower as you page deeper.
 
 <span class="bad">Problem 2: Offset breaks under concurrent writes</span>
 
@@ -482,227 +477,248 @@ Page 1: rows [1, 2, 3, 4, 5] returned  ← user reads this
 Page 2 (OFFSET 5): rows [5, 6, 7, 8, 9] returned  ← row 5 appears TWICE
                     row 1 was pushed down and is now MISSING from page 1</div>
 
-    <h3>Cursor Pagination — The Right Approach</h3>
-    <p>Instead of "skip N rows", cursor pagination says: "give me everything before this specific row." The cursor is the <code>created_at</code> timestamp of the last row you already have.</p>
+    <h3>Cursor pagination — the right approach</h3>
+    <div class="code-block"><span class="cmt"># First page</span>
+GET /api/v1/solves?puzzle_type=333&limit=50
 
-    <div class="code-block"><span class="cmt"># First page — no cursor</span>
-GET /api/solves?puzzle_type=333&limit=50
-
-<span class="cmt"># Response includes the next cursor</span>
+<span class="cmt"># Response</span>
 {
   <span class="str">"solves"</span>: [...<span class="num">50</span> solves...],
-  <span class="str">"next_cursor"</span>: <span class="str">"2024-11-15T09:32:11.000Z"</span>   <span class="cmt">← created_at of last row</span>
+  <span class="str">"next_cursor"</span>: <span class="str">"MjAyNi0wNC0yOVQyMjozMjoxMS4wMDBafGFiYy0xMjM..."</span>   <span class="cmt">// b64url("created_at|id")</span>
 }
 
-<span class="cmt"># Next page — pass the cursor</span>
-GET /api/solves?puzzle_type=333&limit=50&cursor=2024-11-15T09:32:11.000Z</div>
+<span class="cmt"># Next page</span>
+GET /api/v1/solves?puzzle_type=333&limit=50&cursor=&lt;next_cursor&gt;</div>
 
-    <p>The SQL query becomes:</p>
+    <h3>The (created_at, id) tiebreaker — D.9</h3>
+    <p>Without a tiebreaker, two solves with identical microsecond timestamps (rare under normal use; possible under bulk inserts or migrations) drop a row across pages. The cursor is now <code>base64url("created_at|id")</code>; the WHERE clause uses an OR with the tiebreaker:</p>
 
-    <div class="code-block"><span class="cmt">-- Cursor query (uses the B-tree index directly)</span>
+    <div class="code-block"><span class="cmt"># Postgres-side query</span>
 SELECT * FROM solves
 WHERE user_id = $1
   AND puzzle_type = $2
-  AND created_at &lt; $cursor         <span class="cmt">-- "everything before the cursor"</span>
-ORDER BY created_at DESC
+  AND deleted_at IS NULL                 <span class="cmt">-- soft-delete filter</span>
+  AND (created_at &lt; $cursor_ts
+       <span class="hi">OR (created_at = $cursor_ts AND id &lt; $cursor_id)</span>)
+ORDER BY created_at DESC, id DESC
 LIMIT 50;</div>
 
-    <p>The composite index in <code>002_cursor_pagination_index.sql</code> makes this query O(log n):</p>
+    <p>The decoder still accepts the legacy timestamp-only shape for one release window; after stale cursors rotate out (~30 days of normal use), the legacy branch can be removed.</p>
 
-    <div class="code-block">CREATE INDEX solves_user_puzzle_created_idx
-  ON solves (user_id, puzzle_type, created_at DESC);</div>
+    <h3>The partial composite index — D.1</h3>
+    <div class="code-block">CREATE INDEX solves_user_puzzle_created_active_idx
+  ON solves (user_id, puzzle_type, created_at DESC)
+  WHERE deleted_at IS NULL;</div>
 
-    <p>Postgres can jump directly to the cursor position in the B-tree and read forward — no rows are scanned and discarded. The query time stays O(log n) whether you're on page 1 or page 100.</p>
+    <p>The <code>WHERE deleted_at IS NULL</code> predicate makes this a <strong>partial index</strong>. The query plan no longer needs a Filter row to recheck soft-delete state. EXPLAIN shows an Index Scan with no recheck.</p>
 
-    <div class="diagram">B-tree leaf pages (simplified):
+    <h3>Frontend: TanStack Query handles pagination</h3>
+    <p>The full-list query in <code>queries/solves.ts</code> loops through pages until <code>next_cursor</code> is null or the cap is hit (200 pages × 50 rows = 10,000 solves max). Switching puzzles cancels in-flight requests via the AbortSignal threaded through axios.</p>
 
-  [user_id=ABC, 333, 2024-12-01] → [user_id=ABC, 333, 2024-11-30] → [user_id=ABC, 333, 2024-11-29]
-                                          <span class="ok">↑ cursor lands here</span>
-                                          reads forward from here, no scanning behind</div>
-
-    <h3>Frontend: "Load More" Pattern</h3>
-    <p>The frontend stores the <code>next_cursor</code> in state. A "Load More" button in <code>SolveLog</code> appends the next page without replacing the existing solves — this is the infinite scroll / progressive loading pattern:</p>
-
-    <div class="code-block"><span class="kw">const</span> loadMore = <span class="kw">async</span> () => {
-  <span class="kw">const</span> { solves: moreData, next_cursor } = <span class="kw">await</span> api.<span class="fn">getSolves</span>(puzzleType, nextCursor);
-  <span class="fn">setSolves</span>(prev => [...prev, ...moreData]);    <span class="cmt">// append, don't replace</span>
-  <span class="fn">setNextCursor</span>(next_cursor);                   <span class="cmt">// null = no more pages</span>
+    <div class="code-block"><span class="kw">const</span> <span class="fn">fetchAllAuthSolves</span> = <span class="kw">async</span> (puzzleType, signal) => {
+  <span class="kw">const</span> all = [];
+  <span class="kw">let</span> cursor = <span class="kw">null</span>;
+  <span class="kw">let</span> pages = <span class="num">0</span>;
+  <span class="kw">do</span> {
+    <span class="kw">const</span> page = <span class="kw">await</span> api.<span class="fn">getSolves</span>(puzzleType, cursor, signal);
+    all.<span class="fn">push</span>(...page.solves);
+    cursor = page.next_cursor;
+    pages++;
+    <span class="kw">if</span> (pages &gt;= MAX_PAGES) <span class="kw">break</span>;
+  } <span class="kw">while</span> (cursor);
+  <span class="kw">return</span> { solves: all, truncated: pages &gt;= MAX_PAGES &amp;&amp; cursor !== <span class="kw">null</span> };
 };</div>
 
     <div class="interview-tip">
       <div class="tip-label">Resume Talking Point</div>
-      "I replaced a full-table load with cursor-based pagination. The key insight is that offset pagination re-scans discarded rows on every request and produces duplicate/missing rows under concurrent inserts — both of which get worse over time. A cursor (the created_at timestamp of the last seen row) lets Postgres use a composite B-tree index to jump directly to the next batch in O(log n), regardless of which page you're on. I added the composite index (user_id, puzzle_type, created_at DESC) to make the WHERE clause sargable."
+      "I replaced a full-table load with cursor-based pagination. The cursor encodes (created_at, id) so identical-timestamp inserts cannot drop a row across pages. The composite index on (user_id, puzzle_type, created_at DESC) WHERE deleted_at IS NULL is partial, so the query plan does not need a recheck row for the soft-delete filter. On the frontend, TanStack Query loops pages until done or capped at 10,000, with AbortSignal threaded through axios so puzzle switches cancel in-flight requests."
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ DSA-2 ══ -->
+  <!-- DSA-2 -->
   <div class="section" id="dsa2">
     <div class="section-header">
       <div class="section-badge badge-dsa">DSA-2</div>
       <div class="section-header-text">
         <h2>Binary Search — O(log n) Percentile After Each Solve</h2>
-        <div class="subtitle">frontend/src/components/SolveSession.js &middot; Algorithms &middot; Medium scope</div>
+        <div class="subtitle">frontend/src/hooks/useSortedSolveStats.ts · Algorithms · Medium scope</div>
       </div>
     </div>
 
-    <h3>The Feature</h3>
-    <p>After each solve, SolveHub shows: <em>"Faster than 73% of your solves"</em>. This requires knowing how the new time ranks among all previous solve times.</p>
+    <h3>The feature</h3>
+    <p>After each solve, the SolveHub shows a percentile: "Faster than 73% of your solves." This requires knowing how the new time ranks among all previous times.</p>
 
-    <h3>The Naive Approach</h3>
-    <p>Re-sort all solves every time. If you have 1,000 solves and add one: sort 1,001 elements → O(n log n) per solve. Over 1,000 solves, that's O(n&sup2; log n) total work.</p>
+    <h3>The naive approach</h3>
+    <p>Re-sort all solves every time. With 1,000 solves: O(n log n) per solve. Over 1,000 solves: O(n² log n) total work.</p>
 
-    <h3>The Right Approach: Maintain a Sorted Copy</h3>
-    <p>Instead of re-sorting, maintain a <strong>sorted copy</strong> of all valid times alongside the main <code>solves</code> array. When a new solve arrives, insert it into the sorted copy in the right position using binary search — O(log n) to find the position, O(n) to insert (array splice shifts elements). This is the standard sorted-insertion maintenance pattern.</p>
+    <h3>The right approach: maintain a sorted copy</h3>
+    <p>Keep a sorted copy of all valid times alongside the main solves array. On each new solve, insert it into the sorted copy in the right position using binary search — O(log n) to find, O(n) to splice. Standard sorted-insertion maintenance.</p>
 
-    <div class="code-block"><span class="cmt">// bisectLeft: returns the leftmost index where val can be inserted</span>
-<span class="cmt">// to keep arr sorted. Classic binary search variant.</span>
-<span class="kw">const</span> <span class="fn">bisectLeft</span> = (arr, val) => {
+    <div class="code-block"><span class="cmt">// bisectLeft: leftmost index where val can be inserted to keep arr sorted</span>
+<span class="kw">const</span> <span class="fn">bisectLeft</span> = (arr: number[], val: number): number => {
   <span class="kw">let</span> lo = <span class="num">0</span>, hi = arr.length;
   <span class="kw">while</span> (lo &lt; hi) {
-    <span class="kw">const</span> mid = (lo + hi) >> <span class="num">1</span>;   <span class="cmt">// integer divide by 2 (bit shift)</span>
-    <span class="kw">if</span> (arr[mid] &lt; val) lo = mid + <span class="num">1</span>;
+    <span class="kw">const</span> mid = (lo + hi) &gt;&gt; <span class="num">1</span>;
+    <span class="kw">if</span> (arr[mid]! &lt; val) lo = mid + <span class="num">1</span>;
     <span class="kw">else</span>               hi = mid;
   }
   <span class="kw">return</span> lo;
 };</div>
 
-    <div class="diagram">sortedTimes (before new solve): [5.21, 7.83, 9.02, 11.44, 13.10]
-                                      <span class="warn">↓</span>
-New solve: 9.50
+    <p>The non-null assertion on <code>arr[mid]!</code> is required by <code>noUncheckedIndexedAccess</code>; the binary-search invariant guarantees it is safe.</p>
 
-bisectLeft([5.21, 7.83, 9.02, 11.44, 13.10], 9.50)
-  → lo=0, hi=5, mid=2 → arr[2]=9.02 &lt; 9.50 → lo=3
-  → lo=3, hi=5, mid=4 → arr[4]=13.10 &gt; 9.50 → hi=4
-  → lo=3, hi=4, mid=3 → arr[3]=11.44 &gt; 9.50 → hi=3
-  → lo=3 == hi=3 → return <span class="ok">3</span>
-
-Position 3: 3 solves are faster, 2 solves are slower.
-<span class="ok">Faster than (2/5) × 100 = 40% of your solves</span></div>
-
-    <h3>The Percentile Formula</h3>
-    <div class="code-block"><span class="cmt">// pos = number of previous solves FASTER than this one (lower times)</span>
+    <h3>The percentile formula</h3>
+    <div class="code-block"><span class="cmt">// pos = number of previous solves FASTER than this one</span>
 <span class="cmt">// beaten = number of previous solves SLOWER than this one</span>
-<span class="cmt">// "Faster than X% of your previous solves"</span>
 <span class="kw">const</span> pos    = <span class="fn">bisectLeft</span>(prev, time);
 <span class="kw">const</span> beaten = prev.length - pos;
 <span class="kw">const</span> pct    = <span class="fn">Math.round</span>((beaten / prev.length) * <span class="num">100</span>);</div>
 
-    <h3>Why bisectLeft, not bisectRight?</h3>
-    <p><code>bisectLeft</code> places the new element <em>before</em> any existing equal elements. <code>bisectRight</code> places it after. For computing "how many solves did I beat?", either works for unique times. <code>bisectLeft</code> is the conservative choice — if your time ties with an existing solve, it doesn't inflate your percentile.</p>
+    <h3>Where this lives</h3>
+    <p>Audit E.9 extracted this logic from the monolithic <code>useSolveSession</code> into <code>useSortedSolveStats</code>:</p>
+    <div class="code-block"><span class="kw">const</span> <span class="fn">useSortedSolveStats</span> = () => {
+  <span class="kw">const</span> sortedTimesRef = <span class="fn">useRef</span>&lt;number[]&gt;([]);
+  <span class="kw">const</span> [lastPercentile, setLastPercentile] = <span class="fn">useState</span>&lt;number | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> medianTracker = <span class="fn">useMedianTracker</span>();
+
+  <span class="kw">return</span> {
+    sortedTimesRef,
+    lastPercentile,
+    currentMedian: medianTracker.<span class="fn">getMedian</span>(),
+    <span class="fn">applySolveAdded</span>(time: number): void { <span class="cmt">/* binary insert + percentile + median push */</span> },
+    <span class="fn">applySolveRemoved</span>(time: number): void { <span class="cmt">/* splice + median rebuild */</span> },
+    <span class="fn">rebuildFrom</span>(times: number[]): void { <span class="cmt">/* full rebuild from a fresh fetch */</span> },
+  };
+};</div>
+
+    <h3>Why bisectLeft over bisectRight</h3>
+    <p><code>bisectLeft</code> places the new element <em>before</em> any existing equal elements. The conservative choice — if your time ties an existing solve, it does not inflate your percentile.</p>
 
     <table>
       <tr><th>Operation</th><th>Re-sort approach</th><th>Binary search + sorted copy</th></tr>
       <tr><td>Find position</td><td class="bad">O(n log n)</td><td class="good">O(log n)</td></tr>
-      <tr><td>Insert element</td><td class="bad">O(n log n)</td><td>O(n) — splice shifts</td></tr>
+      <tr><td>Insert element</td><td class="bad">O(n log n)</td><td>O(n) splice</td></tr>
       <tr><td>Total per solve</td><td class="bad">O(n log n)</td><td class="good">O(log n) find + O(n) insert</td></tr>
-      <tr><td>After 1,000 solves total</td><td class="bad">O(n² log n)</td><td class="good">O(n²) worst — but fast in practice</td></tr>
+      <tr><td>After 1,000 solves total</td><td class="bad">O(n² log n)</td><td class="good">O(n²) — fast in practice</td></tr>
     </table>
 
     <div class="callout callout-orange">
-      <strong>Why keep a separate sorted array instead of sorting the main solves array?</strong> The main <code>solves</code> array is displayed in reverse-chronological order (newest first). Sorting it in place would destroy the display order. Maintaining a separate sorted copy is a classic space-for-time tradeoff — double the memory, but O(log n) lookup instead of O(n log n) sort.
-    </div>
-
-    <div class="interview-tip">
-      <div class="tip-label">Resume Talking Point</div>
-      "I maintain a sorted copy of solve times alongside the main reverse-chronological list. On each new solve, I binary search (bisect_left) to find the insertion position in O(log n), compute the percentile from that position, and splice the new time in. This avoids re-sorting on every solve — which would be O(n log n) per solve and O(n² log n) after n solves total."
+      <strong>Why a separate sorted array instead of sorting solves in place?</strong> The main solves array is displayed in reverse-chronological order (newest first). Sorting it in place destroys display order. A separate sorted copy is a classic space-for-time tradeoff: 2x memory, O(log n) lookup instead of O(n log n) sort.
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ SD-3 ══ -->
+  <!-- SD-3 -->
   <div class="section" id="sd3">
     <div class="section-header">
       <div class="section-badge badge-sd">SD-3</div>
       <div class="section-header-text">
-        <h2>Personal Best History — Write-Time Materialization (CQRS Lite)</h2>
-        <div class="subtitle">backend/migrations/003_personal_bests.sql &middot; routes/solves.py &middot; SolveHub.js</div>
+        <h2>Personal Best History — Atomic Postgres RPC (CQRS Lite)</h2>
+        <div class="subtitle">migrations/003, 010, 011 · services/solves_service.py · SolveHub.tsx</div>
       </div>
     </div>
 
-    <h3>The Feature</h3>
-    <p>A chart showing how your personal best (PB) for a puzzle improved over time — your fastest solve ever, at each point in history. This answers: "How has my 3x3 PB improved over the past 6 months?"</p>
+    <h3>The feature</h3>
+    <p>A chart showing how your personal best (PB) for a puzzle improved over time. Answers: "How has my 3x3 PB improved over the past 6 months?"</p>
 
-    <h3>The Core Design Decision: When Do You Compute PBs?</h3>
-    <p>This is one of the fundamental tradeoffs in system design: <strong>compute on read, or compute on write?</strong></p>
-
-    <div class="diagram"><span class="hi">Option A — Compute on READ (every request)</span>
+    <h3>Compute on read vs. compute on write</h3>
+    <div class="diagram"><span class="info">Option A — Compute on READ (every request)</span>
 GET /personal-bests
   → SELECT MIN(time) FROM solves WHERE user_id=X AND puzzle_type=333
-  → ... and how do we get the PB history? We'd have to scan ALL solves in order,
-       track the running minimum, emit a row each time it drops.
-  → O(n) scan, every request. At 10,000 solves, that's 10,000 rows scanned.
+  → For history we'd scan ALL solves in order, track running minimum, emit a row each drop.
+  → O(n) scan, every request. 10,000 solves means 10,000 rows scanned per page load.
 
 <span class="ok">Option B — Compute on WRITE (current implementation)</span>
 POST /solves  (new solve arrives)
   → Insert solve ✓
-  → Check: is this time &lt; current PB recorded in personal_bests?
-  → If yes: insert one row into personal_bests
+  → Atomically: if time &lt; current PB, insert one row into personal_bests
 GET /personal-bests
-  → SELECT * FROM personal_bests WHERE user_id=X AND puzzle_type=333
-  → Returns only the PB rows — O(1) index scan regardless of solve count</div>
+  → SELECT * FROM personal_bests WHERE user_id=X AND puzzle_type=333 ORDER BY achieved_at
+  → O(1) index scan regardless of solve count</div>
 
     <div class="callout callout-green">
-      <strong>This is the CQRS principle in miniature.</strong> CQRS = Command Query Responsibility Segregation. Commands (writes) pay a small extra cost to maintain derived state. Queries (reads) pay almost nothing. The personal_bests table is a <em>write-time materialized view</em> — a denormalized, derived table that's kept up-to-date on every write.
+      <strong>The CQRS principle in miniature.</strong> Commands (writes) pay a small extra cost to maintain derived state. Queries (reads) pay almost nothing. <code>personal_bests</code> is a write-time materialized view, kept up-to-date on every write.
     </div>
 
-    <h3>The Schema</h3>
-    <div class="code-block">CREATE TABLE personal_bests (
-  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id     uuid REFERENCES auth.users NOT NULL,
-  puzzle_type text NOT NULL,
-  time        numeric NOT NULL,         <span class="cmt">-- the PB time itself</span>
-  achieved_at timestamptz NOT NULL,     <span class="cmt">-- when this PB was set</span>
-  solve_id    uuid REFERENCES solves(id) ON DELETE SET NULL  <span class="cmt">-- which solve it came from</span>
-);</div>
+    <h3>The atomic RPC — D.8</h3>
+    <p>The original implementation was a read-then-insert pattern (two round-trips, no transaction). Concurrent solves could race to insert duplicate PB rows for ties. The fix was a Postgres function:</p>
 
-    <p>Row Level Security ensures users can only read their own PBs — same pattern as the <code>solves</code> table.</p>
+    <div class="code-block">CREATE FUNCTION <span class="fn">record_pb_if_better</span>(
+  p_user_id    uuid,
+  p_puzzle_type text,
+  p_solve_id   uuid,
+  p_time       numeric
+) RETURNS void AS $$
+BEGIN
+  INSERT INTO personal_bests (user_id, puzzle_type, time, achieved_at, solve_id)
+  SELECT p_user_id, p_puzzle_type, p_time, now(), p_solve_id
+  WHERE NOT EXISTS (
+    SELECT 1 FROM personal_bests
+    WHERE user_id = p_user_id
+      AND puzzle_type = p_puzzle_type
+      AND time &lt;= p_time     <span class="cmt">-- already at or below this time? skip insert</span>
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER;</div>
 
-    <h3>The Write-Time Logic</h3>
-    <div class="code-block"><span class="kw">def</span> <span class="fn">_maybe_record_pb</span>(supabase, user_id, puzzle_type, new_time, ...):
-    <span class="cmt"># Query the current PB from the personal_bests table</span>
-    pb_result = supabase.table(<span class="str">'personal_bests'</span>)
-                        .select(<span class="str">'time'</span>)
-                        .eq(<span class="str">'user_id'</span>, user_id)
-                        .eq(<span class="str">'puzzle_type'</span>, puzzle_type)
-                        .order(<span class="str">'time'</span>)      <span class="cmt">← sort ascending, take best</span>
-                        .limit(<span class="num">1</span>)
-                        .execute()
+    <p>One round-trip, atomic. The <code>SECURITY INVOKER</code> means it runs as the calling user, so RLS still applies.</p>
 
-    current_pb = pb_result.data[<span class="num">0</span>][<span class="str">'time'</span>] <span class="kw">if</span> pb_result.data <span class="kw">else None</span>
+    <h3>Service-side call</h3>
+    <div class="code-block"><span class="kw">class</span> <span class="fn">PersonalBestsRepository</span>:
+    <span class="kw">def</span> <span class="fn">record_pb_if_better</span>(<span class="hi">self</span>, user_id, puzzle_type, solve_id, time):
+        <span class="hi">self</span>.supabase.<span class="fn">rpc</span>(<span class="str">'record_pb_if_better'</span>, {
+            <span class="str">'p_user_id'</span>: user_id,
+            <span class="str">'p_puzzle_type'</span>: puzzle_type,
+            <span class="str">'p_solve_id'</span>: solve_id,
+            <span class="str">'p_time'</span>: time,
+        }).<span class="fn">execute</span>()</div>
 
-    <span class="kw">if</span> current_pb <span class="kw">is None or</span> new_time &lt; current_pb:    <span class="cmt">← new PB!</span>
-        supabase.table(<span class="str">'personal_bests'</span>).insert({...}).execute()</div>
+    <h3>Batch migration: recompute_pbs_for_user — D.7</h3>
+    <p>When a guest signs up, the batch endpoint inserts up to 1,000 solves in one transaction. PBs cannot be incrementally maintained because the solves arrive out of natural insertion order. Migration 011 adds a second RPC that wipes and rebuilds PB rows from scratch in chronological order:</p>
+    <div class="code-block">CREATE FUNCTION <span class="fn">recompute_pbs_for_user</span>(p_user_id uuid) RETURNS void AS $$
+BEGIN
+  DELETE FROM personal_bests WHERE user_id = p_user_id;
+  INSERT INTO personal_bests (user_id, puzzle_type, time, achieved_at, solve_id)
+  SELECT user_id, puzzle_type, time, created_at, id
+  FROM (
+    SELECT user_id, puzzle_type, time, created_at, id,
+           min(time) OVER (PARTITION BY puzzle_type ORDER BY created_at, id) AS running_min
+    FROM solves
+    WHERE user_id = p_user_id AND deleted_at IS NULL AND NOT dnf
+  ) ranked
+  WHERE time = running_min;
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER;</div>
 
-    <p>The function is called <em>after</em> the main solve insert and is wrapped in a try/except that swallows errors. The PB tracking is <strong>best-effort</strong> — if it fails (Supabase hiccup, network blip), the solve is still saved successfully. The user doesn't see an error. This is a deliberate decision: PB history is secondary data; the solve itself is primary.</p>
-
-    <h3>The Tradeoffs You Should Know</h3>
+    <h3>Tradeoffs</h3>
     <table>
       <tr><th>Concern</th><th>Impact</th><th>Decision</th></tr>
-      <tr><td>Race conditions</td><td>Two concurrent solves could both think they're a PB</td><td>Acceptable — speedcubers time one solve at a time</td></tr>
-      <tr><td>Storage</td><td>A new row per PB event (rare writes)</td><td>Tiny — most users have &lt;100 PBs ever</td></tr>
-      <tr><td>PB after delete</td><td>If you delete your PB solve, personal_bests still has it</td><td>solve_id SET NULL on delete; chart is historical, not live</td></tr>
+      <tr><td>Race conditions</td><td>Two concurrent solves race for a PB</td><td>Atomic RPC eliminates the race</td></tr>
+      <tr><td>Storage</td><td>One row per PB event</td><td>Tiny — most users have &lt; 100 PBs ever</td></tr>
+      <tr><td>PB after solve delete</td><td>Deleted PB row stays referenced if solve_id is set null</td><td>solve_id ON DELETE SET NULL; chart is historical, not live</td></tr>
+      <tr><td>Batch migration</td><td>Out-of-order arrival corrupts incremental PBs</td><td>recompute_pbs_for_user RPC after batch insert</td></tr>
     </table>
 
     <div class="interview-tip">
       <div class="tip-label">Resume Talking Point</div>
-      "I faced a choice: compute PB history on every GET by scanning all solves in order, or materialize it at write time. I chose write-time materialization — the personal_bests table is updated on every non-DNF POST /solves. This keeps GET /personal-bests to an O(1) indexed query regardless of how many solves exist, at the cost of one extra query per solve insertion. This is the CQRS pattern: commands pay a small extra cost so queries are cheap. The PB tracking is also best-effort — if it fails, the solve insert still succeeds."
+      "I chose write-time PB materialization over read-time computation. GET /personal-bests is an O(1) indexed query regardless of solve count. The original implementation was a read-then-insert pattern with a TOCTOU race; I replaced it with an atomic Postgres function that inserts only if no equal-or-better PB exists. For the batch guest-migration path, a separate RPC wipes and rebuilds PB rows in chronological order from a window-function query, since incremental maintenance does not work when solves arrive out of order."
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ DSA-3 ══ -->
+  <!-- DSA-3 -->
   <div class="section" id="dsa3">
     <div class="section-header">
       <div class="section-badge badge-dsa">DSA-3</div>
       <div class="section-header-text">
         <h2>Circular Buffer — O(1) Fixed-Window Tracking</h2>
-        <div class="subtitle">frontend/src/hooks/useCircularBuffer.js &middot; Data Structures &middot; Small scope</div>
+        <div class="subtitle">frontend/src/lib/circularBuffer.ts · Data Structures · Small scope</div>
       </div>
     </div>
 
-    <h3>What is a Circular Buffer?</h3>
-    <p>A circular buffer (also called a ring buffer) is a fixed-capacity array that reuses its own storage. When it's full, the next write overwrites the oldest element. Two pointers — <code>head</code> (next write position) and <code>size</code> — are all you need to track state.</p>
+    <h3>What is a circular buffer</h3>
+    <p>A circular buffer (ring buffer) is a fixed-capacity array that reuses its own storage. When full, the next write overwrites the oldest element. Two pointers (<code>head</code> and <code>size</code>) are all you need to track state.</p>
 
     <div class="diagram">Buffer of capacity 5, after pushing [A, B, C, D, E]:
 
@@ -712,7 +728,7 @@ GET /personal-bests
                           head=0 (wraps back to start)
 
 Push F:
-  items:  [ F  B  C  D  E ]     <span class="cmt">← A is overwritten</span>
+  items:  [ F  B  C  D  E ]     <span class="info">← A is overwritten</span>
                <span class="hi">↑</span>
              head=1
 
@@ -725,410 +741,1134 @@ toArray() reads from head → head+size, wrapping: [B, C, D, E, F] ✓</div>
       <tr><td>Add item to end</td><td>O(1)</td><td>O(1)</td></tr>
       <tr><td>Evict oldest (keep last N)</td><td class="bad">O(n) — splice or slice</td><td class="good">O(1) — overwrite slot, move head</td></tr>
       <tr><td>Read all items</td><td>O(n)</td><td>O(n)</td></tr>
-      <tr><td>Memory allocation</td><td class="bad">New array on every eviction</td><td class="good">Fixed array, reused forever</td></tr>
+      <tr><td>Memory allocation</td><td class="bad">New array on every eviction</td><td class="good">Fixed array, reused</td></tr>
     </table>
 
-    <p>For a window of 12, the difference in <em>absolute terms</em> is tiny. But the circular buffer teaches the concept used in real systems everywhere: OS kernel network receive buffers, audio playback buffers, log rotation, the Linux kernel's <code>kfifo</code>.</p>
-
-    <h3>The Implementation</h3>
-    <div class="code-block"><span class="kw">const</span> <span class="fn">useCircularBuffer</span> = (capacity) => {
-  <span class="cmt">// useRef, not useState — push() must not trigger re-renders</span>
-  <span class="kw">const</span> state = <span class="fn">useRef</span>({
-    items: <span class="kw">new</span> <span class="fn">Array</span>(capacity).<span class="fn">fill</span>(<span class="kw">null</span>),
-    head: <span class="num">0</span>,   <span class="cmt">// next write slot (= oldest item when full)</span>
-    size: <span class="num">0</span>,
-  });
-
-  <span class="kw">const</span> push = <span class="fn">useCallback</span>((item) => {
-    <span class="kw">const</span> s = state.current;
-    s.items[s.head] = item;                      <span class="cmt">// overwrite oldest slot</span>
-    s.head = (s.head + <span class="num">1</span>) % capacity;           <span class="cmt">// advance, wrap around</span>
-    <span class="kw">if</span> (s.size &lt; capacity) s.size += <span class="num">1</span>;          <span class="cmt">// track fill level</span>
-  }, [capacity]);
-
-  <span class="kw">const</span> toArray = <span class="fn">useCallback</span>(() => {
-    <span class="kw">const</span> { items, head, size } = state.current;
-    <span class="kw">const</span> start = size &lt; capacity ? <span class="num">0</span> : head;     <span class="cmt">// oldest item position</span>
-    <span class="kw">return</span> <span class="fn">Array.from</span>({ length: size },
-      (_, i) => items[(start + i) % capacity]);  <span class="cmt">// walk oldest → newest</span>
-  }, []);
-
-  <span class="kw">return</span> { push, toArray, reset };
-};</div>
-
-    <h3>Key React Decision: useRef not useState</h3>
-    <p>The buffer state lives in a <code>useRef</code>, not <code>useState</code>. This is intentional: <code>push()</code> should not cause a re-render. The buffer is a <em>write-only side structure</em> — components read it through <code>toArray()</code> which is called in a <code>useMemo</code> that depends on <code>solves</code>. When <code>solves</code> changes (from a new solve or delete), the memo recalculates, which calls <code>toArray()</code>, which reads the current buffer state. No spurious re-renders from the buffer itself.</p>
+    <p>For a window of 12, the absolute difference is small. The circular buffer teaches the concept used in real systems everywhere: OS kernel network receive buffers, audio playback buffers, log rotation, the Linux kernel's <code>kfifo</code>.</p>
 
     <div class="callout callout-blue">
-      <strong>Where it's used:</strong> <code>SolveSession</code> maintains a capacity-12 buffer. As new solves arrive via <code>handleSolveComplete</code>, they're pushed to the buffer — O(1). <code>SolveHub</code> receives <code>recentSolves</code> (the last 12, from <code>toArray()</code>) and uses them for the solve-time chart instead of slicing from the full array.
-    </div>
-
-    <div class="interview-tip">
-      <div class="tip-label">Resume Talking Point</div>
-      "I implemented a circular buffer as a custom React hook to track the last 12 solves without allocating a new array on each insertion. The key design choice was using useRef instead of useState — push() should not trigger re-renders, since the buffer is a write-only side structure that components consume via toArray() inside a useMemo that's already gated on the solves array changing."
+      <strong>Where it is used:</strong> The recent-12 chart in SolveHub. Solve arrivals push to the buffer in O(1); the chart reads via <code>toArray()</code> wrapped in a useMemo gated on the solves array.
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ SD-5 ══ -->
+  <!-- SD-5 -->
   <div class="section" id="sd5">
     <div class="section-header">
       <div class="section-badge badge-sd">SD-5</div>
       <div class="section-header-text">
-        <h2>Token Bucket Rate Limiting — API Abuse Prevention</h2>
-        <div class="subtitle">backend/app/extensions.py &middot; routes/solves.py &middot; Security &middot; Small scope</div>
+        <h2>Per-User Token Bucket Rate Limiting</h2>
+        <div class="subtitle">backend/app/extensions.py · routes/solves.py · Security · Small scope</div>
       </div>
     </div>
 
-    <h3>Why Rate Limit?</h3>
-    <p>Without rate limiting, any authenticated user can hammer the API — intentionally or from a client bug running in a loop. A tight loop of <code>POST /solves</code> could insert thousands of rows per minute, inflating storage and compute costs. <code>GET /solves</code> loops could stress the database. Rate limiting gives you a predictable upper bound on API traffic per client.</p>
+    <h3>Why rate limit</h3>
+    <p>Without rate limiting, any authenticated user can hammer the API — intentionally or from a client bug running in a loop. A tight loop of POST /solves could insert thousands of rows per minute, inflating storage and compute costs.</p>
 
-    <h3>Three Common Rate Limiting Algorithms</h3>
+    <h3>Three common algorithms</h3>
 
     <table>
       <tr><th>Algorithm</th><th>How it works</th><th>Burst behavior</th><th>Complexity</th></tr>
       <tr>
         <td><strong>Fixed Window</strong></td>
-        <td>Count requests in a fixed time bucket (e.g., this minute). Reset to 0 at minute boundary.</td>
-        <td class="bad">Allows 2× burst at window boundary (last second of minute + first second of next)</td>
+        <td>Count requests in a fixed time bucket; reset at boundary</td>
+        <td class="bad">Allows 2x burst at window boundary</td>
         <td>O(1)</td>
       </tr>
       <tr>
         <td><strong>Sliding Window Log</strong></td>
-        <td>Store timestamp of every request, count how many are in the past N seconds.</td>
-        <td class="good">Exact — no boundary burst</td>
+        <td>Store timestamp of every request, count in past N seconds</td>
+        <td class="good">Exact</td>
         <td class="bad">O(requests) storage</td>
       </tr>
       <tr>
         <td><strong>Token Bucket</strong> (current)</td>
-        <td>Bucket holds up to C tokens, refills at rate R tokens/sec. Each request consumes 1 token. Block if empty.</td>
-        <td class="good">Allows bursts up to capacity C, then enforces rate R</td>
+        <td>Bucket of C tokens, refills at R/sec; each request consumes 1</td>
+        <td class="good">Allows bursts up to C, then enforces R</td>
         <td class="good">O(1) time, O(1) storage</td>
       </tr>
     </table>
 
-    <h3>Token Bucket Intuition</h3>
-    <div class="diagram">Bucket capacity: C = 30 tokens   Refill rate: R = 0.5 tokens/sec (30/min)
+    <h3>Per-user keying — B.10</h3>
+    <p>Originally the limiter keyed on IP address. Two problems: (1) corporate NATs share an IP across users; (2) attackers can rotate IPs. Audit B.10 changed the key function:</p>
 
-t=0s:   bucket=[<span class="ok">●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</span>] 30 tokens full
-t=0s:   25 requests arrive instantly → bucket=[<span class="ok">●●●●●</span>] 5 tokens left   → all served
-t=1s:   1 more request → bucket=[<span class="ok">●●●●●</span>+<span class="ok">●</span>] refilled 0.5 → served
-t=2s:   5 requests arrive → bucket=[<span class="ok">●</span>] → 1 served, <span class="bad">4 blocked</span>
-...
-<span class="ok">Bursts are absorbed (up to C). Sustained rate is capped at R.</span></div>
-
-    <h3>The Implementation</h3>
-    <div class="code-block"><span class="cmt"># extensions.py — single limiter instance, shared across routes</span>
+    <div class="code-block"><span class="cmt"># extensions.py</span>
+<span class="kw">from</span> flask <span class="kw">import</span> g
 <span class="kw">from</span> flask_limiter <span class="kw">import</span> Limiter
 <span class="kw">from</span> flask_limiter.util <span class="kw">import</span> get_remote_address
 
-limiter = <span class="fn">Limiter</span>(key_func=get_remote_address, storage_uri=<span class="str">"memory://"</span>)
+<span class="kw">def</span> <span class="fn">_user_or_ip_key</span>():
+    user_id = <span class="fn">getattr</span>(g, <span class="str">'user_id'</span>, <span class="kw">None</span>)
+    <span class="kw">return</span> user_id <span class="kw">or</span> <span class="fn">get_remote_address</span>()
 
-<span class="cmt"># __init__.py — plugs into the Flask app factory</span>
-limiter.<span class="fn">init_app</span>(app)
+limiter = <span class="fn">Limiter</span>(
+    key_func=_user_or_ip_key,
+    storage_uri=os.environ.<span class="fn">get</span>(<span class="str">"LIMITER_STORAGE_URI"</span>, <span class="str">"memory://"</span>),  <span class="cmt"># B.11: swappable</span>
+)</div>
 
-<span class="cmt"># routes/solves.py — per-route limits</span>
-@solves.<span class="fn">route</span>(<span class="str">'/solves'</span>, methods=[<span class="str">'GET'</span>])
+    <p>Authenticated routes key on user (require_auth runs first and sets g.user_id). Unauthenticated routes (auth, share read) key on IP. Users behind a corporate NAT no longer share quota with each other.</p>
+
+    <h3>Per-route limits</h3>
+    <div class="code-block">@solves.<span class="fn">route</span>(<span class="str">'/solves'</span>, methods=[<span class="str">'GET'</span>])
 @require_auth
-@limiter.<span class="fn">limit</span>(<span class="str">"60 per minute"</span>)     <span class="cmt">← 1 request/sec sustained</span>
+@limiter.<span class="fn">limit</span>(<span class="str">"60 per minute"</span>)
 <span class="kw">def</span> <span class="fn">get_solves</span>(): ...
 
 @solves.<span class="fn">route</span>(<span class="str">'/solves'</span>, methods=[<span class="str">'POST'</span>])
 @require_auth
-@limiter.<span class="fn">limit</span>(<span class="str">"30 per minute"</span>)     <span class="cmt">← tighter: you can't spam solves</span>
-<span class="kw">def</span> <span class="fn">create_solve</span>(): ...</div>
+@limiter.<span class="fn">limit</span>(<span class="str">"30 per minute"</span>)
+<span class="kw">def</span> <span class="fn">create_solve</span>(): ...
 
-    <p>When the limit is exceeded, Flask-Limiter automatically returns:</p>
-    <div class="code-block">HTTP/1.1 <span class="num">429</span> Too Many Requests
-Retry-After: <span class="num">14</span>
+@solves.<span class="fn">route</span>(<span class="str">'/solves/batch'</span>, methods=[<span class="str">'POST'</span>])
+@require_auth
+@limiter.<span class="fn">limit</span>(<span class="str">"5 per minute"</span>)         <span class="cmt"># tighter; batch up to 1000 rows each</span>
+<span class="kw">def</span> <span class="fn">create_solves_batch</span>(): ...</div>
 
-{ <span class="str">"error"</span>: <span class="str">"30 per 1 minute"</span> }</div>
-
-    <h3>Flask App Factory Pattern</h3>
-    <p>The limiter is created in <code>extensions.py</code> (without an app reference) and then initialized in <code>create_app()</code> via <code>limiter.init_app(app)</code>. This is Flask's Application Factory pattern. It's important here because:</p>
-    <ul style="padding-left:1.5rem; margin-bottom:0.9rem; color:var(--muted);">
-      <li>Routes import <code>limiter</code> from <code>extensions</code> to use <code>@limiter.limit()</code></li>
-      <li>The app isn't created yet when routes are imported (circular import risk)</li>
-      <li><code>init_app</code> defers app binding until the factory runs — safe and testable</li>
-    </ul>
-
-    <div class="callout callout-red">
-      <strong>Current limitation:</strong> The key function is IP address. Behind a load balancer or NAT, multiple users might share an IP and eat each other's quota. Production systems use authenticated user ID as the key — but that requires the rate check to run after auth, which is the order we already have (<code>@require_auth</code> runs before <code>@limiter.limit</code> in the call chain).
-    </div>
+    <h3>Storage swappable</h3>
+    <p>Default is <code>memory://</code> (in-process). For multi-worker deployments where the same user can hit different workers and effectively get N x quota, set <code>LIMITER_STORAGE_URI=redis://...</code> in the host's env. No code change.</p>
 
     <div class="interview-tip">
       <div class="tip-label">Resume Talking Point</div>
-      "I added rate limiting using the token bucket algorithm — 30 requests/min on POST /solves and 60/min on GET. Token bucket was the right choice over fixed window because fixed window allows a 2× burst at the window boundary (end of one window + start of next). Token bucket smooths this out: it allows short bursts up to capacity C, then enforces the sustained rate. I used Flask-Limiter's Application Factory pattern so the limiter instance is created in extensions.py without an app reference, then wired in via init_app — avoiding circular imports between the factory and the routes."
+      "Rate limiting uses the token bucket algorithm — 30/min POST, 60/min GET. Token bucket beats fixed window because fixed window allows a 2x burst at the window boundary. The audit changed the key function from IP to user ID, with IP fallback for unauthenticated routes — corporate NAT users no longer share quota and IP rotation no longer evades the limit. Storage URI is env-driven so a multi-worker deployment can swap from in-memory to Redis without a code change."
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ UX-1 ══ -->
+  <!-- UX-1 -->
   <div class="section" id="ux1">
     <div class="section-header">
       <div class="section-badge badge-ux">UX-1</div>
       <div class="section-header-text">
-        <h2>WCA Inspection Timer &mdash; State Machine Design</h2>
-        <div class="subtitle">frontend/src/components/Timer.js &middot; UX &middot; Medium scope</div>
+        <h2>WCA Inspection Timer — Phase State Machine</h2>
+        <div class="subtitle">frontend/src/hooks/useTimerMachine.ts · UX · Medium scope</div>
       </div>
     </div>
 
-    <h3>The Feature</h3>
-    <p>WCA regulations give competitors 15 seconds of inspection time before each solve. During inspection you can look at the cube; the solve clock starts only when you touch the timer. If you exceed 15 seconds, a +2 penalty is applied (adds 2 seconds to the result). Exceeding 17 seconds is a DNF.</p>
+    <h3>The feature</h3>
+    <p>WCA regulations give competitors 15 seconds of inspection before each solve. During inspection you can look at the cube; the solve clock starts when you touch the timer. Exceeding 15 seconds applies a +2 penalty.</p>
 
-    <h3>The Problem with Booleans</h3>
-    <p>The original Timer used two booleans — <code>isRunning</code> and <code>isReady</code> — to track state. Adding inspection requires a third phase. Two booleans already have 4 possible combinations (3 of which are valid, 1 is illegal). A third boolean would give 8 combinations — 6 illegal. This is a classic state explosion: the code becomes a mess of <code>if (!isRunning && !isReady && !isInspecting)</code> guards.</p>
+    <h3>The boolean trap</h3>
+    <p>The original Timer used <code>isRunning</code> + <code>isReady</code>. Two booleans = 4 combinations (3 valid, 1 illegal). Adding inspection as a third boolean = 8 combinations (4 illegal). Bugs emerge when you forget to guard one of them.</p>
 
-    <div class="callout callout-red">
-      <strong>The boolean flag trap:</strong> Each boolean added to represent a new phase multiplies the total state space by 2. Most combinations are illegal and must be explicitly prevented. Bugs emerge when you forget to guard one of them.
-    </div>
-
-    <h3>The Solution: A Phase Enum (Finite State Machine)</h3>
-    <p>Replace the booleans with a single <code>phase</code> string that can only ever hold one of four values. This is a <strong>Finite State Machine (FSM)</strong> — a well-known pattern for managing UI that has multiple exclusive modes.</p>
-
+    <h3>The phase enum FSM</h3>
     <div class="diagram"><span class="hi">State machine:</span>
 
   IDLE ──(space down)──&gt; READY ──(space up)──&gt; INSPECTION ──(space down)──&gt; RUNNING
-   ^                                                                               │
+   ^                                                                              │
    └──────────────────────────────(space down)─────────────────────────────────────┘
 
-  INSPECTION: countdown ticks from 15 → 0 every 100ms
-  RUNNING:    solve timer counts up every 10ms
-  Transition RUNNING → IDLE: record inspectionMs elapsed, flag +2 if &gt; 15000ms</div>
+  INSPECTION: countdown ticks 15 → 0 (gated to displayed-second changes)
+  RUNNING:    RAF loop writes elapsed ms to DOM textContent (zero React commits)
+  Transition RUNNING → IDLE: read timeRef.current, fire onSolveComplete</div>
 
-    <h3>Stale Closure Problem — Why phaseRef is Needed</h3>
-    <p>React event handlers registered in <code>useEffect</code> capture the state values at the time the effect runs — a classic JavaScript closure. If <code>phase</code> state changes, the old handler still sees the old <code>phase</code>. The fix: keep a <code>phaseRef</code> that is always mutated synchronously alongside the state update. Event handlers read from <code>phaseRef.current</code>; React renders read from <code>phase</code> state.</p>
+    <h3>The hook extraction — E.10</h3>
+    <p>Audit E.10 extracted all timer logic from the component into <code>hooks/useTimerMachine.ts</code>. Component became a 60-line presentational shell. The pure helper <code>tickInspection(elapsed): 'continue' | 'expired'</code> is also extracted and unit-tested in isolation.</p>
 
-    <div class="code-block"><span class="cmt">// phaseRef drives keyboard logic; phase state drives rendering.</span>
-<span class="kw">const</span> phaseRef = <span class="fn">useRef</span>(<span class="str">'idle'</span>);
-<span class="kw">const</span> [phase, setPhase] = <span class="fn">useState</span>(<span class="str">'idle'</span>);
+    <h3>Stale-closure problem</h3>
+    <p>React event handlers registered in useEffect capture state values at the time the effect runs. The fix is a <code>phaseRef</code> mutated synchronously alongside the state update:</p>
 
-<span class="kw">const</span> handleKeyDown = (event) => {
-  <span class="kw">const</span> p = phaseRef.current;        <span class="cmt">// always fresh — not a stale closure</span>
-  <span class="kw">if</span> (p === <span class="str">'idle'</span>)       { phaseRef.current = <span class="str">'ready'</span>;      setPhase(<span class="str">'ready'</span>); }
-  <span class="kw">else if</span> (p === <span class="str">'inspection'</span>) { startRunning(); }
-  <span class="kw">else if</span> (p === <span class="str">'running'</span>)    { finishSolve(); }
+    <div class="code-block"><span class="kw">const</span> phaseRef = <span class="fn">useRef</span>&lt;Phase&gt;(<span class="str">'idle'</span>);
+<span class="kw">const</span> [phase, setPhase] = <span class="fn">useState</span>&lt;Phase&gt;(<span class="str">'idle'</span>);
+
+<span class="kw">const</span> setPhaseSync = (next: Phase) => {
+  phaseRef.current = next;
+  <span class="fn">setPhase</span>(next);
+};
+
+<span class="kw">const</span> handleKeyDown = (event: KeyboardEvent) => {
+  <span class="kw">const</span> p = phaseRef.current;
+  <span class="kw">if</span> (p === <span class="str">'idle'</span>)        <span class="fn">setPhaseSync</span>(<span class="str">'ready'</span>);
+  <span class="kw">else if</span> (p === <span class="str">'inspection'</span>) <span class="fn">startRunning</span>();
+  <span class="kw">else if</span> (p === <span class="str">'running'</span>)    <span class="fn">finishSolve</span>();
 };</div>
 
-    <h3>Inspection Countdown Implementation</h3>
-    <div class="code-block"><span class="kw">const</span> startInspection = <span class="fn">useCallback</span>(() => {
-  inspectionStartRef.current = <span class="fn">Date.now</span>();
+    <h3>Inspection countdown — gated ticks (C.2)</h3>
+    <div class="code-block"><span class="kw">const</span> lastShownSecondRef = <span class="fn">useRef</span>(<span class="num">15</span>);
+
+<span class="kw">const</span> startInspection = <span class="fn">useCallback</span>(() => {
+  inspectionStartRef.current = <span class="fn">performance.now</span>();
   <span class="fn">setInspectionCount</span>(<span class="num">15</span>);
-  <span class="cmt">// Tick every 100ms — no need for 10ms precision on a countdown</span>
   inspectionIntervalRef.current = <span class="fn">setInterval</span>(() => {
-    <span class="kw">const</span> elapsed   = <span class="fn">Date.now</span>() - inspectionStartRef.current;
+    <span class="kw">const</span> elapsed = <span class="fn">performance.now</span>() - inspectionStartRef.current;
     <span class="kw">const</span> remaining = <span class="fn">Math.max</span>(<span class="num">0</span>, <span class="fn">Math.ceil</span>((<span class="num">15000</span> - elapsed) / <span class="num">1000</span>));
-    <span class="fn">setInspectionCount</span>(remaining);
-  }, <span class="num">100</span>);
-  phaseRef.current = <span class="str">'inspection'</span>;
-  <span class="fn">setPhase</span>(<span class="str">'inspection'</span>);
+    <span class="kw">if</span> (remaining !== lastShownSecondRef.current) {
+      lastShownSecondRef.current = remaining;
+      <span class="fn">setInspectionCount</span>(remaining);  <span class="cmt">// only when displayed second changes</span>
+    }
+  }, <span class="num">250</span>);
+  <span class="fn">setPhaseSync</span>(<span class="str">'inspection'</span>);
 }, []);</div>
 
-    <h3>Penalty Rule</h3>
-    <div class="code-block"><span class="kw">const</span> finishSolve = <span class="fn">useCallback</span>(() => {
-  <span class="fn">clearInterval</span>(timerIntervalRef.current);
-  <span class="kw">const</span> inspectionElapsed   = inspectionStartRef.current
-    ? <span class="fn">Date.now</span>() - inspectionStartRef.current : <span class="num">0</span>;
-  <span class="kw">const</span> inspectionOverran = inspectionElapsed &gt; <span class="num">15000</span>;
-  phaseRef.current = <span class="str">'idle'</span>;
-  <span class="fn">setPhase</span>(<span class="str">'idle'</span>);
-  <span class="fn">onSolveComplete</span>(timeRef.current / <span class="num">1000</span>, inspectionOverran);
-}, [onSolveComplete]);
+    <p>Polls every 250ms but only re-renders when the visible second changes. ~4 renders per visible second instead of 10/s.</p>
 
-<span class="cmt">// SolveSession receives inspectionOverran and sets plus_two on the new solve:</span>
-<span class="kw">const</span> newSolve = { puzzle_type, time, dnf: <span class="kw">false</span>, plus_two: inspectionOverran, scramble };</div>
-
-    <h3>CSS: Warning at &le;3 Seconds</h3>
-    <div class="code-block"><span class="cmt">/* Timer.css — inspection phases */</span>
-#timer.inspection         { color: <span class="str">#f5a623</span>; }  <span class="cmt">/* orange: counting down */</span>
-#timer.inspection-warning { color: <span class="str">#ef4444</span>; }  <span class="cmt">/* red: ≤ 3s remaining */</span>
-
-<span class="cmt">/* React: compute warning class from phase + count */</span>
-<span class="kw">const</span> isWarning   = phase === <span class="str">'inspection'</span> &amp;&amp; inspectionCount &lt;= <span class="num">3</span>;
-<span class="kw">const</span> timerClass  = isWarning ? <span class="str">'inspection-warning'</span> : <span class="str">'inspection'</span>;</div>
+    <h3>RAF + textContent during running phase — C.1</h3>
+    <p>The naive approach calls <code>setTime</code> 60x/sec. The current approach writes directly to a DOM ref so React commits zero times during a 5-10 second solve. Profiler shows a flat flame graph between phase transitions.</p>
 
     <table>
       <tr><th>Phase</th><th>Display</th><th>Color</th><th>Transition</th></tr>
-      <tr><td>idle</td><td>00:00.000</td><td>default</td><td>space down → ready</td></tr>
-      <tr><td>ready</td><td>00:00.000</td><td class="good">green</td><td>space up → inspection</td></tr>
+      <tr><td>idle</td><td>0.000</td><td>default</td><td>space down → ready</td></tr>
+      <tr><td>ready</td><td>0.000</td><td class="good">green</td><td>space up → inspection</td></tr>
       <tr><td>inspection</td><td>15, 14, ... 1</td><td style="color:var(--orange)">orange</td><td>space down → running</td></tr>
-      <tr><td>inspection (≤3s)</td><td>3, 2, 1</td><td class="bad">red</td><td>space down → running (+2 if &gt;15s)</td></tr>
-      <tr><td>running</td><td>counting up</td><td class="bad">red</td><td>space down → idle, save solve</td></tr>
+      <tr><td>inspection (≥ 8s)</td><td>countdown</td><td style="color:var(--yellow)">yellow flash</td><td>warning at 8s remaining</td></tr>
+      <tr><td>inspection (≥ 12s)</td><td>countdown</td><td class="bad">red flash</td><td>warning at 12s remaining</td></tr>
+      <tr><td>running</td><td>RAF DOM write</td><td>default</td><td>space down → idle, save solve</td></tr>
     </table>
-
-    <div class="interview-tip">
-      <div class="tip-label">Resume Talking Point</div>
-      "Adding a third phase (inspection) to a two-boolean timer caused state explosion — two booleans produce 4 combinations, 3 of which are valid, but a third boolean gives 8 with only 4 valid. I replaced the booleans with a phase enum, making the state machine explicit and the transitions impossible to violate. I also separated the phaseRef (always fresh, used in event handlers) from the phase state (used for rendering) to solve the stale closure problem that arises when useEffect registers event listeners that need to read current state."
-    </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ DSA-4 ══ -->
+  <!-- DSA-4 -->
   <div class="section" id="dsa4">
     <div class="section-header">
       <div class="section-badge badge-dsa">DSA-4</div>
       <div class="section-header-text">
-        <h2>Two-Heap Running Median &mdash; O(log n) Median of a Data Stream</h2>
-        <div class="subtitle">frontend/src/hooks/useMedianTracker.js &middot; Data Structures &middot; Medium scope</div>
+        <h2>Two-Heap Running Median — O(log n) per Push, O(1) Query</h2>
+        <div class="subtitle">frontend/src/hooks/useMedianTracker.ts · Data Structures · Medium scope</div>
       </div>
     </div>
 
-    <h3>The Problem</h3>
-    <p>The average solve time is already shown in SolveHub, but average is skewed by outliers — a single terrible solve drags it up significantly. The median is more robust. A speedcuber's median time is a truer reflection of their "typical" solve.</p>
+    <h3>The problem</h3>
+    <p>Average is skewed by outliers. The median is more robust. A speedcuber's median time is a truer reflection of their typical solve.</p>
 
-    <h3>Why Not Just Sort?</h3>
-    <p>Sorting all times on every new solve is O(n log n). Over n solves total, that's O(n&sup2; log n). At 1,000 solves, you're doing roughly 10 million operations per solve just to find the middle element.</p>
+    <h3>Why not just sort</h3>
+    <p>Sorting all times on every new solve is O(n log n). Over n solves: O(n² log n).</p>
 
-    <h3>The Two-Heap Algorithm</h3>
-    <p>Maintain two heaps that together hold all solve times, split at the median:</p>
+    <h3>Two heaps split at the median</h3>
 
-    <div class="diagram"><span class="hi">lo</span>: max-heap of the <span class="hi">lower half</span>   (peek = largest of lower half = left of median)
-<span class="hi">hi</span>: min-heap of the <span class="hi">upper half</span>   (peek = smallest of upper half = right of median)
+    <div class="diagram"><span class="hi">lo</span>: max-heap of the <span class="hi">lower half</span>   (peek = largest of lower half)
+<span class="hi">hi</span>: min-heap of the <span class="hi">upper half</span>   (peek = smallest of upper half)
 
 Invariant: lo.size &gt;= hi.size  and  lo.size - hi.size &lt;= 1
 
-Example with times [5.2, 7.8, 9.0, 11.4, 13.1]:
+Times [5.2, 7.8, 9.0, 11.4, 13.1]:
+  lo (max-heap): [9.0, 7.8, 5.2]   ← peek = 9.0
+  hi (min-heap): [11.4, 13.1]
+  odd total → median = lo.peek() = <span class="ok">9.0</span>
 
-  lo (max-heap): [9.0, 7.8, 5.2]   ← peek = 9.0  (the middle element)
-  hi (min-heap): [11.4, 13.1]       ← peek = 11.4
-
-  odd total (5)  → median = lo.peek() = <span class="ok">9.0</span>
-
-After adding 10.5:
+Add 10.5:
   lo: [9.0, 7.8, 5.2]    hi: [10.5, 11.4, 13.1]
-  even total (6) → median = (lo.peek() + hi.peek()) / 2 = (9.0 + 10.5) / 2 = <span class="ok">9.75</span></div>
+  even total → median = (9.0 + 10.5) / 2 = <span class="ok">9.75</span></div>
 
-    <h3>Push Algorithm</h3>
+    <h3>Push algorithm</h3>
     <div class="code-block"><span class="kw">function</span> <span class="fn">push</span>(val) {
-  <span class="cmt">// Route new value to the correct heap</span>
-  <span class="kw">if</span> (lo.size === <span class="num">0</span> || val &lt;= lo.<span class="fn">peek</span>()) {
-    lo.<span class="fn">push</span>(val);    <span class="cmt">// belongs in lower half</span>
-  } <span class="kw">else</span> {
-    hi.<span class="fn">push</span>(val);    <span class="cmt">// belongs in upper half</span>
-  }
+  <span class="cmt">// Route to correct heap</span>
+  <span class="kw">if</span> (lo.size === <span class="num">0</span> || val &lt;= lo.<span class="fn">peek</span>()) lo.<span class="fn">push</span>(val);
+  <span class="kw">else</span>                                  hi.<span class="fn">push</span>(val);
 
-  <span class="cmt">// Rebalance: keep sizes within 1 of each other</span>
-  <span class="kw">if</span> (lo.size &lt; hi.size)          lo.<span class="fn">push</span>(hi.<span class="fn">pop</span>());  <span class="cmt">// hi too big</span>
-  <span class="kw">if</span> (lo.size - hi.size &gt; <span class="num">1</span>)    hi.<span class="fn">push</span>(lo.<span class="fn">pop</span>());  <span class="cmt">// lo too big</span>
+  <span class="cmt">// Rebalance</span>
+  <span class="kw">if</span> (lo.size &lt; hi.size)        lo.<span class="fn">push</span>(hi.<span class="fn">pop</span>());
+  <span class="kw">if</span> (lo.size - hi.size &gt; <span class="num">1</span>)  hi.<span class="fn">push</span>(lo.<span class="fn">pop</span>());
 }
 
 <span class="kw">function</span> <span class="fn">getMedian</span>() {
   <span class="kw">if</span> (lo.size === <span class="num">0</span>) <span class="kw">return null</span>;
-  <span class="kw">return</span> lo.size &gt; hi.size
-    ? lo.<span class="fn">peek</span>()
-    : (lo.<span class="fn">peek</span>() + hi.<span class="fn">peek</span>()) / <span class="num">2</span>;
+  <span class="kw">return</span> lo.size &gt; hi.size ? lo.<span class="fn">peek</span>() : (lo.<span class="fn">peek</span>() + hi.<span class="fn">peek</span>()) / <span class="num">2</span>;
 }</div>
 
-    <h3>JS Heap Implementation</h3>
-    <p>JavaScript has no built-in heap. The hook implements a minimal <code>BinaryHeap</code> class parameterised by a compare function — max-heap uses <code>(a, b) =&gt; a &gt; b</code>, min-heap uses <code>(a, b) =&gt; a &lt; b</code>. Both push and pop are O(log n) via bubble-up/sink-down.</p>
+    <h3>Hand-rolled BinaryHeap</h3>
+    <p>JavaScript has no built-in heap. The hook implements a minimal <code>BinaryHeap&lt;T&gt;</code> class parameterised by a compare function:</p>
+    <div class="code-block"><span class="kw">const</span> lo = <span class="fn">useRef</span>(<span class="kw">new</span> <span class="fn">BinaryHeap</span>&lt;number&gt;((a, b) => a &gt; b));  <span class="cmt">// max-heap</span>
+<span class="kw">const</span> hi = <span class="fn">useRef</span>(<span class="kw">new</span> <span class="fn">BinaryHeap</span>&lt;number&gt;((a, b) => a &lt; b));  <span class="cmt">// min-heap</span></div>
 
-    <div class="code-block"><span class="kw">const</span> lo = <span class="fn">useRef</span>(<span class="kw">new</span> <span class="fn">BinaryHeap</span>((a, b) =&gt; a &gt; b));  <span class="cmt">// max-heap</span>
-<span class="kw">const</span> hi = <span class="fn">useRef</span>(<span class="kw">new</span> <span class="fn">BinaryHeap</span>((a, b) =&gt; a &lt; b));  <span class="cmt">// min-heap</span>
-<span class="cmt">// Stored in refs — mutations don't trigger re-renders (same pattern as DSA-3)</span></div>
+    <p>Stored in refs because mutations should not trigger re-renders. Components consume <code>getMedian()</code> via a memo gated on the solves array (same pattern as DSA-3).</p>
 
-    <h3>Why Two Separate Structures for Median vs Percentile?</h3>
-    <p>DSA-2 maintains a <strong>sorted array</strong> for percentile queries — you need the rank of a given time, which requires knowing how many times are below it. The sorted array gives you that in O(log n) via binary search.</p>
-    <p>DSA-4 maintains <strong>two heaps</strong> for the median — you need the middle value, which only requires knowing the top of each half. The heaps give you that in O(1). They're complementary: different query types, different data structures, both maintained in parallel.</p>
+    <h3>Why two structures for percentile vs median</h3>
+    <p>DSA-2 maintains a sorted array for percentile (rank queries). DSA-4 maintains two heaps for median (middle-element queries). Different query types, different optimal structures, both maintained in parallel inside <code>useSortedSolveStats</code>.</p>
 
     <table>
       <tr><th>Query</th><th>Data structure</th><th>Insert</th><th>Query</th></tr>
       <tr><td>Percentile rank of new time</td><td>Sorted array + binary search</td><td>O(n) splice</td><td class="good">O(log n)</td></tr>
       <tr><td>Median of all times</td><td>Two-heap</td><td class="good">O(log n)</td><td class="good">O(1)</td></tr>
-      <tr><td>Median (naive)</td><td>Re-sort array</td><td class="bad">O(n log n)</td><td>O(1)</td></tr>
+      <tr><td>Median (naive)</td><td>Re-sort</td><td class="bad">O(n log n)</td><td>O(1)</td></tr>
     </table>
 
     <div class="callout callout-orange">
-      <strong>Deletion caveat:</strong> Heaps don't support efficient arbitrary deletion. When a solve is deleted, the tracker resets and rebuilds from the sortedTimesRef in O(n). This is acceptable — deletions are rare (one at a time, user-initiated). For a production system needing frequent deletions, an order-statistic tree (e.g. a balanced BST with augmented subtree sizes) would handle both median and rank queries with O(log n) delete.
-    </div>
-
-    <div class="interview-tip">
-      <div class="tip-label">Resume Talking Point</div>
-      "I implemented the two-heap running median — a classic interview problem. The key insight is that you don't need all n elements sorted to find the median; you only need the top of each half. Two heaps split the data at the median: a max-heap of the lower half and a min-heap of the upper half. Push is O(log n) via rebalancing; getMedian is O(1) via peek. I store the heaps in useRef so insertions don't trigger re-renders. This structure is maintained in parallel with a sorted array (DSA-2) — the sorted array handles rank queries, the heaps handle median queries. Different query shapes demand different data structures."
+      <strong>Deletion:</strong> Heaps don't support efficient arbitrary deletion. On solve delete, the tracker resets and rebuilds from sortedTimesRef in O(n). Acceptable since deletions are rare and user-initiated. For a system with frequent deletes, an order-statistic tree (balanced BST with augmented subtree sizes) would handle median + rank + delete all in O(log n).
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ SD-6 ══ -->
+  <!-- SD-6 -->
   <div class="section" id="sd6">
     <div class="section-header">
       <div class="section-badge badge-sd">SD-6</div>
       <div class="section-header-text">
-        <h2>Optimistic Updates with Rollback &mdash; Eventual Consistency at the UI Layer</h2>
-        <div class="subtitle">frontend/src/components/SolveSession.js &middot; System Design &middot; Small scope</div>
+        <h2>Optimistic Updates with Rollback — Eventual Consistency at the UI Layer</h2>
+        <div class="subtitle">frontend/src/hooks/useSolveSession.ts · System Design · Small scope</div>
       </div>
     </div>
 
-    <h3>The Problem with Pessimistic Updates</h3>
-    <p>The original <code>handleSolveUpdate</code> and <code>handleSolveDelete</code> waited for the API response before updating the UI — a <strong>pessimistic</strong> approach. On a fast connection this is invisible, but on mobile or a slow 3G connection, toggling a DNF feels broken: you tap, nothing happens, the UI freezes for 2&ndash;3 seconds, then updates. This is especially jarring in a timer app used between rapid-fire solves.</p>
+    <h3>The problem with pessimistic updates</h3>
+    <p>The original handlers waited for the API response before updating the UI. On mobile or slow connections this feels broken: tap, freeze, then update. Especially jarring in a timer app between rapid solves.</p>
 
-    <div class="code-block"><span class="del">// BEFORE — pessimistic: wait for server before touching UI</span>
-<span class="del">const result = await api.updateSolve(id, data);</span>
-<span class="del">setSolves(prev => prev.map(s => s.id === result.id ? result : s));</span></div>
+    <h3>Optimistic updates: the pattern</h3>
+    <p>Update UI immediately. If the server returns an error, roll back to the pre-mutation snapshot. Instantaneous for the common path (success), correct for the uncommon path (failure).</p>
 
-    <h3>Optimistic Updates: The Pattern</h3>
-    <p>An optimistic update assumes the server will agree and updates the UI immediately. If the server returns an error, roll back to the pre-mutation snapshot. This makes the UI feel instantaneous for the common path (success), while remaining correct for the uncommon path (failure).</p>
-
-    <div class="code-block"><span class="add">// AFTER — optimistic: update UI first, roll back on failure</span>
-<span class="add">const snapshot = solves;                             // capture before mutation</span>
-<span class="add">setSolves(prev => prev.map(s => s.id === updated.id ? updated : s));  // immediate</span>
+    <div class="code-block"><span class="add">// AFTER — optimistic with rollback</span>
+<span class="add">const snapshot = solves;                                            // capture BEFORE mutation</span>
+<span class="add">setSolves(prev => prev.map(s => s.id === updated.id ? updated : s)); // immediate</span>
 <span class="add">try {</span>
-<span class="add">  await api.updateSolve(updated.id, updated);        // fire in background</span>
+<span class="add">  await api.updateSolve(updated.id, updated);                       // fire in background</span>
+<span class="add">  invalidateSolveCaches(qc, puzzleType);                            // tell TanStack Query</span>
 <span class="add">} catch {</span>
-<span class="add">  setSolves(snapshot);                               // rollback on failure</span>
+<span class="add">  setSolves(snapshot);                                              // rollback</span>
+<span class="add">  toast.error('Could not update solve.');</span>
 <span class="add">}</span></div>
 
-    <h3>Three Concepts This Demonstrates</h3>
+    <h3>Three concepts this demonstrates</h3>
 
-    <p><strong>1. Eventual Consistency.</strong> After the optimistic update, the local UI state and the server state temporarily diverge — the UI has already applied the change, but the network request is still in flight. If the request succeeds, both sides converge. If it fails, the rollback re-converges them. This is the same eventual consistency model that distributed databases (Cassandra, DynamoDB) use: accept writes locally, propagate later, resolve conflicts.</p>
+    <p><strong>Eventual consistency.</strong> After the optimistic update, the local UI state and the server state temporarily diverge. The UI has applied the change; the network request is still in flight. Success → both converge. Failure → rollback re-converges.</p>
 
-    <p><strong>2. Idempotency.</strong> PATCH and DELETE are safe to use optimistically because they're idempotent — applying the same operation twice has the same effect as once. If you toggle DNF on a solve that's already DNF (e.g., due to a race condition or retry), the result is the same: DNF. This is why REST chose these verbs for update/delete, and why optimistic updates are safer with PATCH/DELETE than with POST.</p>
+    <p><strong>Idempotency.</strong> PATCH and DELETE are safe to use optimistically because they are idempotent. Toggling DNF on a solve that is already DNF (race condition or retry) yields the same result. This is why REST chose these verbs for update/delete.</p>
 
-    <p><strong>3. Snapshot before mutation.</strong> The snapshot must be captured <em>before</em> the mutation, not after. If you captured it after <code>setSolves()</code>, the snapshot would already contain the optimistic change — your "rollback" would not actually restore anything. This ordering is easy to get wrong.</p>
+    <p><strong>Snapshot before mutation.</strong> Capture the snapshot before the setState, not after. Capturing after means the snapshot already contains the change; "rollback" would not actually restore anything.</p>
 
-    <div class="code-block"><span class="cmt">// Delete: optimistic remove + sorted-times + median rollback</span>
-<span class="kw">const</span> handleSolveDelete = <span class="kw">async</span> (solveToDelete) => {
-  <span class="kw">const</span> snapshot       = solves;                      <span class="cmt">// ← BEFORE, not after</span>
-  <span class="kw">const</span> sortedSnapshot = sortedTimesRef.current;
+    <h3>Delete with derived-state rollback</h3>
+    <div class="code-block"><span class="kw">const</span> handleSolveDelete = <span class="kw">async</span> (solveToDelete) => {
+  <span class="kw">const</span> snapshot          = solves;
+  <span class="kw">const</span> sortedSnapshot    = sortedTimesRef.current;
+  <span class="kw">const</span> medianSnapshot    = medianTracker.<span class="fn">snapshot</span>();
 
-  <span class="fn">setSolves</span>(prev =&gt; prev.<span class="fn">filter</span>(s =&gt; s.id !== solveToDelete.id));  <span class="cmt">// immediate</span>
-  <span class="cmt">// ... update sorted times and rebuild median tracker ...</span>
+  <span class="fn">setSolves</span>(prev => prev.<span class="fn">filter</span>(s => s.id !== solveToDelete.id));
+  applySolveRemoved(solveToDelete.time);  <span class="cmt">// updates sortedTimesRef + median</span>
 
   <span class="kw">try</span> {
     <span class="kw">await</span> api.<span class="fn">deleteSolve</span>(solveToDelete.id);
-  } <span class="kw">catch</span> (err) {
-    <span class="fn">setSolves</span>(snapshot);                               <span class="cmt">// rollback UI</span>
-    sortedTimesRef.current = sortedSnapshot;            <span class="cmt">// rollback ref</span>
-    medianTracker.<span class="fn">reset</span>();                             <span class="cmt">// rollback heaps</span>
-    sortedSnapshot.<span class="fn">forEach</span>(v =&gt; medianTracker.<span class="fn">push</span>(v));
+    <span class="fn">invalidateSolveCaches</span>(qc, puzzleType);
+  } <span class="kw">catch</span> {
+    <span class="fn">setSolves</span>(snapshot);
+    sortedTimesRef.current = sortedSnapshot;
+    medianTracker.<span class="fn">restore</span>(medianSnapshot);
+    toast.<span class="fn">error</span>(<span class="str">'Could not delete solve.'</span>);
   }
 };</div>
 
-    <h3>When Optimistic Updates Are Appropriate</h3>
+    <p>The audit's H.3 work could lift this manual snapshot/rollback pattern into TanStack Query's <code>onMutate</code>/<code>onError</code> lifecycle. The current implementation was deliberately preserved to keep the timer hot path stable; the TODO is in <code>TODO_manual_edits.md</code>.</p>
+
     <table>
       <tr><th>Condition</th><th>Suitable for optimistic?</th></tr>
       <tr><td>Operation is idempotent (PATCH, DELETE)</td><td class="good">Yes</td></tr>
-      <tr><td>Failure rate is low (normal API calls)</td><td class="good">Yes</td></tr>
+      <tr><td>Failure rate is low</td><td class="good">Yes</td></tr>
       <tr><td>User expects immediate feedback</td><td class="good">Yes</td></tr>
       <tr><td>Non-idempotent (POST creating a resource)</td><td class="bad">Risky — double submission on retry</td></tr>
-      <tr><td>Financial transactions</td><td class="bad">No — correctness &gt; latency</td></tr>
-      <tr><td>High failure rate (flaky endpoint)</td><td class="bad">No — constant rollback is worse UX</td></tr>
+      <tr><td>Financial transactions</td><td class="bad">No — correctness over latency</td></tr>
+      <tr><td>High failure rate</td><td class="bad">No — constant rollback is worse UX</td></tr>
     </table>
 
     <div class="callout callout-blue">
-      <strong>To test the rollback:</strong> Open DevTools → Network → set throttle to "Offline". Toggle DNF on a solve. The UI updates instantly (optimistic). After ~30 seconds the request times out and the UI reverts to the original state (rollback).
-    </div>
-
-    <div class="interview-tip">
-      <div class="tip-label">Resume Talking Point</div>
-      "I converted the solve update and delete handlers from pessimistic to optimistic — the UI updates instantly and rolls back only if the server returns an error. Three things make this safe: the operation is idempotent (PATCH/DELETE), so concurrent or retried requests don't corrupt state; the snapshot is captured before the mutation, not after; and the rollback is deterministic — any derived state (the sorted times array, the two-heap median tracker) is also reverted from its own snapshot. This is the same eventual consistency model that distributed systems use: accept locally, propagate asynchronously, reconcile on conflict."
+      <strong>To test the rollback:</strong> DevTools Network → throttle to "Offline". Toggle DNF. UI updates instantly (optimistic). After the request times out, UI reverts (rollback) and a toast surfaces.
     </div>
   </div>
 
 
-  <!-- ── Footer ── -->
+  <!-- SD-7 -->
+  <div class="section" id="sd7">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-7</div>
+      <div class="section-header-text">
+        <h2>Standardized Error Envelope — One Shape, Stable Codes</h2>
+        <div class="subtitle">backend/app/errors.py · services/api.ts · Audit H.2</div>
+      </div>
+    </div>
+
+    <h3>The problem before</h3>
+    <p>Different routes returned different error shapes. Some used <code>{error: "string"}</code>, some used <code>{error: "...", fields: {...}}</code>, some used <code>{message: "..."}</code>. Framework-emitted errors (rate limit 429, missing route 404) returned Flask's HTML error pages or another shape entirely. Frontend had to special-case each.</p>
+
+    <h3>The unified envelope</h3>
+    <div class="code-block">{
+  <span class="str">"error"</span>: {
+    <span class="str">"code"</span>:    <span class="str">"SOLVE_LIMIT_REACHED"</span>,         <span class="cmt">// stable upper-snake-case</span>
+    <span class="str">"message"</span>: <span class="str">"Solve limit reached"</span>,          <span class="cmt">// human-readable</span>
+    <span class="str">"fields"</span>:  { <span class="str">"time"</span>: <span class="str">"Must be > 0"</span> }     <span class="cmt">// optional, present on validation failures</span>
+  }
+}</div>
+
+    <h3>Stable codes catalog</h3>
+    <p><code>backend/app/errors.py</code> exports one constant per error code. Examples: <code>AUTH_MISSING_TOKEN</code>, <code>AUTH_INVALID_TOKEN</code>, <code>AUTH_UNAVAILABLE</code>, <code>VALIDATION_FAILED</code>, <code>SOLVE_LIMIT_REACHED</code>, <code>SOLVE_NOT_FOUND</code>, <code>SHARE_LINK_INVALID</code>, <code>RATE_LIMITED</code>, <code>NOT_FOUND</code>, <code>INTERNAL_ERROR</code>, <code>BATCH_VALIDATION_FAILED</code>, <code>INVALID_QUERY_PARAM</code>.</p>
+
+    <p>Codes are <strong>switch-on-able</strong>: the frontend branches on <code>code</code> for known errors, falls back to <code>message</code> for unknown ones. Adding a new code is additive: existing clients continue to work because they fall back gracefully.</p>
+
+    <h3>The error_response helper</h3>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">error_response</span>(code: str, message: str, status: int, fields: dict | <span class="kw">None</span> = <span class="kw">None</span>):
+    body = {<span class="str">"error"</span>: {<span class="str">"code"</span>: code, <span class="str">"message"</span>: message}}
+    <span class="kw">if</span> fields:
+        body[<span class="str">"error"</span>][<span class="str">"fields"</span>] = fields
+    <span class="kw">return</span> <span class="fn">jsonify</span>(body), status</div>
+
+    <h3>Framework errors covered too</h3>
+    <p>App-level <code>@app.errorhandler</code> registrations for 404, 429, and 500 route framework-emitted errors through <code>error_response</code>. Every error response on the wire matches the same shape regardless of who raised it:</p>
+    <div class="code-block">@app.<span class="fn">errorhandler</span>(<span class="num">429</span>)
+<span class="kw">def</span> <span class="fn">_handle_rate_limit</span>(_e):
+    <span class="kw">return</span> <span class="fn">error_response</span>(RATE_LIMITED, <span class="str">"Too many requests, please slow down"</span>, <span class="num">429</span>)
+
+@app.<span class="fn">errorhandler</span>(<span class="num">404</span>)
+<span class="kw">def</span> <span class="fn">_handle_not_found</span>(_e):
+    <span class="kw">return</span> <span class="fn">error_response</span>(NOT_FOUND, <span class="str">"Resource not found"</span>, <span class="num">404</span>)</div>
+
+    <h3>Frontend parsing</h3>
+    <div class="code-block"><span class="cmt">// services/api.ts</span>
+<span class="kw">interface</span> ApiError {
+  code: <span class="hi">string</span>;
+  message: <span class="hi">string</span>;
+  fields?: Record&lt;<span class="hi">string</span>, <span class="hi">string</span>&gt;;
+}
+
+axios.interceptors.response.<span class="fn">use</span>(
+  (response) => response,
+  (error) => {
+    <span class="kw">const</span> data = error.response?.data;
+    <span class="kw">const</span> apiError: ApiError = data?.error ?? {
+      code: <span class="str">'UNKNOWN'</span>, message: error.message ?? <span class="str">'Unknown error'</span>,
+    };
+    <span class="cmt">// Re-throw with structured fields so call sites can switch on code</span>
+    <span class="kw">throw</span> <span class="fn">Object.assign</span>(<span class="kw">new</span> <span class="fn">Error</span>(apiError.message), { code: apiError.code, fields: apiError.fields });
+  },
+);</div>
+
+    <div class="interview-tip">
+      <div class="tip-label">Resume Talking Point</div>
+      "Every 4xx and 5xx response goes through one helper that emits a stable {error: {code, message, fields}} shape. Codes are stable upper-snake-case identifiers documented in errors.py; the frontend switches on code for branching and falls back to message for unknown codes. App-level errorhandler registrations route framework errors (429, 404, 500) through the same envelope so external clients see one consistent error shape regardless of who raised the error."
+    </div>
+  </div>
+
+
+  <!-- SD-8 -->
+  <div class="section" id="sd8">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-8</div>
+      <div class="section-header-text">
+        <h2>Structured JSON Logging — Hand-Rolled JsonFormatter via dictConfig</h2>
+        <div class="subtitle">backend/app/logging_config.py · app/__init__.py · Audit I.6</div>
+      </div>
+    </div>
+
+    <h3>Why structured</h3>
+    <p>Default Flask logs are human-readable lines: <code>INFO 127.0.0.1 - - [29/Apr/2026 20:05:03] "GET /api/v1/solves HTTP/1.1" 200</code>. Greppable, but not machine-parseable. Aggregating fallback rate, top error codes, slowest endpoints requires a real parser. JSON logs are parseable as-is by <code>jq</code>, Datadog, Loki, etc.</p>
+
+    <h3>Why hand-rolled</h3>
+    <p>The audit considered <code>python-json-logger</code> and <code>structlog</code>. Both are fine. Hand-rolled stdlib was chosen to avoid a new dependency for a small surface — the formatter is ~20 lines.</p>
+
+    <div class="code-block"><span class="kw">class</span> <span class="fn">JsonFormatter</span>(logging.Formatter):
+    <span class="kw">def</span> <span class="fn">format</span>(<span class="hi">self</span>, record: logging.LogRecord) -&gt; str:
+        payload = {
+            <span class="str">"timestamp"</span>: <span class="fn">datetime.fromtimestamp</span>(record.created, tz=timezone.utc).<span class="fn">isoformat</span>(),
+            <span class="str">"level"</span>: record.levelname,
+            <span class="str">"logger"</span>: record.name,
+            <span class="str">"message"</span>: record.<span class="fn">getMessage</span>(),
+        }
+        <span class="kw">try</span>:
+            <span class="kw">from</span> flask <span class="kw">import</span> g, has_request_context
+            <span class="kw">if</span> <span class="fn">has_request_context</span>():
+                request_id = <span class="fn">getattr</span>(g, <span class="str">"request_id"</span>, <span class="kw">None</span>)
+                <span class="kw">if</span> request_id <span class="kw">is not None</span>: payload[<span class="str">"request_id"</span>] = request_id
+                user_id = <span class="fn">getattr</span>(g, <span class="str">"user_id"</span>, <span class="kw">None</span>)
+                <span class="kw">if</span> user_id <span class="kw">is not None</span>: payload[<span class="str">"user_id"</span>] = user_id
+        <span class="kw">except</span> RuntimeError:
+            <span class="kw">pass</span>  <span class="cmt"># outside an application context</span>
+        <span class="kw">if</span> record.exc_info:
+            payload[<span class="str">"exception"</span>] = <span class="hi">self</span>.<span class="fn">formatException</span>(record.exc_info)
+        <span class="kw">return</span> <span class="fn">json.dumps</span>(payload, default=str)</div>
+
+    <h3>Wired via dictConfig</h3>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">configure_logging</span>(level: str = <span class="str">"INFO"</span>) -&gt; <span class="kw">None</span>:
+    logging.config.<span class="fn">dictConfig</span>({
+        <span class="str">"version"</span>: <span class="num">1</span>,
+        <span class="str">"disable_existing_loggers"</span>: <span class="kw">False</span>,
+        <span class="str">"formatters"</span>: {<span class="str">"json"</span>: {<span class="str">"()"</span>: <span class="str">"app.logging_config.JsonFormatter"</span>}},
+        <span class="str">"handlers"</span>:   {<span class="str">"stdout"</span>: {<span class="str">"class"</span>: <span class="str">"logging.StreamHandler"</span>, <span class="str">"stream"</span>: <span class="str">"ext://sys.stdout"</span>, <span class="str">"formatter"</span>: <span class="str">"json"</span>}},
+        <span class="str">"root"</span>:       {<span class="str">"level"</span>: level, <span class="str">"handlers"</span>: [<span class="str">"stdout"</span>]},
+        <span class="str">"loggers"</span>:    {<span class="str">"werkzeug"</span>: {<span class="str">"level"</span>: <span class="str">"WARNING"</span>, <span class="str">"handlers"</span>: [<span class="str">"stdout"</span>], <span class="str">"propagate"</span>: <span class="kw">False</span>}},
+    })</div>
+
+    <p><code>configure_logging</code> is the first thing <code>create_app</code> calls. <code>LOG_LEVEL</code> env var controls verbosity (default INFO). Werkzeug is bumped to WARNING so its access logs don't double with our access log.</p>
+
+    <h3>request_id and user_id injection</h3>
+    <p>Two app-level hooks make every log line in a request automatically carry the request's identifiers:</p>
+    <div class="code-block">@app.<span class="fn">before_request</span>
+<span class="kw">def</span> <span class="fn">_attach_request_id</span>():
+    g.request_id = uuid.<span class="fn">uuid4</span>().hex   <span class="cmt"># 32 hex chars; cheap to generate</span>
+
+@app.<span class="fn">after_request</span>
+<span class="kw">def</span> <span class="fn">_access_log</span>(response):
+    access_logger.<span class="fn">info</span>(<span class="fn">f</span><span class="str">"{request.method} {request.path} {response.status_code}"</span>)
+    <span class="kw">return</span> response</div>
+
+    <p><code>g.user_id</code> is set by <code>require_auth</code>; the formatter pulls it onto every log line emitted during the request, including ones from services and repositories.</p>
+
+    <h3>Sample output</h3>
+    <div class="code-block">{<span class="str">"timestamp"</span>: <span class="str">"2026-04-29T20:05:03.332867+00:00"</span>, <span class="str">"level"</span>: <span class="str">"INFO"</span>, <span class="str">"logger"</span>: <span class="str">"app.access"</span>, <span class="str">"message"</span>: <span class="str">"GET /api/v1/solves 200"</span>, <span class="str">"request_id"</span>: <span class="str">"a114d46e6bd842678..."</span>, <span class="str">"user_id"</span>: <span class="str">"7c3e1f..."</span>}
+{<span class="str">"timestamp"</span>: <span class="str">"2026-04-29T20:05:04.123456+00:00"</span>, <span class="str">"level"</span>: <span class="str">"INFO"</span>, <span class="str">"logger"</span>: <span class="str">"app.routes.solves"</span>, <span class="str">"message"</span>: <span class="str">"auth_slow_path event=auth_slow_path"</span>, <span class="str">"request_id"</span>: <span class="str">"b9e2a1c..."</span>, <span class="str">"user_id"</span>: <span class="str">"7c3e1f..."</span>}</div>
+
+    <p>Aggregation is one <code>jq</code> filter:</p>
+    <div class="code-block"><span class="cmt"># Slow-path fallback rate</span>
+&lt;log&gt; | jq -r 'select(.message | contains("auth_slow_path")) | .timestamp'
+
+<span class="cmt"># Top user_ids by request volume</span>
+&lt;log&gt; | jq -r '.user_id' | sort | uniq -c | sort -nr | head</div>
+  </div>
+
+
+  <!-- SD-9 -->
+  <div class="section" id="sd9">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-9</div>
+      <div class="section-header-text">
+        <h2>HMAC Share-Link Signing — Stateless Tokens with Embedded TTL</h2>
+        <div class="subtitle">backend/app/services/share_links_service.py · Audit A.7</div>
+      </div>
+    </div>
+
+    <h3>The original (broken) scheme</h3>
+    <p>The first share-link implementation embedded a 16-byte HMAC alongside the solve UUID in the URL: <code>b64(id).b64(mac)</code>. Two problems: (1) no expiry, links lived forever; (2) used the service-role Supabase key on every read with no audit trail.</p>
+
+    <h3>Current scheme — A.7</h3>
+    <div class="diagram">Token = <span class="hi">b64url(solve_id)</span>.<span class="ok">b64url(iat)</span>.<span class="warn">b64url(exp)</span>.<span class="bad">b64url(mac)</span>
+
+       │              │            │            │
+       │              │            │            └── HMAC-SHA256(SHARE_SECRET, "id:iat:exp")[:16]
+       │              │            └── exp unix timestamp (8 bytes BE)
+       │              └── iat unix timestamp (8 bytes BE)
+       └── solve UUID</div>
+
+    <h3>Sign and verify</h3>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">_sign_solve_id</span>(solve_id: str) -&gt; str:
+    iat = <span class="fn">_now_seconds</span>()
+    exp = iat + SHARE_TOKEN_TTL_SECONDS  <span class="cmt"># 30 days</span>
+    msg = <span class="fn">f</span><span class="str">"{solve_id}:{iat}:{exp}"</span>.<span class="fn">encode</span>()
+    mac = hmac.<span class="fn">new</span>(<span class="fn">_require_share_secret</span>(), msg, hashlib.sha256).<span class="fn">digest</span>()[:MAC_LENGTH]
+    <span class="kw">return</span> <span class="str">"."</span>.<span class="fn">join</span>([
+        <span class="fn">_b64url</span>(solve_id.<span class="fn">encode</span>()),
+        <span class="fn">_b64url</span>(<span class="fn">_pack_int</span>(iat)),
+        <span class="fn">_b64url</span>(<span class="fn">_pack_int</span>(exp)),
+        <span class="fn">_b64url</span>(mac),
+    ])
+
+<span class="kw">def</span> <span class="fn">_verify_share_token</span>(token: str) -&gt; str | <span class="kw">None</span>:
+    <span class="kw">try</span>:
+        id_part, iat_part, exp_part, mac_part = token.<span class="fn">split</span>(<span class="str">"."</span>, <span class="num">3</span>)
+        solve_id = <span class="fn">_b64url_decode</span>(id_part).<span class="fn">decode</span>(<span class="str">"utf-8"</span>)
+        iat      = <span class="fn">_unpack_int</span>(<span class="fn">_b64url_decode</span>(iat_part))
+        exp      = <span class="fn">_unpack_int</span>(<span class="fn">_b64url_decode</span>(exp_part))
+        provided = <span class="fn">_b64url_decode</span>(mac_part)
+    <span class="kw">except</span> (ValueError, UnicodeDecodeError):
+        <span class="kw">return None</span>
+
+    msg = <span class="fn">f</span><span class="str">"{solve_id}:{iat}:{exp}"</span>.<span class="fn">encode</span>()
+    expected = hmac.<span class="fn">new</span>(<span class="fn">_require_share_secret</span>(), msg, hashlib.sha256).<span class="fn">digest</span>()[:MAC_LENGTH]
+    <span class="kw">if not</span> hmac.<span class="fn">compare_digest</span>(provided, expected): <span class="kw">return None</span>
+    <span class="kw">if</span> <span class="fn">_now_seconds</span>() &gt; exp:                       <span class="kw">return None</span>
+    <span class="kw">return</span> solve_id</div>
+
+    <h3>hmac.compare_digest — constant-time comparison</h3>
+    <p>A naive <code>provided == expected</code> short-circuits on first byte mismatch. The number of bytes compared leaks information about how close the attacker's guess is. <code>hmac.compare_digest</code> always compares all bytes, so timing reveals nothing about the secret.</p>
+
+    <h3>SHARE_SECRET length floor — A.7</h3>
+    <p><code>create_app</code> raises <code>RuntimeError</code> at boot if SHARE_SECRET is shorter than 32 characters. Catches misconfiguration before the first request rather than at first signature verification.</p>
+
+    <h3>Why stateless</h3>
+    <table>
+      <tr><th>Approach</th><th>DB writes per share</th><th>DB reads per verify</th><th>Revocation</th><th>Expiry</th></tr>
+      <tr><td class="good">HMAC stateless (current)</td><td class="good">0</td><td class="good">0</td><td class="bad">Hard cutover only</td><td class="good">Embedded</td></tr>
+      <tr><td>DB-backed share_links</td><td>1</td><td>1</td><td class="good">Per-link</td><td>Configurable</td></tr>
+    </table>
+
+    <p>Per-link revocation was deferred (A.7 option 2). Today the only revocation lever is rotating SHARE_SECRET, which invalidates every outstanding link. The runbook in <code>docs/share-secret-rotation.md</code> documents the procedure plus a future dual-secret rolling-window pattern (~30 lines of Python) if frequent rotation becomes necessary.</p>
+
+    <h3>The dangerous_admin module — H.8</h3>
+    <p>The share-read route is the only path that uses the service-role Supabase key (it has to bypass RLS to read another user's solve, after the signature has been verified). The function lives in <code>backend/app/dangerous_admin.py</code> with a docstring contract: "BYPASSES RLS. Only call with explicit, audited authorization." Code review can grep for that import.</p>
+  </div>
+
+
+  <!-- SD-10 -->
+  <div class="section" id="sd10">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-10</div>
+      <div class="section-header-text">
+        <h2>Local JWT Verification — PyJWT + Cached JWKS</h2>
+        <div class="subtitle">backend/app/auth.py · Phase 8.1</div>
+      </div>
+    </div>
+
+    <h3>The original implementation</h3>
+    <p>Every authenticated request did a network round-trip to Supabase: <code>supabase.auth.get_user(jwt=token)</code>. That meant every API call paid an extra HTTP hop before the actual route ran.</p>
+
+    <h3>The fast/slow split</h3>
+    <p><code>require_auth</code> attempts two paths in order. Both produce a verified user_id; only the cost differs. Documented at <code>docs/jwt-verification.md</code>.</p>
+
+    <div class="diagram"><span class="hi">Fast path:</span>  verify_token_local(token)  →  PyJWT decodes against cached JWKS
+                                       │
+                                       ▼
+                            sub claim → return user_id
+
+<span class="warn">Slow path</span> (only on fast-path failure):
+              supabase.auth.get_user(jwt=token)  →  HTTP round-trip
+                                       │
+                                       ▼
+                              user.user.id → user_id
+              <span class="info">+ INFO log: "auth_slow_path event=auth_slow_path"</span>  (operator-aggregated)</div>
+
+    <h3>The JWKS singleton — B.3</h3>
+    <div class="code-block">_jwks_client: Optional[jwt.PyJWKClient] = <span class="kw">None</span>
+_jwks_lock = threading.<span class="fn">Lock</span>()  <span class="cmt"># B.3: serialize first-call construction</span>
+
+<span class="kw">def</span> <span class="fn">_get_jwks_client</span>() -&gt; Optional[jwt.PyJWKClient]:
+    <span class="kw">global</span> _jwks_client
+    <span class="kw">if</span> _jwks_client <span class="kw">is not None</span>: <span class="kw">return</span> _jwks_client  <span class="cmt"># fast path: lock-free</span>
+    <span class="kw">with</span> _jwks_lock:
+        <span class="kw">if</span> _jwks_client <span class="kw">is not None</span>: <span class="kw">return</span> _jwks_client  <span class="cmt"># double-check</span>
+        url = Config.SUPABASE_URL
+        <span class="kw">if not</span> url: <span class="kw">return None</span>
+        _jwks_client = jwt.<span class="fn">PyJWKClient</span>(
+            <span class="fn">f</span><span class="str">"{url.rstrip('/')}/auth/v1/.well-known/jwks.json"</span>,
+            cache_keys=<span class="kw">True</span>,
+            lifespan=<span class="num">300</span>,        <span class="cmt"># refresh every 5 minutes</span>
+            max_cached_keys=<span class="num">16</span>,  <span class="cmt"># bound memory under key churn</span>
+        )
+        <span class="kw">return</span> _jwks_client</div>
+
+    <p>Process-wide singleton. Lazy first-call construction under a threading lock with double-check inside (classic double-checked locking). 5-minute cache lifespan; 16-key bound for rotations.</p>
+
+    <h3>Decode validation — B.1</h3>
+    <div class="code-block">payload = jwt.<span class="fn">decode</span>(
+    token,
+    signing_key.key,
+    algorithms=[<span class="str">"ES256"</span>, <span class="str">"RS256"</span>],   <span class="cmt"># asymmetric only</span>
+    audience=<span class="str">"authenticated"</span>,
+    issuer=<span class="fn">f</span><span class="str">"{url}/auth/v1"</span>,         <span class="cmt"># B.1: reject tokens from other projects</span>
+)</div>
+
+    <h3>Tightened exception handling — B.2</h3>
+    <p>The original <code>except Exception</code> collapsed expired tokens, signature errors, and programmer bugs into one silent <code>None</code>. The audit split this:</p>
+    <div class="code-block"><span class="kw">except</span> jwt.ExpiredSignatureError:
+    logger.<span class="fn">debug</span>(<span class="str">"verify_token_local: token_expired"</span>)
+    <span class="kw">return None</span>
+<span class="kw">except</span> jwt.InvalidTokenError:
+    logger.<span class="fn">debug</span>(<span class="str">"verify_token_local: token_invalid"</span>)
+    <span class="kw">return None</span>
+<span class="cmt"># Anything else propagates so observability sees real bugs.</span></div>
+
+    <h3>When the slow path fires</h3>
+    <ol style="padding-left: 1.5rem;">
+      <li><strong>JWKS unreachable</strong> (transient or sustained Supabase outage)</li>
+      <li><strong>Legacy HS256 tokens</strong> (older Supabase projects that haven't rotated to asymmetric keys)</li>
+      <li><strong>Key rotation lag</strong> (5-minute cache returning stale keys until next refresh)</li>
+      <li><strong>Token from a different Supabase project</strong> (issuer mismatch caught on fast path; slow path also rejects, possibly with a 503 if the network call fails)</li>
+    </ol>
+
+    <h3>Operator visibility</h3>
+    <p>Each slow-path entry logs <code>auth_slow_path event=auth_slow_path</code> at INFO from <code>app.routes.solves</code>. After SD-8 (JSON logging) shipped, operators can <code>jq</code> the stream to chart fallback rate. Healthy steady state is &lt; 1% of authenticated requests; spikes &gt; 5% indicate JWKS unreachability or recent rotation.</p>
+  </div>
+
+
+  <!-- SD-11 -->
+  <div class="section" id="sd11">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-11</div>
+      <div class="section-header-text">
+        <h2>Atomic Solve-Lifetime Cap — Counter Table + Trigger</h2>
+        <div class="subtitle">migrations/009_user_stats.sql · Audit A.2 + D.4</div>
+      </div>
+    </div>
+
+    <h3>The original implementation and its race</h3>
+    <p>The lifetime cap (100,000 solves per user) was originally enforced with a <code>count(*)</code> query before every insert. Two problems:</p>
+    <ol style="padding-left: 1.5rem;">
+      <li><strong>Slow at scale.</strong> <code>count(*)</code> is a sequential scan in Postgres for non-trivial table sizes.</li>
+      <li><strong>TOCTOU race.</strong> Two concurrent inserts both read <code>count = 99,999</code>, both decide they are below the cap, both insert, final count is <code>100,001</code>.</li>
+    </ol>
+
+    <h3>The counter table</h3>
+    <div class="code-block">CREATE TABLE user_stats (
+  user_id     uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+  solve_count integer NOT NULL DEFAULT 0
+);
+
+CREATE FUNCTION <span class="fn">update_user_solve_count</span>() RETURNS trigger AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO user_stats (user_id, solve_count) VALUES (NEW.user_id, 1)
+    ON CONFLICT (user_id) DO UPDATE SET solve_count = user_stats.solve_count + 1;
+  ELSIF (TG_OP = 'UPDATE' AND OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) THEN
+    UPDATE user_stats SET solve_count = solve_count - 1 WHERE user_id = NEW.user_id;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER solves_solve_count_trigger
+  AFTER INSERT OR UPDATE ON solves
+  FOR EACH ROW EXECUTE FUNCTION <span class="fn">update_user_solve_count</span>();</div>
+
+    <h3>Why the trigger fixes the race</h3>
+    <p>The trigger runs inside the same transaction as the insert. The atomic increment via <code>ON CONFLICT DO UPDATE</code> serializes concurrent inserts. The service reads the counter (single index lookup, fast); if it's at the cap, it returns 429 with code <code>SOLVE_LIMIT_REACHED</code> before attempting the insert. If two requests race past the read, the trigger's atomic increment ensures the count remains correct, and the next request will fail the check.</p>
+
+    <h3>Soft-delete semantics</h3>
+    <p>Soft-delete (audit A.6 + B.6) sets <code>deleted_at</code> to a timestamp. The trigger detects this transition via <code>OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL</code> and decrements. Hard inserts of already-deleted rows are rare (test fixtures only) and don't increment.</p>
+
+    <h3>Backfill</h3>
+    <p>The migration backfills <code>user_stats</code> from existing data in the same transaction. Orphan audit (D.3 cascade FK) runs first to ensure no rows reference non-existent auth users.</p>
+
+    <h3>Sanity check</h3>
+    <p>After deployment, an operator query verifies the trigger stays consistent with ground truth:</p>
+    <div class="code-block">SELECT u.user_id, u.solve_count, c.actual
+FROM user_stats u
+JOIN (
+  SELECT user_id, count(*) AS actual
+  FROM solves WHERE deleted_at IS NULL
+  GROUP BY user_id
+) c ON c.user_id = u.user_id
+WHERE u.solve_count &lt;&gt; c.actual;
+<span class="cmt">-- Expected: zero rows</span></div>
+
+    <div class="interview-tip">
+      <div class="tip-label">Resume Talking Point</div>
+      "I replaced a count(*) cap check with an atomic per-user counter table maintained by trigger. The original had a TOCTOU race — two concurrent inserts could both pass the cap check and both insert, exceeding the limit. The counter table eliminates the race because the trigger runs inside the insert transaction with ON CONFLICT DO UPDATE atomic increment. The cap check is now a single index lookup instead of a full table scan; concurrent inserts cannot exceed the cap. The trigger also handles the soft-delete decrement so the counter stays consistent with reality."
+    </div>
+  </div>
+
+
+  <!-- SD-12 -->
+  <div class="section" id="sd12">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-12</div>
+      <div class="section-header-text">
+        <h2>Service + Repository Layers — Routes Are HTTP Adapters Only</h2>
+        <div class="subtitle">backend/app/routes/, services/, repositories/ · Audit E.11</div>
+      </div>
+    </div>
+
+    <h3>The before</h3>
+    <p>Before E.11, <code>routes/solves.py</code> was a 600-line file mixing HTTP parsing, business rules, PB materialization, share-token signing, lifetime-cap counting, and Supabase queries. Hard to test in isolation. Any change risked touching several concerns.</p>
+
+    <h3>The split</h3>
+    <div class="code-block">routes/solves.py             <span class="cmt"># HTTP adapter only — auth, validation, error envelope</span>
+  ↓ calls
+services/solves_service.py   <span class="cmt"># Business logic — cap check, PB orchestration, exceptions</span>
+services/share_links_service.py
+services/exceptions.py       <span class="cmt"># Custom exceptions: SolveLimitReached, SolveNotFound</span>
+  ↓ calls
+repositories/solves_repo.py  <span class="cmt"># Supabase access — insert, soft-delete, query</span>
+repositories/personal_bests_repo.py</div>
+
+    <h3>Route example</h3>
+    <div class="code-block">@solves.<span class="fn">route</span>(<span class="str">'/solves'</span>, methods=[<span class="str">'POST'</span>])
+@require_auth
+@limiter.<span class="fn">limit</span>(<span class="str">"30 per minute"</span>)
+<span class="kw">def</span> <span class="fn">create_solve</span>():
+    data = request.<span class="fn">get_json</span>()
+    errors = <span class="fn">validate_create_solve</span>(data)
+    <span class="kw">if</span> errors:
+        <span class="kw">return</span> <span class="fn">error_response</span>(VALIDATION_FAILED, <span class="str">"Validation failed"</span>, <span class="num">422</span>, fields=errors)
+
+    service = <span class="fn">_make_service</span>(g.supabase)
+    <span class="kw">try</span>:
+        solve = service.<span class="fn">create_solve</span>(g.user_id, data)
+    <span class="kw">except</span> SolveLimitReached:
+        <span class="kw">return</span> <span class="fn">error_response</span>(SOLVE_LIMIT_REACHED, <span class="str">"Solve limit reached"</span>, <span class="num">429</span>)
+    <span class="kw">except</span> Exception:
+        <span class="kw">return</span> <span class="fn">_internal_error</span>(<span class="str">"create_solve"</span>)
+    <span class="kw">return</span> <span class="fn">jsonify</span>(solve), <span class="num">201</span></div>
+
+    <h3>Service example</h3>
+    <div class="code-block"><span class="kw">class</span> <span class="fn">SolvesService</span>:
+    <span class="kw">def</span> __init__(<span class="hi">self</span>, repo: SolvesRepository, pb_repo: PersonalBestsRepository):
+        <span class="hi">self</span>.repo, <span class="hi">self</span>.pb_repo = repo, pb_repo
+
+    <span class="kw">def</span> <span class="fn">create_solve</span>(<span class="hi">self</span>, user_id: str, data: dict) -&gt; dict:
+        count = <span class="hi">self</span>.repo.<span class="fn">get_solve_count</span>(user_id)
+        <span class="kw">if</span> count &gt;= SOLVE_LIFETIME_CAP:
+            <span class="kw">raise</span> <span class="fn">SolveLimitReached</span>()
+        solve = <span class="hi">self</span>.repo.<span class="fn">insert_solve</span>(user_id, data)
+        <span class="kw">if not</span> solve[<span class="str">'dnf'</span>]:
+            <span class="hi">self</span>.pb_repo.<span class="fn">record_pb_if_better</span>(
+                user_id, solve[<span class="str">'puzzle_type'</span>], solve[<span class="str">'id'</span>], solve[<span class="str">'time'</span>],
+            )
+        <span class="kw">return</span> solve</div>
+
+    <h3>Repository example</h3>
+    <div class="code-block"><span class="kw">class</span> <span class="fn">SolvesRepository</span>:
+    <span class="kw">def</span> __init__(<span class="hi">self</span>, supabase): <span class="hi">self</span>.supabase = supabase
+
+    <span class="kw">def</span> <span class="fn">get_solve_count</span>(<span class="hi">self</span>, user_id: str) -&gt; int:
+        result = <span class="hi">self</span>.supabase.<span class="fn">table</span>(<span class="str">'user_stats'</span>) \
+                                   .<span class="fn">select</span>(<span class="str">'solve_count'</span>) \
+                                   .<span class="fn">eq</span>(<span class="str">'user_id'</span>, user_id) \
+                                   .<span class="fn">execute</span>()
+        <span class="kw">return</span> result.data[<span class="num">0</span>][<span class="str">'solve_count'</span>] <span class="kw">if</span> result.data <span class="kw">else</span> <span class="num">0</span>
+
+    <span class="kw">def</span> <span class="fn">insert_solve</span>(<span class="hi">self</span>, user_id: str, data: dict) -&gt; dict:
+        result = <span class="hi">self</span>.supabase.<span class="fn">table</span>(<span class="str">'solves'</span>).<span class="fn">insert</span>({
+            <span class="str">'user_id'</span>: user_id,
+            <span class="str">'puzzle_type'</span>: data[<span class="str">'puzzle_type'</span>],
+            <span class="str">'time'</span>: data[<span class="str">'time'</span>],
+            <span class="str">'dnf'</span>: data.<span class="fn">get</span>(<span class="str">'dnf'</span>, <span class="kw">False</span>),
+            <span class="str">'plus_two'</span>: data.<span class="fn">get</span>(<span class="str">'plus_two'</span>, <span class="kw">False</span>),
+            <span class="str">'scramble'</span>: data.<span class="fn">get</span>(<span class="str">'scramble'</span>, <span class="str">''</span>),
+        }).<span class="fn">execute</span>()
+        <span class="kw">return</span> result.data[<span class="num">0</span>]</div>
+
+    <h3>Why this matters</h3>
+    <ul style="padding-left: 1.5rem;">
+      <li><strong>Testability.</strong> Services can be unit-tested with mock repositories, no HTTP setup.</li>
+      <li><strong>Single responsibility.</strong> Each layer has one reason to change. Wire-shape change → routes only. Business rule change → services only. Schema/query change → repositories only.</li>
+      <li><strong>Auditability.</strong> Service-role Supabase imports concentrated in <code>dangerous_admin.py</code>; repositories use the user-scoped client by default.</li>
+    </ul>
+  </div>
+
+
+  <!-- SD-13 -->
+  <div class="section" id="sd13">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-13</div>
+      <div class="section-header-text">
+        <h2>TanStack Query — Cross-Page Cache Consistency</h2>
+        <div class="subtitle">frontend/src/queries/solves.ts · Audit H.3</div>
+      </div>
+    </div>
+
+    <h3>The problem before</h3>
+    <p>Solves were fetched independently per page. Creating a solve on the timer page did not appear on Stats until manual refetch (refresh, or a navigation that re-mounted Stats). No cross-page invalidation.</p>
+
+    <h3>The query key shape</h3>
+    <div class="code-block"><span class="kw">export const</span> solvesQueryKey = {
+  all: [<span class="str">'solves'</span>] <span class="kw">as const</span>,
+  byPuzzle: (puzzleType: PuzzleType) =&gt; [<span class="str">'solves'</span>, puzzleType] <span class="kw">as const</span>,
+  fullList: (puzzleType: PuzzleType, isGuest: boolean) =&gt;
+    [<span class="str">'solves'</span>, puzzleType, <span class="str">'full'</span>, isGuest] <span class="kw">as const</span>,
+};</div>
+
+    <p>Hierarchical keys: invalidate <code>['solves']</code> nukes everything; invalidate <code>['solves', '333']</code> nukes only the 333 caches; invalidate <code>['solves', '333', 'full']</code> targets the Stats query specifically.</p>
+
+    <h3>The hook</h3>
+    <div class="code-block"><span class="kw">export const</span> <span class="fn">useAllSolvesQuery</span> = (puzzleType, isGuest) =&gt; {
+  <span class="kw">const</span> query = <span class="fn">useQuery</span>({
+    queryKey: solvesQueryKey.<span class="fn">fullList</span>(puzzleType, isGuest),
+    queryFn: <span class="kw">async</span> ({ signal }) =&gt; {
+      <span class="kw">if</span> (isGuest) <span class="kw">return</span> { solves: <span class="fn">getGuestSolves</span>(puzzleType), truncated: <span class="kw">false</span> };
+      <span class="kw">return</span> <span class="fn">fetchAllAuthSolves</span>(puzzleType, signal);
+    },
+  });
+  <span class="kw">return</span> {
+    solves: query.data?.solves ?? [],
+    loading: query.isLoading || query.isFetching,
+    truncated: query.data?.truncated ?? <span class="kw">false</span>,
+  };
+};</div>
+
+    <h3>Invalidation on mutation</h3>
+    <div class="code-block"><span class="kw">export const</span> <span class="fn">invalidateSolveCaches</span> = (qc: QueryClient, puzzleType: PuzzleType): <span class="kw">void</span> =&gt; {
+  qc.<span class="fn">invalidateQueries</span>({ queryKey: solvesQueryKey.<span class="fn">byPuzzle</span>(puzzleType) });
+};</div>
+
+    <p>Called from <code>useSolveSession</code> after every successful create/update/delete. The Stats page query is marked stale; on next mount or focus it refetches transparently.</p>
+
+    <h3>Request cancellation via AbortSignal</h3>
+    <p>The query function receives a <code>signal</code> from TanStack Query. <code>fetchAllAuthSolves</code> threads it into <code>api.getSolves(puzzleType, cursor, signal)</code>, which axios respects. Switching puzzles mid-fetch cancels in-flight requests; visible in DevTools Network as canceled requests when throttled to slow 3G.</p>
+
+    <h3>What was preserved (deliberately)</h3>
+    <p>The audit deferred lifting <code>useSolveSession</code>'s manual snapshot/rollback into TanStack Query's <code>onMutate</code>/<code>onError</code> lifecycle. The timer page is the hot path; preserving the explicit pattern kept the audit's blast radius small. Migration is documented in <code>TODO_manual_edits.md</code> as a deferred follow-up.</p>
+
+    <h3>What is NOT in the cache</h3>
+    <p>Personal-best reads still go through a <code>useEffect</code> in <code>useSolveSession</code>. The same cross-page consistency gap exists for PBs as it did for solves before H.3. Migrating PB reads to react-query (key <code>['personalBests', puzzleType]</code>) is in the deferred follow-ups.</p>
+  </div>
+
+
+  <!-- SD-14 -->
+  <div class="section" id="sd14">
+    <div class="section-header">
+      <div class="section-badge badge-sd">SD-14</div>
+      <div class="section-header-text">
+        <h2>AuthClient Seam — Decouple from the Auth Vendor</h2>
+        <div class="subtitle">frontend/src/services/authClient.ts · Audit H.4</div>
+      </div>
+    </div>
+
+    <h3>The before</h3>
+    <p>Components imported <code>supabase</code> directly from <code>services/auth.ts</code> and called <code>supabase.auth.signInWithPassword(...)</code>, <code>supabase.auth.signOut()</code>, etc. Every call site coupled the rest of the app to the Supabase JS SDK. Swapping vendors would touch every call site.</p>
+
+    <h3>The interface</h3>
+    <div class="code-block"><span class="kw">export interface</span> AuthClient {
+  <span class="fn">getAccessToken</span>(): Promise&lt;<span class="hi">string</span> | <span class="hi">null</span>&gt;;
+  <span class="fn">signInWithPassword</span>(email: <span class="hi">string</span>, password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">signUp</span>(email: <span class="hi">string</span>, password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">signOut</span>(): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">resetPasswordForEmail</span>(email: <span class="hi">string</span>, redirectTo: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">updatePassword</span>(password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">onSignIn</span>(callback: () =&gt; <span class="hi">void</span>): () =&gt; <span class="hi">void</span>;
+}
+
+<span class="kw">export const</span> supabaseAuthClient: AuthClient = {
+  <span class="fn">getAccessToken</span>: <span class="kw">async</span> () =&gt; (<span class="kw">await</span> supabase.auth.<span class="fn">getSession</span>()).data.session?.access_token ?? <span class="kw">null</span>,
+  <span class="fn">signInWithPassword</span>: <span class="kw">async</span> (email, password) =&gt; {
+    <span class="kw">const</span> { error } = <span class="kw">await</span> supabase.auth.<span class="fn">signInWithPassword</span>({ email, password });
+    <span class="kw">return</span> { error: error?.message };
+  },
+  <span class="cmt">// ... other methods</span>
+  <span class="fn">onSignIn</span>: (callback) =&gt; {
+    <span class="kw">const</span> { data } = supabase.auth.<span class="fn">onAuthStateChange</span>((event) =&gt; {
+      <span class="kw">if</span> (event === <span class="str">'SIGNED_IN'</span>) <span class="fn">callback</span>();
+    });
+    <span class="kw">return</span> () =&gt; data.subscription.<span class="fn">unsubscribe</span>();
+  },
+};</div>
+
+    <h3>Result</h3>
+    <p>The Supabase JS SDK is imported in exactly one file (<code>services/auth.ts</code>, the lazy client instance). Every other call site (<code>Auth.tsx</code>, <code>Header.tsx</code>, <code>SolveDetailModal.tsx</code>, <code>AuthContext.tsx</code>, <code>services/api.ts</code>) talks to the seam. Swapping to a different auth provider touches one file plus the seam implementation.</p>
+
+    <h3>Error shape normalization</h3>
+    <p>Supabase auth methods return <code>{ data, error }</code>. The seam normalizes this to <code>{ error?: string }</code> — call sites no longer need to know about Supabase's specific error type. Throws are normalized to error strings.</p>
+  </div>
+
+
+  <!-- DSA-5 -->
+  <div class="section" id="dsa5">
+    <div class="section-header">
+      <div class="section-badge badge-dsa">DSA-5</div>
+      <div class="section-header-text">
+        <h2>Virtualized SolveLog — O(viewport) Render at 10k Rows</h2>
+        <div class="subtitle">frontend/src/components/SolveLog.tsx · @tanstack/react-virtual · Audit C.5</div>
+      </div>
+    </div>
+
+    <h3>The problem</h3>
+    <p>SolveLog renders one row per solve. At 10,000 solves, that's 10,000 DOM nodes plus a per-row Ao5 computation. Render time grows O(N). Scrolling drops to 20-30 fps; React reconciles every row on each prop change.</p>
+
+    <h3>The fix: virtualization</h3>
+    <p><code>@tanstack/react-virtual</code> renders only the visible window's rows plus a small overscan buffer. Outside the viewport, only spacer divs preserve scroll position. Total DOM nodes: ~30 instead of 10,000.</p>
+
+    <div class="code-block"><span class="kw">const</span> rowVirtualizer = <span class="fn">useVirtualizer</span>({
+  count: solves.length,
+  getScrollElement: () =&gt; scrollRef.current,
+  estimateSize: () =&gt; <span class="num">52</span>,        <span class="cmt">// row height in px</span>
+  overscan: <span class="num">8</span>,                    <span class="cmt">// render 8 extra rows above/below for smooth scroll</span>
+});
+
+<span class="kw">return</span> (
+  &lt;div ref={scrollRef} className=<span class="str">"solves-list-scroll"</span>&gt;
+    &lt;div style={{ height: rowVirtualizer.<span class="fn">getTotalSize</span>(), position: <span class="str">'relative'</span> }}&gt;
+      {rowVirtualizer.<span class="fn">getVirtualItems</span>().<span class="fn">map</span>((virtualRow) =&gt; {
+        <span class="kw">const</span> solve = solves[virtualRow.index]!;
+        <span class="kw">return</span> (
+          &lt;div
+            key={solve.id}
+            style={{ position: <span class="str">'absolute'</span>, top: virtualRow.start, height: virtualRow.size }}
+          &gt;
+            &lt;SolveRow solve={solve} ao5={perSolveAo5[virtualRow.index]} ... /&gt;
+          &lt;/div&gt;
+        );
+      })}
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</div>
+
+    <h3>Per-row Ao5 precomputation</h3>
+    <p>The naive approach computes Ao5 inside each row's render. With virtualization that's still O(viewport) per scroll tick, but each Ao5 itself reads 5 elements from the solves array, an O(1)-after-DSA-1 operation. Audit C.5 went further: precompute the entire <code>perSolveAo5: number[]</code> array once when <code>solves</code> changes (incremental on prepend), pass it as a prop, rows index into it. O(1) per row render.</p>
+
+    <h3>Tradeoffs</h3>
+    <table>
+      <tr><th>Concern</th><th>Impact</th><th>Mitigation</th></tr>
+      <tr><td>Variable row height</td><td>Estimate-based virtualizer can mispredict</td><td>Rows are uniform here; estimate is exact</td></tr>
+      <tr><td>Scroll-to-row API</td><td>Can't naively scroll to a solve by id</td><td>Use rowVirtualizer.scrollToIndex(idx)</td></tr>
+      <tr><td>SolveDetailModal context window</td><td>Modal needs ±2 ao5 context regardless of viewport</td><td>Pass solveWindow prop directly; not virtualizer-aware</td></tr>
+    </table>
+
+    <div class="callout callout-blue">
+      <strong>JSDOM caveat:</strong> Vitest uses jsdom which does not implement layout. Virtualizer behaviour cannot be unit-tested visually; tests verify the component mounts. Real-browser verification via DevTools Performance tab is documented in <code>TODO_manual_edits.md</code>.
+    </div>
+  </div>
+
+
+  <!-- UX-2 -->
+  <div class="section" id="ux2">
+    <div class="section-header">
+      <div class="section-badge badge-ux">UX-2</div>
+      <div class="section-header-text">
+        <h2>Focus Trap on Modal Dialogs — Accessible Modals from Stdlib</h2>
+        <div class="subtitle">frontend/src/hooks/useFocusTrap.ts · Audit I.7</div>
+      </div>
+    </div>
+
+    <h3>The problem</h3>
+    <p>Both <code>SolveDetailModal</code> and <code>HotkeyHelp</code> rendered <code>role="dialog"</code> but lacked <code>aria-modal="true"</code> and a focus trap. Without a trap, Tab moves focus into the page behind the modal. Without restoration, focus is lost when the modal closes. Keyboard and screen-reader users could not use the dialogs reliably.</p>
+
+    <h3>Hand-rolled hook</h3>
+    <p>The audit considered <code>focus-trap-react</code>. Hand-rolled was chosen to avoid the dependency for ~40 lines of code. The hook captures focusables on open, focuses the first, intercepts Tab/Shift+Tab to wrap, and restores focus on close.</p>
+
+    <div class="code-block"><span class="kw">const</span> FOCUSABLE_SELECTOR = [
+  <span class="str">'a[href]'</span>,
+  <span class="str">'button:not([disabled])'</span>,
+  <span class="str">'input:not([disabled])'</span>,
+  <span class="str">'select:not([disabled])'</span>,
+  <span class="str">'textarea:not([disabled])'</span>,
+  <span class="str">'[tabindex]:not([tabindex="-1"])'</span>,
+].<span class="fn">join</span>(<span class="str">','</span>);
+
+<span class="kw">const</span> focusables = (root: HTMLElement): HTMLElement[] =&gt;
+  <span class="fn">Array.from</span>(root.<span class="fn">querySelectorAll</span>&lt;HTMLElement&gt;(FOCUSABLE_SELECTOR))
+       .<span class="fn">filter</span>((el) =&gt; !el.<span class="fn">hasAttribute</span>(<span class="str">'disabled'</span>));
+
+<span class="kw">export const</span> <span class="fn">useFocusTrap</span> = (ref: RefObject&lt;HTMLElement | <span class="kw">null</span>&gt;, enabled = <span class="kw">true</span>) =&gt; {
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">if</span> (!enabled) <span class="kw">return</span>;
+    <span class="kw">const</span> root = ref.current; <span class="kw">if</span> (!root) <span class="kw">return</span>;
+
+    <span class="kw">const</span> previouslyFocused = document.activeElement <span class="kw">as</span> HTMLElement | <span class="kw">null</span>;
+    <span class="fn">focusables</span>(root)[<span class="num">0</span>]?.<span class="fn">focus</span>();
+
+    <span class="kw">const</span> handleKey = (e: KeyboardEvent) =&gt; {
+      <span class="kw">if</span> (e.key !== <span class="str">'Tab'</span>) <span class="kw">return</span>;
+      <span class="kw">const</span> current = <span class="fn">focusables</span>(root);
+      <span class="kw">if</span> (current.length === <span class="num">0</span>) { e.<span class="fn">preventDefault</span>(); <span class="kw">return</span>; }
+      <span class="kw">const</span> first = current[<span class="num">0</span>]!, last = current[current.length - <span class="num">1</span>]!;
+      <span class="kw">const</span> active = document.activeElement;
+      <span class="kw">if</span> (e.shiftKey &amp;&amp; active === first) { e.<span class="fn">preventDefault</span>(); last.<span class="fn">focus</span>(); }
+      <span class="kw">else if</span> (!e.shiftKey &amp;&amp; active === last) { e.<span class="fn">preventDefault</span>(); first.<span class="fn">focus</span>(); }
+    };
+
+    root.<span class="fn">addEventListener</span>(<span class="str">'keydown'</span>, handleKey);
+    <span class="kw">return</span> () =&gt; {
+      root.<span class="fn">removeEventListener</span>(<span class="str">'keydown'</span>, handleKey);
+      previouslyFocused?.<span class="fn">focus</span>?.();
+    };
+  }, [ref, enabled]);
+};</div>
+
+    <h3>Application</h3>
+    <div class="code-block"><span class="cmt">// SolveDetailModal.tsx</span>
+&lt;div ref={modalRef} role=<span class="str">"dialog"</span> aria-modal=<span class="str">"true"</span> aria-label=<span class="str">"Solve details"</span>&gt;
+  ...
+&lt;/div&gt;
+
+<span class="kw">const</span> modalRef = <span class="fn">useRef</span>&lt;HTMLDivElement&gt;(<span class="kw">null</span>);
+<span class="fn">useDismissOnOutsideClick</span>(modalRef, onClose);   <span class="cmt">// existing — Esc + click outside</span>
+<span class="fn">useFocusTrap</span>(modalRef);                      <span class="cmt">// new in I.7</span></div>
+
+    <h3>What it covers</h3>
+    <ul style="padding-left: 1.5rem;">
+      <li><strong>Initial focus.</strong> First focusable in the modal is focused on mount.</li>
+      <li><strong>Tab cycle.</strong> Tab from the last focusable wraps to the first; Shift+Tab from the first wraps to the last.</li>
+      <li><strong>Focus restoration.</strong> On unmount, focus returns to whatever was focused before the modal opened.</li>
+      <li><strong>aria-modal=true.</strong> Screen readers know to constrain virtual cursor to the dialog.</li>
+    </ul>
+
+    <p>Tested via @testing-library + fireEvent. The five test cases (initial focus, Tab wrap, Shift+Tab wrap, restore on unmount, no-op when disabled) ship in <code>useFocusTrap.test.tsx</code>.</p>
+  </div>
+
+
+  <!-- UX-3 -->
+  <div class="section" id="ux3">
+    <div class="section-header">
+      <div class="section-badge badge-ux">UX-3</div>
+      <div class="section-header-text">
+        <h2>Top-Level Error Boundary — No Blank Screens</h2>
+        <div class="subtitle">frontend/src/components/ErrorBoundary.tsx · Audit H.5</div>
+      </div>
+    </div>
+
+    <h3>The problem</h3>
+    <p>A render-time throw in any route produced a blank white screen. Lazy-route load failures fell through Suspense with no recovery UI. Users saw nothing and had to reload manually. No error reporting captured the throw.</p>
+
+    <h3>The boundary</h3>
+    <p>React's <code>componentDidCatch</code> + <code>getDerivedStateFromError</code> are class-only. A thin class wrapper around a functional render is the standard pattern.</p>
+
+    <div class="code-block"><span class="kw">export class</span> <span class="fn">ErrorBoundary</span> <span class="kw">extends</span> Component&lt;Props, State&gt; {
+  state: State = { hasError: <span class="kw">false</span>, error: <span class="kw">null</span> };
+
+  <span class="kw">static</span> <span class="fn">getDerivedStateFromError</span>(error: Error): State {
+    <span class="kw">return</span> { hasError: <span class="kw">true</span>, error };
+  }
+
+  <span class="fn">componentDidCatch</span>(error: Error, errorInfo: ErrorInfo): <span class="hi">void</span> {
+    <span class="cmt">// Log to console for now; vendor (Sentry / PostHog / etc.) deferred (H.6)</span>
+    <span class="fn">console.error</span>(<span class="str">'ErrorBoundary caught:'</span>, error, errorInfo);
+    toast.<span class="fn">error</span>(<span class="str">'Something went wrong. Please reload.'</span>);
+  }
+
+  <span class="fn">handleReload</span> = (): <span class="hi">void</span> =&gt; { window.location.<span class="fn">reload</span>(); };
+
+  <span class="fn">render</span>(): ReactNode {
+    <span class="kw">if</span> (<span class="kw">this</span>.state.hasError) {
+      <span class="kw">return</span> (
+        &lt;div role=<span class="str">"alert"</span> className=<span class="str">"error-boundary"</span>&gt;
+          &lt;h1&gt;Something went wrong&lt;/h1&gt;
+          &lt;p&gt;The page couldn't load. Reload to try again.&lt;/p&gt;
+          &lt;button <span class="fn">onClick</span>={<span class="kw">this</span>.handleReload}&gt;Reload&lt;/button&gt;
+        &lt;/div&gt;
+      );
+    }
+    <span class="kw">return</span> <span class="kw">this</span>.props.children;
+  }
+}</div>
+
+    <h3>Wraps the entire app</h3>
+    <div class="code-block"><span class="cmt">// App.tsx</span>
+<span class="kw">return</span> (
+  &lt;ErrorBoundary&gt;
+    &lt;Routes&gt;
+      &lt;Route path=<span class="str">"/"</span> element={&lt;SolveSession /&gt;} /&gt;
+      &lt;Route path=<span class="str">"/stats"</span> element={&lt;Suspense fallback={&lt;RouteLoading /&gt;}&gt;&lt;Stats /&gt;&lt;/Suspense&gt;} /&gt;
+      ...
+    &lt;/Routes&gt;
+  &lt;/ErrorBoundary&gt;
+);</div>
+
+    <h3>What's deferred — H.6</h3>
+    <p>Wiring an error reporting vendor (Sentry / PostHog / Highlight / GlitchTip) is on the deferred list. The boundary is in place; <code>componentDidCatch</code> just needs an additional <code>captureException(error)</code> call when a vendor is picked. The placeholder plan with full step outlines lives at <code>docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md</code>.</p>
+  </div>
+
+
+  <!-- SEC-1 -->
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-badge badge-sec">SEC-1</div>
+      <div class="section-header-text">
+        <h2>Defense-in-Depth — Headers + RLS + Input Validation + Boot Checks</h2>
+        <div class="subtitle">backend/app/__init__.py · Cluster B</div>
+      </div>
+    </div>
+
+    <h3>Layered defense</h3>
+    <p>No single mitigation is the line of defense. Each layer is a guess at what an attacker might bypass; the next layer assumes the previous one failed.</p>
+
+    <h3>Boot-time config validation — B.4</h3>
+    <p><code>create_app</code> raises <code>RuntimeError</code> at boot if any of <code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, or <code>SHARE_SECRET</code> is missing or <code>SHARE_SECRET</code> is shorter than 32 chars. Catches misconfiguration at deploy time, not on first request.</p>
+
+    <h3>Security headers — B.7</h3>
+    <p>Every response carries:</p>
+    <ul style="padding-left: 1.5rem;">
+      <li><code>Content-Security-Policy-Report-Only</code> (phase 1; flips to enforcing after burn-in per <code>TODO_manual_edits.md</code>)</li>
+      <li><code>X-Frame-Options: DENY</code> (clickjacking prevention)</li>
+      <li><code>X-Content-Type-Options: nosniff</code> (MIME-type sniffing prevention)</li>
+      <li><code>Referrer-Policy: no-referrer</code> (do not leak URLs to third-party requests)</li>
+      <li><code>Strict-Transport-Security: max-age=31536000; includeSubDomains</code> (HSTS)</li>
+    </ul>
+
+    <h3>JWT issuer check — B.1</h3>
+    <p><code>jwt.decode</code> is passed <code>issuer=&lt;SUPABASE_URL&gt;/auth/v1</code> so a token minted by a different Supabase project (even if signature-valid) is rejected.</p>
+
+    <h3>Tightened bare-except handling — B.2</h3>
+    <p>The original <code>except Exception</code> in <code>verify_token_local</code> swallowed expired tokens, signature errors, and programmer bugs into one silent <code>None</code>. The audit split this into specific PyJWT exception classes; unexpected exceptions now propagate.</p>
+
+    <h3>Per-route rate limits — B.10</h3>
+    <p>Per-user (with IP fallback for anonymous routes). Documented in SD-5.</p>
+
+    <h3>Per-route protection at runtime</h3>
+    <p>Three layers: anon key → require_auth → RLS. A Bearer token from another project gets caught at the issuer check; one without a sub claim at the require_auth user check; one without a row to read at RLS. Each layer assumes the others might fail.</p>
+
+    <h3>Production source maps off — B.9</h3>
+    <p><code>vite.config.ts</code> gates source maps on <code>mode === 'development'</code>. Production builds emit no <code>*.map</code> files. (Source maps reveal frontend logic for reverse-engineering.)</p>
+
+    <h3>flask-cors version pin — B.8</h3>
+    <p>Bumped past CVE range to <code>flask-cors&gt;=5.0.0,&lt;6</code>.</p>
+
+    <h3>.env hygiene — B.14</h3>
+    <p><code>.gitignore</code> covers <code>.env</code> at any depth (<code>.env</code>, <code>**/.env</code>, <code>*.env.local</code>). Only public anon keys belong in <code>VITE_*</code> env vars on the frontend.</p>
+  </div>
+
+
+  <!-- Footer -->
   <div class="footer">
-    <p>Ao5 &mdash; Speedcubing Timer &middot; Built with React, Flask, Supabase</p>
-    <p style="margin-top:0.3rem;">Run the two new migrations in Supabase SQL editor before starting: <code>002_cursor_pagination_index.sql</code> and <code>003_personal_bests.sql</code></p>
+    <p>Ao5 Engineering Notes &mdash; React 18 · TypeScript · Vite · Flask 3 · Supabase · PostgreSQL</p>
+    <p style="margin-top:0.3rem;">See <code>ARCHITECTURE.html</code> for the system-level walkthrough, and <code>docs/audits/2026-04-25-full-stack-audit.md</code> for the audit that shaped this codebase.</p>
   </div>
 
 </div>
