@@ -4,7 +4,7 @@ Flask REST API for the Ao5 speedcubing timer. Validates Supabase JWTs and proxie
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - A Supabase project with a `solves` table
 
 ## Setup
@@ -27,11 +27,17 @@ pip install -r requirements.txt
 ```env
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+SHARE_SECRET=at_least_32_random_characters
 FLASK_APP=app
 FLASK_ENV=development
 ```
 
 You can find your Supabase URL and anon key in your Supabase project under **Settings → API**.
+
+`SHARE_SECRET` must be at least 32 characters; `create_app` raises at boot
+otherwise. Generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
+See `docs/share-secret-rotation.md` for the rotation procedure.
 
 ## Database
 
@@ -121,6 +127,6 @@ codes. `fields` is omitted when empty. Codes are catalogued in
 - **Flask 3** — Web framework
 - **flask-cors** — CORS support for the React frontend at `localhost:3000`
 - **supabase-py** — Database client; an authenticated client is created per request using the user's JWT
-- **python-jose** — JWT utilities
+- **PyJWT[crypto]** — JWT verification via the Supabase project's JWKS endpoint (cached, ES256/RS256). See `docs/jwt-verification.md`.
 - **python-dotenv** — Loads `.env` into environment variables
 - **pytest** — Test runner
