@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 import StatsPage from './Stats';
 import api from '../services/api';
 import { buildCsv, downloadCsv } from '../utils/exportCsv';
 import { getGuestSolves } from '../services/guestStorage';
 import { renderWithProviders } from '../test-utils/renderWithProviders';
 import type { Solve } from '../types';
+
+// Helper: read the current URL search via useLocation so the test asserts
+// what react-router actually saw.
+const LocationSpy = ({ onChange }: { onChange: (search: string) => void }) => {
+  const loc = useLocation();
+  onChange(loc.search);
+  return null;
+};
 
 vi.mock('../services/api');
 vi.mock('../services/auth', async () => {
@@ -81,6 +90,27 @@ describe('StatsPage', () => {
     expect(downloadMock.mock.calls[0]![1]).toBe('csv-body');
     // Filename matches the puzzle slug and is dated.
     expect(downloadMock.mock.calls[0]![0]).toMatch(/^decipher-333-\d{4}-\d{2}-\d{2}\.csv$/);
+  });
+
+  it('updates the URL puzzle param when a different puzzle is selected', async () => {
+    let lastSearch = '';
+    renderWithProviders(
+      <>
+        <StatsPage />
+        <LocationSpy onChange={(s) => { lastSearch = s; }} />
+      </>,
+      { initialEntries: ['/stats?puzzle=333'] },
+    );
+    await waitFor(() => expect(screen.getByText('Scramble history')).toBeInTheDocument());
+    expect(lastSearch).toBe('?puzzle=333');
+
+    // The Header on desktop renders one button per puzzle. On the test
+    // viewport (jsdom defaults), useMatchMedia is false so the desktop
+    // button row renders.
+    const button2x2 = screen.getByRole('button', { name: '2x2' });
+    fireEvent.click(button2x2);
+
+    await waitFor(() => expect(lastSearch).toBe('?puzzle=222'));
   });
 
   it('disables the Export button when no solves match the filter', async () => {

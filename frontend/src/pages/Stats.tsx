@@ -58,7 +58,11 @@ const StatsPage = (): ReactElement => {
     const target = e.currentTarget as HTMLSelectElement | HTMLButtonElement;
     if (!isPuzzleType(target.value)) return;
     const value = target.value;
-    setSearchParams(prev => { prev.set('puzzle', value); return prev; });
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('puzzle', value);
+      return next;
+    });
   };
 
   return (
