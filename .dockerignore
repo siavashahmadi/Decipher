@@ -1,0 +1,34 @@
+# Build outputs and caches that should never be in the build context.
+.git
+.github
+.claude
+.vite
+.pytest_cache
+.DS_Store
+*.pyc
+**/__pycache__
+
+# Frontend
+frontend/node_modules
+frontend/build
+frontend/.vite
+frontend/coverage
+
+# Backend
+backend/sia-venv
+backend/venv
+backend/.env
+backend/.pytest_cache
+backend/tests
+backend/__pycache__
+
+# Docs and meta — not needed inside the image
+docs
+TODO_manual_edits.md
+README.md
+CLAUDE.md
+
+# Env files (loaded via compose env_file, not baked into the image)
+.env
+**/.env
+*.env.local

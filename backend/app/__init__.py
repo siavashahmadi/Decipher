@@ -1,7 +1,8 @@
 import logging
 import os
 import uuid
-from flask import Flask, current_app, g, jsonify, request
+from pathlib import Path
+from flask import Flask, current_app, g, jsonify, request, send_from_directory
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .routes.solves import solves
@@ -19,7 +20,16 @@ def create_app(config_class=Config):
     configure_logging(os.environ.get("LOG_LEVEL", "INFO"))
     access_logger = logging.getLogger("app.access")
 
-    app = Flask(__name__)
+    # SERVE_FRONTEND_DIR (set by the Docker image to /app/frontend) makes
+    # this Flask process also serve the built React app. When unset (local
+    # dev with `npm run dev` on a separate port), Flask is API-only.
+    # static_folder is set to None on the Flask app so its built-in static
+    # handler never claims /<filename> routes; the SPA catch-all below owns
+    # all non-API paths.
+    frontend_dir = os.environ.get("SERVE_FRONTEND_DIR")
+    static_folder = frontend_dir if frontend_dir and Path(frontend_dir).is_dir() else None
+
+    app = Flask(__name__, static_folder=None)
 
     # Trust X-Forwarded-* from a single upstream proxy so flask-limiter sees
     # the real client IP instead of the proxy's socket address.
@@ -184,6 +194,25 @@ def create_app(config_class=Config):
             "max-age=31536000; includeSubDomains",
         )
         return response
+
+    if static_folder:
+        index_path = Path(static_folder) / "index.html"
+
+        @app.route("/", defaults={"path": ""})
+        @app.route("/<path:path>")
+        def _serve_spa(path):
+            # Never intercept API or operational routes; Flask's normal
+            # routing handles those (and 404s missing API paths).
+            if path.startswith(("api/", "api")):
+                return error_response(NOT_FOUND, "Resource not found", 404)
+
+            # Static asset hit (e.g. /assets/index-abc123.js): serve the file
+            # if it exists, otherwise fall through to index.html for SPA routes
+            # like /stats, /trainers, /s/<token>.
+            target = Path(static_folder) / path
+            if path and target.is_file():
+                return send_from_directory(static_folder, path)
+            return send_from_directory(str(index_path.parent), index_path.name)
 
     @app.after_request
     def _legacy_api_headers(response):

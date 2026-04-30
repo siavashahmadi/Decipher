@@ -1,0 +1,35 @@
+# Single-service compose for the home-server deploy.
+#
+# The container exposes the app on host port 5000 (loopback only by default;
+# remove the 127.0.0.1: prefix below if you want the LAN to reach it directly).
+# Nginx Proxy Manager (NPM) on this host points sia.sia-server.duckdns.org
+# at this port via a proxy host entry.
+#
+# Quick reference:
+#   docker compose build               (rebuild after code changes)
+#   docker compose up -d               (start in background)
+#   docker compose logs -f ao5         (tail JSON logs)
+#   docker compose restart ao5         (restart without rebuild)
+#   docker compose down                (stop and remove the container)
+#
+# Required: an .env file at the project root holding the secrets listed in
+# docs/deployment.md. Compose loads it automatically.
+
+services:
+  ao5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ao5:latest
+    container_name: ao5
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # Bound to all interfaces so the NPM container can reach this via the
+      # host. Two equivalent ways NPM can address it:
+      #   - <host-lan-ip>:5000  (e.g. 192.168.x.x; from `hostname -I`)
+      #   - 172.17.0.1:5000     (the Docker default-bridge gateway = the host
+      #                          as seen from sibling containers)
+      # See docs/deployment.md for the NPM proxy host setup.
+      - "5000:5000"
