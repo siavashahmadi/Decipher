@@ -63,7 +63,7 @@ const Header = ({ type, handleTypeChange }: HeaderProps): ReactElement => {
           title="Settings"
           onClick={() => setSettingsOpen(prev => !prev)}
         >
-          {'\u2699'}
+          \u2699
         </button>
         {settingsOpen && <SettingsPanel />}
       </div>
