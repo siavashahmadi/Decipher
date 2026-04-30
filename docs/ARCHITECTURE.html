@@ -41,7 +41,7 @@
       padding: 2rem 1.5rem 7rem;
     }
 
-    /* ── Hero ── */
+    /* Hero */
     .hero {
       padding: 3rem 0 2.5rem;
       border-bottom: 1px solid var(--border);
@@ -82,12 +82,15 @@
       border: 1px solid;
     }
     .pill-react  { color: #61dafb; border-color: #1d4e60; background: rgba(97,218,251,0.07); }
+    .pill-vite   { color: #b366f3; border-color: #4a2a6a; background: rgba(179,102,243,0.07); }
+    .pill-ts     { color: #3178c6; border-color: #1d4060; background: rgba(49,120,198,0.07); }
     .pill-flask  { color: #a8d8a8; border-color: #2a4a2a; background: rgba(168,216,168,0.07); }
     .pill-supa   { color: var(--green); border-color: #1a4a2a; background: rgba(61,201,66,0.07); }
     .pill-pg     { color: var(--blue);  border-color: #1d3a5f; background: rgba(96,165,250,0.07); }
     .pill-jwt    { color: var(--orange); border-color: #4a3a1a; background: rgba(245,166,35,0.07); }
+    .pill-tq     { color: var(--pink); border-color: #5a2a4a; background: rgba(244,114,182,0.07); }
 
-    /* ── TOC ── */
+    /* TOC */
     .toc {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -118,7 +121,7 @@
       font-size: 0.7rem;
       color: var(--dim);
       font-family: monospace;
-      min-width: 20px;
+      min-width: 24px;
     }
     .toc-item a {
       color: var(--blue);
@@ -127,7 +130,7 @@
     }
     .toc-item a:hover { text-decoration: underline; }
 
-    /* ── Section ── */
+    /* Section */
     .section {
       margin-bottom: 3rem;
       scroll-margin-top: 1.5rem;
@@ -191,7 +194,7 @@
       color: var(--teal);
     }
 
-    /* ── Code blocks ── */
+    /* Code blocks */
     .code-block {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -212,7 +215,7 @@
     .num { color: var(--yellow); }
     .hi  { color: var(--teal); }
 
-    /* ── Diagrams ── */
+    /* Diagrams */
     .diagram {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -233,8 +236,9 @@
     .d-white { color: #fff; }
     .d-teal  { color: var(--teal);  }
     .d-yellow{ color: var(--yellow);}
+    .d-pink  { color: var(--pink);  }
 
-    /* ── Callouts ── */
+    /* Callouts */
     .callout {
       border-left: 3px solid;
       border-radius: 0 8px 8px 0;
@@ -249,7 +253,7 @@
     .callout-purple { border-color: var(--purple); background: rgba(167,139,250,0.07); }
     .callout-teal   { border-color: var(--teal);   background: rgba(45,212,191,0.07);  }
 
-    /* ── Tradeoff table ── */
+    /* Tradeoff table */
     .tradeoff-table {
       width: 100%;
       border-collapse: collapse;
@@ -281,7 +285,7 @@
     .pro { color: var(--green); }
     .con { color: var(--red); }
 
-    /* ── Talking point ── */
+    /* Talking point */
     .talking-point {
       background: linear-gradient(135deg, rgba(167,139,250,0.07), rgba(96,165,250,0.07));
       border: 1px solid rgba(167,139,250,0.25);
@@ -300,7 +304,7 @@
     }
     .tp-body { color: var(--text); font-style: italic; line-height: 1.65; }
 
-    /* ── Flow steps ── */
+    /* Flow steps */
     .flow {
       display: flex;
       flex-direction: column;
@@ -334,7 +338,7 @@
     .flow-content strong { color: #fff; }
     .flow-content .detail { color: var(--muted); font-size: 0.82rem; margin-top: 0.2rem; }
 
-    /* ── Component tree ── */
+    /* Component tree */
     .component-tree {
       background: var(--code-bg);
       border: 1px solid var(--border);
@@ -353,14 +357,14 @@
     .ct-state  { color: var(--orange); }
     .ct-arrow  { color: var(--dim); }
 
-    /* ── Divider ── */
+    /* Divider */
     .divider {
       border: none;
       border-top: 1px solid var(--border);
       margin: 2.5rem 0;
     }
 
-    /* ── Footer ── */
+    /* Footer */
     .footer {
       text-align: center;
       color: var(--muted);
@@ -382,13 +386,16 @@
   <div class="hero">
     <div class="hero-label">Architecture Study Guide</div>
     <h1>Ao5 — <em>How It All Works</em></h1>
-    <p>A complete walkthrough of every architectural decision in this app, written so you can speak on the design with confidence in any technical conversation.</p>
+    <p>A complete walkthrough of every architectural decision in this app, written so you can speak on the design with confidence in any technical conversation. Reflects the post-audit codebase as of April 2026.</p>
     <div class="stack-pills">
-      <span class="pill pill-react">React (CRA)</span>
-      <span class="pill pill-flask">Flask</span>
+      <span class="pill pill-vite">Vite 5</span>
+      <span class="pill pill-react">React 18</span>
+      <span class="pill pill-ts">TypeScript</span>
+      <span class="pill pill-tq">TanStack Query</span>
+      <span class="pill pill-flask">Flask 3</span>
       <span class="pill pill-supa">Supabase</span>
       <span class="pill pill-pg">PostgreSQL + RLS</span>
-      <span class="pill pill-jwt">JWT Auth</span>
+      <span class="pill pill-jwt">PyJWT + JWKS</span>
     </div>
   </div>
 
@@ -405,14 +412,17 @@
       <div class="toc-item"><span class="toc-num">07</span><a href="#backend">Backend Architecture</a></div>
       <div class="toc-item"><span class="toc-num">08</span><a href="#database">Database Design</a></div>
       <div class="toc-item"><span class="toc-num">09</span><a href="#security">Security Layers</a></div>
-      <div class="toc-item"><span class="toc-num">10</span><a href="#timer">Timer: useState vs useRef</a></div>
-      <div class="toc-item"><span class="toc-num">11</span><a href="#state">State Management Strategy</a></div>
-      <div class="toc-item"><span class="toc-num">12</span><a href="#interview">Full Interview Script</a></div>
+      <div class="toc-item"><span class="toc-num">10</span><a href="#share">Share Links</a></div>
+      <div class="toc-item"><span class="toc-num">11</span><a href="#guest">Guest Mode</a></div>
+      <div class="toc-item"><span class="toc-num">12</span><a href="#timer">Timer Architecture</a></div>
+      <div class="toc-item"><span class="toc-num">13</span><a href="#state">State Management</a></div>
+      <div class="toc-item"><span class="toc-num">14</span><a href="#observability">Observability</a></div>
+      <div class="toc-item"><span class="toc-num">15</span><a href="#interview">Interview Script</a></div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 01 ══ -->
+  <!-- 01 -->
   <div class="section" id="pitch">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(61,201,66,0.1); border:1px solid rgba(61,201,66,0.3);">🎯</div>
@@ -422,272 +432,374 @@
       </div>
     </div>
 
-    <p>Ao5 is a full-stack speedcubing timer web app. Users log in, solve WCA puzzles with a spacebar or touch interface, and their times are saved to a database. The app computes rolling statistics — Ao5, Ao12, session mean, personal bests — and charts performance over time.</p>
+    <p>Ao5 (also called Decipher) is a full-stack speedcubing timer web app. Users sign in (or use guest mode), solve any of 15 WCA puzzles with a spacebar or touch interface, and their times are saved to a database. The app computes rolling statistics (Ao5, Ao12, session mean, running median, percentile rank), tracks personal bests, charts performance over time, and includes case-by-case algorithm trainers for OLL, PLL, F2L, and CMLL.</p>
 
     <div class="callout callout-blue">
-      <strong>Sentence version:</strong> "A real-time puzzle timer with persistent solve history, rolling average stats, personal best tracking, and a progression chart — built with React, Flask, and Supabase, with JWT-based authentication and row-level security enforced at the database layer."
+      <strong>Sentence version:</strong> "A real-time puzzle timer with persistent solve history, rolling average stats, personal-best tracking, distribution charts, OLL/PLL trainers, share-link snapshots, and a guest mode that migrates seamlessly on first sign-in. Built with React 18 + TypeScript, Flask 3, and Supabase, with JWT auth (local JWKS verification with a Supabase fallback) and row-level security enforced at the database layer."
     </div>
 
     <h3>What makes it non-trivial</h3>
-    <p>It's not just a CRUD app. The interesting parts are: a high-precision timer that avoids React's stale closure problem with a ref; client-side scramble generation for 15 WCA puzzle types via <code>cubing.js</code>; a stateless Flask backend that acts as an authenticated proxy, validating JWTs on every request; row-level security so the database itself enforces data ownership; cursor-based pagination replacing a naive full-table load; write-time materialization of personal best history; and several DSA improvements (sliding window, binary search, circular buffer).</p>
+    <p>It is not just a CRUD app. The interesting parts are: a high-precision timer with phase state machine and direct-DOM writes during the running phase to avoid 60Hz re-renders; client-side scramble generation for 15 WCA puzzle types via cubing.js; a stateless Flask backend that acts as an authenticated proxy with two-path JWT verification (local JWKS fast path, Supabase fallback); row-level security so the database itself enforces data ownership; cursor-based pagination with `(created_at, id)` tiebreaker; write-time materialization of personal-best history via an atomic Postgres RPC; a per-user counter table to enforce a 100,000-solve lifetime cap atomically; HMAC-signed share-link tokens with 30-day TTL; a virtualized solve log; TanStack Query for cross-page cache consistency; structured JSON logging with request-scoped IDs; and several DSA improvements (sliding window Ao5, binary-search percentile, two-heap running median, circular buffer for the recent-solves chart).</p>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 02 ══ -->
+  <!-- 02 -->
   <div class="section" id="system">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3);">🗺</div>
       <div>
         <h2>System Architecture</h2>
-        <div class="sub">Three independent layers — browser, proxy, database</div>
+        <div class="sub">Three layers, plus a deliberate seam between the app and the auth vendor</div>
       </div>
     </div>
 
-    <div class="diagram"><span class="d-white">┌─────────────────────────────────────────────────────────────────────┐</span>
-<span class="d-white">│                         BROWSER                                     │</span>
-<span class="d-white">│                                                                     │</span>
-<span class="d-white">│  ┌─────────────────────────────────────────────────────────────┐   │</span>
-<span class="d-white">│  │                 React App (Create React App)                 │   │</span>
-<span class="d-white">│  │                                                             │   │</span>
-<span class="d-white">│  │  ┌──────────┐   ┌───────────┐   ┌──────────┐   ┌───────┐  │   │</span>
-<span class="d-blue">│  │  │  Auth    │   │SolveSession│   │ SolveLog │   │SolveHub│  │   │</span>
-<span class="d-white">│  │  └──────────┘   └───────────┘   └──────────┘   └───────┘  │   │</span>
-<span class="d-white">│  │       │               │                                     │   │</span>
-<span class="d-green">│  │  Supabase Auth    api.js (Axios)                            │   │</span>
-<span class="d-white">│  │  (direct to DB)        │                                    │   │</span>
-<span class="d-white">│  └────────────────────────│────────────────────────────────────┘   │</span>
-<span class="d-white">└───────────────────────────│─────────────────────────────────────────┘</span>
-                            │ HTTPS  Authorization: Bearer &lt;JWT&gt;
-<span class="d-white">┌───────────────────────────▼─────────────────────────────────────────┐</span>
-<span class="d-white">│                    Flask Backend  :5000                             │</span>
-<span class="d-blue">│                                                                     │</span>
-<span class="d-blue">│  require_auth decorator → validates JWT → sets request.user_id     │</span>
-<span class="d-blue">│  Input validation  →  rate limiting  →  query Supabase             │</span>
-<span class="d-white">│                               │                                     │</span>
-<span class="d-white">└───────────────────────────────│─────────────────────────────────────┘</span>
-                                │ supabase-py  (user's token forwarded)
-<span class="d-white">┌───────────────────────────────▼─────────────────────────────────────┐</span>
-<span class="d-white">│                       Supabase                                      │</span>
-<span class="d-green">│                                                                     │</span>
-<span class="d-green">│   PostgreSQL  +  Row Level Security  +  Auth  +  PostgREST API    │</span>
-<span class="d-white">└─────────────────────────────────────────────────────────────────────┘</span></div>
+    <div class="diagram"><span class="d-white">┌──────────────────────────────────────────────────────────────────────┐</span>
+<span class="d-white">│                              BROWSER                                 │</span>
+<span class="d-white">│                                                                      │</span>
+<span class="d-white">│  ┌────────────────────────────────────────────────────────────────┐  │</span>
+<span class="d-white">│  │              React 18 + Vite + TypeScript (strict)             │  │</span>
+<span class="d-white">│  │                                                                │  │</span>
+<span class="d-white">│  │    Routes (lazy):  </span><span class="d-blue">/  /stats  /trainers  /s/:token  /login</span><span class="d-white">     │  │</span>
+<span class="d-white">│  │                                                                │  │</span>
+<span class="d-white">│  │    </span><span class="d-pink">ErrorBoundary</span><span class="d-white"> wraps every route                              │  │</span>
+<span class="d-white">│  │    </span><span class="d-orange">QueryClientProvider</span><span class="d-white"> wraps the app (TanStack Query cache)      │  │</span>
+<span class="d-white">│  │    </span><span class="d-green">AuthProvider</span><span class="d-white"> manages session state via AuthClient seam      │  │</span>
+<span class="d-white">│  │                                                                │  │</span>
+<span class="d-white">│  │    services/</span><span class="d-teal">authClient</span><span class="d-white">    services/</span><span class="d-teal">api</span><span class="d-white"> (axios)                  │  │</span>
+<span class="d-white">│  │         │                       │                              │  │</span>
+<span class="d-white">│  └─────────│───────────────────────│──────────────────────────────┘  │</span>
+<span class="d-white">└────────────│───────────────────────│─────────────────────────────────┘</span>
+             │                       │ HTTPS · Authorization: Bearer &lt;JWT&gt;
+             │                       │ Standardized error envelope on errors
+<span class="d-white">┌────────────│───────────────────────▼─────────────────────────────────┐</span>
+<span class="d-white">│            │                Flask 3  :5000                          │</span>
+<span class="d-blue">│            │                                                        │</span>
+<span class="d-blue">│            │  Mount: /api/v1   (legacy /api alias until 2026-07-01) │</span>
+<span class="d-blue">│            │                                                        │</span>
+<span class="d-blue">│            │  routes/ → services/ → repositories/ → Supabase         │</span>
+<span class="d-blue">│            │                                                        │</span>
+<span class="d-blue">│            │  require_auth: PyJWT JWKS fast path → Supabase slow     │</span>
+<span class="d-blue">│            │  fallback. Logs event=auth_slow_path on fallback.       │</span>
+<span class="d-blue">│            │                                                        │</span>
+<span class="d-blue">│            │  Per-request g.request_id (uuid). g.user_id from auth.  │</span>
+<span class="d-blue">│            │  Rate limiter keys on user, then IP.                    │</span>
+<span class="d-white">│            │                                                        │</span>
+<span class="d-white">└────────────│────────────────────────────────────────────────────────┘</span>
+             │                                       │
+             │ Supabase Auth (direct)                │ supabase-py (user-scoped)
+             │ JWKS fetch (cached, lazy)             │ (service role only for share read)
+<span class="d-white">┌────────────▼───────────────────────────────────────▼─────────────────┐</span>
+<span class="d-white">│                          Supabase                                    │</span>
+<span class="d-green">│                                                                      │</span>
+<span class="d-green">│   PostgreSQL + RLS + Auth + PostgREST + JWKS endpoint               │</span>
+<span class="d-green">│                                                                      │</span>
+<span class="d-green">│   Tables: solves, personal_bests, user_stats                        │</span>
+<span class="d-green">│   RPCs:  record_pb_if_better, recompute_pbs_for_user                │</span>
+<span class="d-green">│   Trigger: update_user_solve_count on solves insert/soft-delete     │</span>
+<span class="d-white">└──────────────────────────────────────────────────────────────────────┘</span></div>
 
     <h3>Why three layers?</h3>
-    <p>The frontend can't talk to the database directly for data operations — the anon key would be exposed and client-side code can be tampered with. The Flask backend acts as a trusted intermediary: it validates identity (JWT), enforces business rules (validation, rate limits), and then forwards the request to Supabase <strong>using the user's own token</strong> so that Supabase's row-level security still applies.</p>
+    <p>The browser cannot talk to the database directly for data operations. The anon key ships to every visitor, and client-side code can be tampered with. The Flask backend acts as a trusted intermediary: it validates identity (JWT), enforces business rules (validation, rate limits, lifetime cap), and forwards the request to Supabase <strong>using the user's own token</strong> so that Supabase's row-level security still applies at the database layer. Even a bug in Flask cannot expose another user's data; PostgreSQL itself rejects the query.</p>
 
-    <p>Note that <strong>auth itself</strong> is handled directly between the browser and Supabase (no Flask involved). The Supabase JS client manages the login flow and stores the resulting JWT. That JWT is then attached to every Flask API call. This is the correct pattern — auth servers should talk directly to clients, not be proxied.</p>
+    <p>Note that <strong>auth itself</strong> is handled directly between the browser and Supabase (no Flask involved). The Supabase JS client manages the login flow and stores the resulting JWT. That JWT is then attached to every Flask API call as a Bearer token. Flask is not in the login flow at all. This is the correct pattern: auth servers should talk directly to clients, not be proxied.</p>
+
+    <h3>The AuthClient seam</h3>
+    <p>The frontend never imports from <code>@supabase/supabase-js</code> directly outside of one file (<code>services/auth.ts</code>). Everything else goes through the <code>AuthClient</code> interface in <code>services/authClient.ts</code>:</p>
+    <div class="code-block"><span class="kw">interface</span> AuthClient {
+  <span class="fn">getAccessToken</span>(): Promise&lt;<span class="hi">string</span> | <span class="hi">null</span>&gt;;
+  <span class="fn">signInWithPassword</span>(email: <span class="hi">string</span>, password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">signUp</span>(email: <span class="hi">string</span>, password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">signOut</span>(): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">resetPasswordForEmail</span>(email: <span class="hi">string</span>, redirectTo: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">updatePassword</span>(password: <span class="hi">string</span>): Promise&lt;{ error?: <span class="hi">string</span> }&gt;;
+  <span class="fn">onSignIn</span>(callback: () => <span class="hi">void</span>): () => <span class="hi">void</span>;
+}</div>
+    <p>This three-method seam means swapping Supabase for a different auth provider (Auth0, Clerk, hand-rolled) touches one file. Without the seam, every <code>supabase.auth.*</code> call site would need refactoring.</p>
 
     <h3>Monorepo structure</h3>
     <div class="code-block">ao5/
-├── <span class="fn">frontend/</span>          React app — served from CDN or static host (Vercel)
+├── <span class="fn">frontend/</span>          Vite + React + TS — deploys to a static CDN (Vercel, Netlify)
 │   ├── src/
-│   │   ├── components/   UI components
-│   │   ├── services/     api.js, auth.js
-│   │   └── hooks/        useCircularBuffer.js
-└── <span class="fn">backend/</span>           Flask app — deployed to Railway, Render, or Fly.io
+│   │   ├── App.tsx                Routing shell + ErrorBoundary
+│   │   ├── main.tsx               Mounts QueryClientProvider, AuthProvider, ThemedToaster
+│   │   ├── pages/                 Lazy-loaded routes: Stats, Trainers, SharedSolve, Auth
+│   │   ├── components/            UI (Timer, Scramble, SolveLog, SolveHub, Header, modals, trainer UI, stats UI)
+│   │   ├── hooks/                 useSolveSession, useTimerMachine, useFocusTrap, useMedianTracker, ...
+│   │   ├── contexts/              AuthContext (single global)
+│   │   ├── services/              authClient, api (axios), guestStorage, auth (Supabase JS instance)
+│   │   ├── queries/               TanStack Query keys, fetchers, invalidation helpers
+│   │   ├── data/                  Static (PUZZLES, hotkey maps)
+│   │   ├── utils/                 Pure functions (averages, statsBuckets, formatTime, exportCsv, puzzleIds)
+│   │   ├── types/                 Shared types + isPuzzleType predicate
+│   │   └── test-utils/            renderWithProviders, makeSolve, mockSupabaseAuth
+│   ├── vite.config.ts             Source maps off in production
+│   └── tsconfig.json              strict + noUncheckedIndexedAccess
+└── <span class="fn">backend/</span>           Flask app — deploys to Render / Fly / Railway (vendor pick deferred)
     ├── app/
-    │   ├── routes/       API endpoints (Blueprint)
-    │   ├── validators.py  Input validation
-    │   ├── extensions.py  Rate limiter instance
-    │   ├── db.py          Supabase client factory
-    │   └── config.py      Environment config
-    └── migrations/       SQL files run manually in Supabase</div>
+    │   ├── __init__.py            create_app: configure_logging, ProxyFix, CORS, blueprint mount, hooks
+    │   ├── routes/solves.py       HTTP adapter only (require_auth + thin route handlers)
+    │   ├── services/              SolvesService, ShareLinksService, custom exceptions
+    │   ├── repositories/          SolvesRepository, PersonalBestsRepository
+    │   ├── auth.py                verify_token_local (PyJWT + JWKS, thread-safe singleton)
+    │   ├── dangerous_admin.py     Service-role client (RLS bypass; only the share-read route imports)
+    │   ├── db.py                  User-scoped Supabase client factory
+    │   ├── extensions.py          flask-limiter (per-user key when authenticated)
+    │   ├── errors.py              Standardized error envelope codes
+    │   ├── logging_config.py      Hand-rolled JsonFormatter + dictConfig
+    │   ├── validators.py          Boundary validation
+    │   └── config.py              Env-loaded constants
+    └── migrations/                Numbered SQL files (001 through 012) with paired rollbacks</div>
 
     <div class="callout callout-orange">
-      <strong>Deployment independence:</strong> The frontend and backend deploy independently. Frontend goes to a static CDN (zero cost, globally fast). Backend goes to a small server instance. They communicate only over HTTP. You could swap the backend for a completely different language/framework and the frontend wouldn't need to change, as long as the API contract stays the same.
+      <strong>Deployment independence:</strong> The frontend and backend deploy independently. Frontend goes to a static CDN (zero cost, globally fast). Backend goes to a small server instance. They communicate only over HTTP, parsing the standardized error envelope on non-2xx responses. You could swap the backend for a completely different language or framework and the frontend would not need to change as long as the API contract holds.
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 03 ══ -->
+  <!-- 03 -->
   <div class="section" id="tech">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.3);">⚖️</div>
       <div>
-        <h2>Technology Choices &amp; Tradeoffs</h2>
-        <div class="sub">The "why" behind every tool — this is what interviewers actually want to hear</div>
+        <h2>Technology Choices and Tradeoffs</h2>
+        <div class="sub">The "why" behind every tool in the stack</div>
       </div>
     </div>
 
-    <h3>React (Create React App) vs. Next.js vs. Vue</h3>
+    <h3>Vite + React 18 vs. Next.js vs. Vue</h3>
     <table class="tradeoff-table">
       <tr><th>Option</th><th>Key trait</th><th>Why chosen / not chosen</th></tr>
       <tr>
-        <td class="chosen">React CRA ✓</td>
-        <td>Pure client-side SPA</td>
-        <td class="pro">This app is entirely behind a login wall — there's nothing to prerender or SEO-index. SSR (Next.js's main benefit) provides zero value here. CRA gives you a simple, well-understood React environment with no framework opinions on routing or data fetching.</td>
+        <td class="chosen">Vite + React 18 ✓</td>
+        <td>Pure client-side SPA, fast dev server, ESM-native</td>
+        <td class="pro">This app is entirely behind a login wall (or a public share token). There is nothing to prerender or SEO-index. SSR (Next.js's main benefit) provides zero value here. Vite gives instant HMR and small production bundles via Rollup. Migrated from Create React App in early development; CRA is unmaintained.</td>
       </tr>
       <tr>
         <td class="unchosen">Next.js</td>
-        <td>SSR, file-based routing, edge functions</td>
-        <td class="con">Adds real complexity (SSR hydration, API routes, build configuration) for no benefit when every page requires authentication. "Don't pay costs you don't collect benefits from."</td>
+        <td>SSR, file-based routing, API routes, edge functions</td>
+        <td class="con">Adds real complexity (SSR hydration, server components, route handlers) for no benefit when every interactive page requires authentication. The shared share-link page is one route and renders fine on the client.</td>
       </tr>
       <tr>
         <td class="unchosen">Vue / Svelte</td>
-        <td>Smaller bundle, simpler reactivity</td>
-        <td class="con">Smaller ecosystem for libraries like recharts. React is the dominant choice in industry — choosing it maximizes the resume signal.</td>
+        <td>Smaller bundles, simpler reactivity</td>
+        <td class="con">Smaller ecosystems for libraries like Recharts, @nivo/calendar, and cubing.js. React is the dominant choice in industry; choosing it maximizes the resume signal and keeps third-party options open.</td>
       </tr>
     </table>
 
-    <h3>Flask vs. FastAPI vs. Django vs. Node/Express</h3>
+    <h3>TypeScript strict + noUncheckedIndexedAccess</h3>
+    <p>The frontend was migrated to TypeScript with <code>strict: true</code> and <code>noUncheckedIndexedAccess: true</code>. The latter makes <code>arr[i]</code> typed as <code>T | undefined</code>, forcing every indexed access to either narrow the type or assert. Caught a wave of latent bugs during the F.1 audit pass. Combined with `isPuzzleType`-style predicates, the URL query parameter for the puzzle picker can never leak an invalid value into the type system.</p>
+
+    <h3>TanStack Query for solves cache</h3>
     <table class="tradeoff-table">
       <tr><th>Option</th><th>Key trait</th><th>Why chosen / not chosen</th></tr>
       <tr>
-        <td class="chosen">Flask ✓</td>
-        <td>Micro-framework, minimal opinions</td>
-        <td class="pro">The backend is a thin authenticated proxy — it doesn't own the database, doesn't need an ORM, doesn't need admin panels or form handling. Flask is exactly as powerful as needed and no more. The Blueprint pattern gives clean route organization without framework overhead.</td>
+        <td class="chosen">TanStack Query ✓</td>
+        <td>Server-state cache with key-based invalidation</td>
+        <td class="pro">Solves are fetched on the timer page (paginated) and on the Stats page (full history). Without a shared cache, creating a solve on the timer page would not appear on Stats until manual refetch. With TanStack Query, both pages share <code>['solves', puzzleType, ...]</code> keys; mutations call <code>invalidateSolveCaches</code> and the other page refetches on next view. Also handles request cancellation (AbortSignal threaded through axios).</td>
+      </tr>
+      <tr>
+        <td class="unchosen">SWR</td>
+        <td>Lighter, simpler API</td>
+        <td class="con">Roughly equivalent feature set; TanStack Query is more capable on mutations and was the audit's recommendation (H.3).</td>
+      </tr>
+      <tr>
+        <td class="unchosen">Hand-rolled cache via Context</td>
+        <td>Zero deps</td>
+        <td class="con">Re-implementing query key invalidation, request cancellation, refetch-on-focus, and stale-while-revalidate is a meaningful project. Adopting a small, well-maintained library was the better tradeoff.</td>
+      </tr>
+    </table>
+
+    <h3>Flask vs. FastAPI vs. Django vs. Node</h3>
+    <table class="tradeoff-table">
+      <tr><th>Option</th><th>Key trait</th><th>Why chosen / not chosen</th></tr>
+      <tr>
+        <td class="chosen">Flask 3 ✓</td>
+        <td>Micro-framework, minimal opinions, mature</td>
+        <td class="pro">The backend is a thin authenticated proxy. It does not own the database, does not need an ORM, does not need admin panels or form handling. Flask is exactly as powerful as needed and no more. The Blueprint pattern + service/repository layering gives clean structure. Flask 3 also has good CSP, security-header, and error-handler ergonomics.</td>
       </tr>
       <tr>
         <td class="unchosen">FastAPI</td>
-        <td>Async, automatic OpenAPI docs, Pydantic validation</td>
-        <td class="con">Async provides no real benefit when the bottleneck is Supabase network round-trips (which you'd still await). Pydantic adds a C extension compile step — problematic on this machine (Python 3.14, Xcode license issue). We built our own thin validation layer instead.</td>
+        <td>Async, automatic OpenAPI, Pydantic validation</td>
+        <td class="con">Async provides no real benefit when every Supabase call is awaited and the bottleneck is a single network round-trip. Pydantic adds a C extension compile step that bit us on the dev machine (Python 3.14, Xcode license issue). Hand-rolled <code>validators.py</code> is small, fast, and has zero compile dependencies.</td>
       </tr>
       <tr>
         <td class="unchosen">Django</td>
         <td>Batteries-included: ORM, admin, migrations, forms</td>
-        <td class="con">Massive overkill. Django shines when you own a database through its ORM. Here, Supabase manages the database. You'd be carrying all of Django's weight while using almost none of it.</td>
+        <td class="con">Massive overkill. Django shines when you own a database through its ORM. Here, Supabase manages the database. You would be carrying all of Django's weight while using almost none of it.</td>
       </tr>
       <tr>
-        <td class="unchosen">Node/Express</td>
+        <td class="unchosen">Node / Express</td>
         <td>Same language as frontend</td>
-        <td class="con">No technical reason to avoid it, but Flask is the stronger resume choice for a Python-fluent engineer. The frontend/backend language split is fine — they communicate over HTTP, not in-process.</td>
+        <td class="con">No technical reason to avoid it, but Flask is the stronger resume choice for a Python-fluent engineer. The frontend/backend language split is fine; they communicate over HTTP, not in-process.</td>
       </tr>
     </table>
 
-    <h3>Supabase vs. Firebase vs. Raw PostgreSQL</h3>
+    <h3>Supabase vs. Firebase vs. raw PostgreSQL</h3>
     <table class="tradeoff-table">
       <tr><th>Option</th><th>Key trait</th><th>Why chosen / not chosen</th></tr>
       <tr>
         <td class="chosen">Supabase ✓</td>
         <td>Managed PostgreSQL + auth + PostgREST + RLS</td>
-        <td class="pro">You get a real relational database (joins, constraints, complex queries, ACID transactions), managed auth with JWT issuance, and row-level security enforced at the database engine level. The free tier is generous. It's the right tool for structured, relational data.</td>
+        <td class="pro">Real relational database (joins, constraints, complex queries, ACID transactions, triggers, RPCs), managed auth with JWT issuance, and row-level security enforced at the database engine level. Free tier is generous. Right tool for structured, relational data.</td>
       </tr>
       <tr>
         <td class="unchosen">Firebase (Firestore)</td>
         <td>NoSQL document store</td>
-        <td class="con">Solve data is inherently relational — each solve belongs to a user, has a puzzle type, a time, flags. NoSQL would require application-level access control instead of database-level RLS. Queries like "min time per puzzle type" become awkward. Firebase's security rules are harder to reason about than SQL policies.</td>
+        <td class="con">Solve data is inherently relational. Each solve belongs to a user, has a puzzle type, a time, flags. NoSQL would require application-level access control instead of database-level RLS. Queries like "min time per puzzle type" become awkward. Firebase security rules are harder to reason about than SQL policies.</td>
       </tr>
       <tr>
         <td class="unchosen">Raw PostgreSQL (self-hosted)</td>
         <td>Full control</td>
-        <td class="con">You'd manage connection pooling, backups, auth tokens, migrations, and a PostgREST equivalent yourself. Supabase wraps all of this for free. The tradeoff is vendor lock-in — Supabase-specific features (RLS policies, auth.uid()) would need rewriting to migrate.</td>
+        <td class="con">You manage connection pooling, backups, auth tokens, migrations, and a PostgREST equivalent yourself. Supabase wraps all of this. The tradeoff is vendor lock-in. Supabase-specific features (RLS policies, auth.uid()) would need rewriting to migrate.</td>
       </tr>
     </table>
 
-    <h3>cubing.js for Scrambles</h3>
-    <p>Scrambles are generated <strong>client-side</strong> using <code>cubing.js</code> — a well-maintained open-source library that generates WCA-legal random-state scrambles for all 15 official puzzles. The alternative would be a backend endpoint that calls the library server-side.</p>
+    <h3>PyJWT for local JWT verification</h3>
+    <p>Originally every authenticated request did a network round-trip to Supabase to verify the JWT. Switched to PyJWT with cached JWKS as a fast path; Supabase fallback only fires on local-verification failure (legacy HS256 tokens, JWKS unreachable, key rotation lag). Documented in <code>docs/jwt-verification.md</code>. Eliminated the per-request network call for the common path.</p>
+
+    <h3>cubing.js for scrambles</h3>
+    <p>Scrambles are generated <strong>client-side</strong> using <code>cubing.js</code> for the timer and a small in-house generator for the trainer routes (which need case-by-case scrambles with prepended setup moves). The alternative would be a backend endpoint.</p>
 
     <div class="callout callout-teal">
-      <strong>Why client-side?</strong> Scramble generation is CPU-bound (especially for big cubes like 5x5 and 6x6). Running it on the server means every solve would require a server round-trip before the user can start timing. Client-side is instant and works offline. The tradeoff is bundle size — cubing.js is not small. For a dedicated speedcubing app where users expect instant scrambles, client-side wins decisively.
+      <strong>Why client-side?</strong> Scramble generation is CPU-bound, especially for big cubes (5x5, 6x6, 7x7). Running it on the server means every solve would require a network round-trip before the user can start timing. Client-side is instant and works offline. The tradeoff is bundle size; cubing.js is not small. For a dedicated speedcubing app where users expect instant scrambles, client-side wins decisively. Lazy-loading the trainer route keeps the initial bundle lean.
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 04 ══ -->
+  <!-- 04 -->
   <div class="section" id="auth">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);">🔐</div>
       <div>
         <h2>Auth Flow Deep Dive</h2>
-        <div class="sub">JWT, Supabase auth, and the require_auth decorator</div>
+        <div class="sub">JWT, JWKS fast path, AuthClient seam, and the require_auth decorator</div>
       </div>
     </div>
 
     <h3>What is a JWT?</h3>
-    <p>A JSON Web Token (JWT) is a self-contained credential. It has three Base64-encoded parts separated by dots: <code>header.payload.signature</code>. The payload contains claims like <code>sub</code> (the user ID), <code>email</code>, and <code>exp</code> (expiration). The signature is produced by the auth server using a secret key.</p>
+    <p>A JSON Web Token is a self-contained credential. It has three Base64-encoded parts separated by dots: <code>header.payload.signature</code>. The payload contains claims like <code>sub</code> (the user ID), <code>email</code>, <code>aud</code> (audience), <code>iss</code> (issuer), and <code>exp</code> (expiration). The signature is produced by the auth server using a private key (asymmetric ES256/RS256 in our case).</p>
 
-    <div class="diagram"><span class="d-blue">eyJhbGciOiJIUzI1NiJ9</span>.<span class="d-green">eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoiLi4uIn0</span>.<span class="d-orange">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
-    │                            │                               │
-<span class="d-blue">  header (alg)            payload (claims)           signature</span>
+    <div class="diagram"><span class="d-blue">eyJhbGciOiJFUzI1NiJ9</span>.<span class="d-green">eyJzdWIiOiJ1c2VyLTEyMyIsImF1ZCI6ImF1dGhlbnRpY2F0ZWQiLi4ufQ</span>.<span class="d-orange">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    │                            │                                          │
+<span class="d-blue">  header (alg)            payload (claims)                            signature</span>
                     { sub: "user-123",
-                      email: "...",
+                      aud: "authenticated",
+                      iss: "https://&lt;project&gt;.supabase.co/auth/v1",
                       exp: 1735000000 }   ← unix timestamp</div>
 
-    <p>The key property: <strong>anyone can read the payload</strong> (it's just Base64 encoded, not encrypted). But <strong>only the auth server can produce a valid signature</strong>. A verifier checks the signature using the public key — if it matches, the claims are trusted. If someone tampers with the payload, the signature breaks.</p>
+    <p>Anyone can read the payload (Base64, not encrypted). Only the auth server can produce a valid signature. With asymmetric algorithms, anyone with the public key can <em>verify</em>, but only the holder of the private key can <em>sign</em>. JWKS (JSON Web Key Set) is the standard endpoint that publishes the public keys.</p>
 
-    <h3>The Full Auth Flow</h3>
+    <h3>The full auth flow</h3>
     <div class="flow">
       <div class="flow-step">
         <div class="flow-num">1</div>
         <div class="flow-content">
-          <strong>User submits email + password in Auth.js</strong>
-          <div class="detail">Supabase JS client calls <code>supabase.auth.signInWithPassword()</code> — this hits Supabase's auth endpoint directly, not our Flask backend. Flask is not involved in login at all.</div>
+          <strong>User submits email + password to Auth.tsx</strong>
+          <div class="detail">The form calls <code>supabaseAuthClient.signInWithPassword(email, password)</code>. The AuthClient seam calls <code>supabase.auth.signInWithPassword</code> internally; this hits Supabase's auth endpoint directly. Flask is not in the login flow.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">2</div>
         <div class="flow-content">
           <strong>Supabase returns a JWT + refresh token</strong>
-          <div class="detail">The JWT has a short expiry (~1 hour). The refresh token lets Supabase issue a new JWT silently when the current one expires. Both are stored in <code>localStorage</code> by the Supabase JS client automatically.</div>
+          <div class="detail">The JWT has a short expiry (~1 hour). The refresh token lets Supabase issue a new JWT silently when the current one expires. Both are stored in <code>localStorage</code> by the Supabase JS client. (Token storage strategy is a known long-term concern; the recorded decision is at <code>docs/decisions/2026-04-26-token-storage.md</code>.)</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">3</div>
         <div class="flow-content">
-          <strong>React state updates — App.js shows the timer</strong>
-          <div class="detail">App.js listens to <code>supabase.auth.onAuthStateChange()</code>. When the session arrives, it sets <code>session</code> state, which renders <code>&lt;SolveSession&gt;</code> instead of <code>&lt;Auth&gt;</code>.</div>
+          <strong>AuthContext fires SIGNED_IN; routes update</strong>
+          <div class="detail"><code>AuthProvider</code> subscribes to <code>onAuthStateChange</code>. When SIGNED_IN arrives, it fires the AuthClient's <code>onSignIn</code> callback, which kicks off any guest-to-auth migration if guest solves exist in localStorage.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">4</div>
         <div class="flow-content">
           <strong>Every API call attaches the JWT as a Bearer token</strong>
-          <div class="detail"><code>api.js</code> calls <code>supabase.auth.getSession()</code> before every request and extracts the <code>access_token</code>. Axios includes it as <code>Authorization: Bearer &lt;token&gt;</code>.</div>
+          <div class="detail"><code>services/api.ts</code> calls <code>supabaseAuthClient.getAccessToken()</code> before every request. Axios includes it as <code>Authorization: Bearer &lt;token&gt;</code>. The api wrapper also parses the standardized error envelope on non-2xx responses.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">5</div>
         <div class="flow-content">
-          <strong>Flask's require_auth decorator validates the JWT</strong>
-          <div class="detail">The decorator calls <code>supabase.auth.get_user(jwt=token)</code>. This asks Supabase to verify the signature and return the user object. If valid, <code>request.user_id</code> is set. If not, 401.</div>
+          <strong>Flask require_auth: fast path via local JWKS</strong>
+          <div class="detail"><code>verify_token_local(token)</code> uses PyJWT to decode the token against Supabase's published JWKS. The JWKS client is a process-wide singleton initialized lazily under a threading lock, with a 5-minute cache lifespan. On success, returns the user_id (<code>sub</code> claim). On token-shape failures (expired, bad signature, wrong issuer, wrong audience), logs at DEBUG and returns None.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">6</div>
         <div class="flow-content">
-          <strong>Flask forwards the user's token to Supabase for DB queries</strong>
-          <div class="detail">The Supabase client is created with <code>client.postgrest.auth(access_token)</code> — this tells PostgREST to run queries as that user. Supabase's RLS policies then use <code>auth.uid()</code> to scope every query to that user's rows.</div>
+          <strong>Flask require_auth: slow path on fast-path failure</strong>
+          <div class="detail">If <code>verify_token_local</code> returns None, fall back to <code>supabase.auth.get_user(jwt=token)</code> (a network round-trip). Logs <code>event=auth_slow_path</code> at INFO so operators can grep fallback rate. Sustained spikes mean JWKS unreachability or recent key rotation.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-content">
+          <strong>Flask sets g.user_id and g.supabase, runs the route</strong>
+          <div class="detail"><code>flask.g</code> is request-scoped. <code>g.user_id</code> is set from the JWT subject; <code>g.supabase</code> is a Supabase client created with <code>postgrest.auth(token)</code>, so all queries from this request run as that user and RLS applies.</div>
         </div>
       </div>
     </div>
 
-    <h3>JWT vs. Session Cookies — Why JWT Here?</h3>
+    <h3>JWT vs. session cookies — why JWT here</h3>
     <table class="tradeoff-table">
       <tr><th></th><th>JWT (current)</th><th>Session cookies</th></tr>
-      <tr><td><strong>Server state</strong></td><td class="pro">None — stateless. Flask doesn't store anything.</td><td class="con">Requires a session store (Redis, DB table) — every request does a lookup.</td></tr>
-      <tr><td><strong>Scalability</strong></td><td class="pro">Any Flask instance can validate any JWT — just needs the Supabase key.</td><td class="con">All instances must share the same session store, or use sticky sessions.</td></tr>
-      <tr><td><strong>Revocation</strong></td><td class="con">You can't invalidate a JWT before it expires (~1hr). A logged-out user's token technically still works until expiry.</td><td class="pro">Delete the session row — revoked instantly.</td></tr>
-      <tr><td><strong>Cross-origin</strong></td><td class="pro">Works naturally across different domains (frontend on Vercel, backend on Railway).</td><td class="con">Cookies require <code>SameSite=None; Secure</code> for cross-origin, plus CORS credentials config.</td></tr>
+      <tr><td><strong>Server state</strong></td><td class="pro">None — stateless. Flask stores nothing.</td><td class="con">Requires a session store (Redis, DB table). Every request does a lookup.</td></tr>
+      <tr><td><strong>Scalability</strong></td><td class="pro">Any Flask instance can validate any JWT — just needs the JWKS public keys (cached).</td><td class="con">All instances must share the same session store, or use sticky sessions.</td></tr>
+      <tr><td><strong>Revocation</strong></td><td class="con">A JWT is valid until its exp claim. A logged-out user's token technically still works until expiry (~1hr).</td><td class="pro">Delete the session row — revoked instantly.</td></tr>
+      <tr><td><strong>Cross-origin</strong></td><td class="pro">Works naturally across different domains (frontend on Vercel, backend on Render).</td><td class="con">Cookies require <code>SameSite=None; Secure</code> for cross-origin, plus CORS credentials config.</td></tr>
     </table>
 
-    <p>For this app, statelessness wins. Supabase handles the short expiry + refresh token rotation, which mitigates the revocation concern. The backend never needs to store state.</p>
+    <p>Statelessness wins for this app. Supabase handles the short expiry plus refresh-token rotation, which mitigates the revocation concern. The backend never needs to store state.</p>
 
     <h3>The require_auth decorator</h3>
     <div class="code-block"><span class="kw">def</span> <span class="fn">require_auth</span>(f):
-    <span class="hi">@wraps(f)</span>                             <span class="cmt"># preserves function name for Flask routing</span>
+    <span class="hi">@wraps(f)</span>
     <span class="kw">def</span> <span class="fn">decorated</span>(*args, **kwargs):
-        token = request.headers.get(<span class="str">'Authorization'</span>).split(<span class="str">' '</span>)[<span class="num">1</span>]
+        auth_header = request.headers.get(<span class="str">'Authorization'</span>, <span class="str">''</span>)
+        <span class="kw">if not</span> auth_header.startswith(BEARER_PREFIX):
+            <span class="kw">return</span> error_response(AUTH_MISSING_TOKEN, <span class="str">"No authorization token provided"</span>, <span class="num">401</span>)
 
-        <span class="cmt"># Ask Supabase to verify the JWT signature + expiry</span>
-        user = supabase.auth.<span class="fn">get_user</span>(jwt=token)
+        token = auth_header.removeprefix(BEARER_PREFIX).strip()
+        <span class="kw">if not</span> token:
+            <span class="kw">return</span> error_response(AUTH_MISSING_TOKEN, <span class="str">"No authorization token provided"</span>, <span class="num">401</span>)
 
-        <span class="cmt"># Attach user_id and authenticated client to the request context</span>
-        request.user_id = user.user.id
-        request.supabase = <span class="fn">get_supabase_client</span>(token)  <span class="cmt"># ← user-scoped client</span>
+        <span class="cmt"># Fast path: local JWKS</span>
+        user_id = <span class="fn">verify_token_local</span>(token)
 
+        <span class="kw">if</span> user_id <span class="kw">is None</span>:
+            <span class="cmt"># Slow path; logged so operators can track fallback rate</span>
+            logger.<span class="fn">info</span>(<span class="str">"auth_slow_path event=auth_slow_path"</span>)
+            <span class="kw">try</span>:
+                supabase = <span class="fn">get_supabase_client</span>(token)
+                user = supabase.auth.<span class="fn">get_user</span>(jwt=token)
+            <span class="kw">except</span> Exception:
+                current_app.logger.<span class="fn">exception</span>(<span class="str">"Supabase auth lookup failed"</span>)
+                <span class="kw">return</span> error_response(AUTH_UNAVAILABLE, <span class="str">"Auth service unavailable"</span>, <span class="num">503</span>)
+
+            <span class="kw">if not</span> user <span class="kw">or not</span> <span class="fn">getattr</span>(user, <span class="str">'user'</span>, <span class="kw">None</span>):
+                <span class="kw">return</span> error_response(AUTH_INVALID_TOKEN, <span class="str">"Invalid authentication token"</span>, <span class="num">401</span>)
+
+            user_id = user.user.id
+            g.supabase = supabase
+        <span class="kw">else</span>:
+            g.supabase = <span class="fn">get_supabase_client</span>(token)
+
+        g.user_id = user_id
         <span class="kw">return</span> <span class="fn">f</span>(*args, **kwargs)
     <span class="kw">return</span> decorated</div>
 
-    <p>The decorator pattern (vs. middleware) is a deliberate choice. Flask middleware (<code>@app.before_request</code>) runs on <em>every</em> request — but <code>/api/health</code> should be public. The decorator is explicit: you can see at a glance which routes are protected. The tradeoff is you could forget to add it to a new route — but this is mitigated by code review and the fact that Supabase's RLS is a second line of defense anyway.</p>
+    <p>The decorator pattern (vs. global middleware) is deliberate. <code>/api/health</code> and <code>/api/ready</code> are public; you can see at a glance which routes are protected. Public routes that take a share token (<code>GET /api/v1/solves/share/&lt;token&gt;</code>) skip <code>require_auth</code> and rely on the share-link signature verification instead.</p>
 
     <div class="talking-point">
       <div class="tp-label">Talking Point</div>
-      <div class="tp-body">"Authentication is handled by Supabase entirely on the frontend — Flask is not in the login flow at all. The frontend gets a JWT from Supabase and attaches it as a Bearer token on every API call. Flask validates the signature by calling back to Supabase, extracts the user ID, then creates a Supabase client scoped to that user's token so that PostgreSQL row-level security policies still apply at the database layer. This gives us two independent layers of access control."</div>
+      <div class="tp-body">"Authentication is handled entirely between the browser and Supabase. Flask is never in the login flow. The frontend gets a JWT and attaches it as a Bearer token on every API call. Flask validates the signature using a two-path scheme: a fast local JWKS verification via PyJWT for the common case (millisecond, zero network calls), with a Supabase auth.get_user fallback for legacy tokens or JWKS outages. The slow path emits a structured log event so we can monitor fallback rate. Once verified, Flask creates a Supabase client scoped to the user's token so PostgreSQL row-level security still applies at the database. Two independent layers of access control."</div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 05 ══ -->
+  <!-- 05 -->
   <div class="section" id="dataflow">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(45,212,191,0.1); border:1px solid rgba(45,212,191,0.3);">⚡</div>
@@ -702,261 +814,434 @@
         <div class="flow-num">1</div>
         <div class="flow-content">
           <strong>User releases spacebar</strong>
-          <div class="detail">The <code>keyup</code> event listener in <code>Timer.js</code> fires. <code>stopTimer()</code> reads <code>timeRef.current</code> (not <code>time</code> state — see Timer section), converts milliseconds to seconds, and calls <code>onSolveComplete(time)</code>.</div>
+          <div class="detail">The keyup handler in <code>useTimerMachine</code> fires inside <code>Timer.tsx</code>. The timer reads its time directly from <code>timeRef.current</code> (mutated by the RAF loop). RAF is cancelled, the phase ref transitions to <code>'idle'</code>, and <code>onSolveComplete(time, inspectionOverran)</code> fires.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">2</div>
         <div class="flow-content">
-          <strong>SolveSession.handleSolveComplete fires</strong>
-          <div class="detail">Builds a <code>newSolve</code> object from the time, current puzzle type, and the current scramble string (which was captured when cubing.js generated it and stored in SolveSession state).</div>
+          <strong>useSolveSession.handleSolveComplete</strong>
+          <div class="detail">Builds a solve payload from time, current puzzle type, the current scramble (managed by <code>scrambleQueue</code>), and inspection-overran flag (sets <code>plus_two: true</code> if the user exceeded 15s).</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">3</div>
         <div class="flow-content">
-          <strong>api.createSolve() — Axios POST to Flask</strong>
-          <div class="detail"><code>api.js</code> fetches the current Supabase session, extracts the JWT, and makes <code>POST /api/solves</code> with <code>Authorization: Bearer &lt;token&gt;</code>.</div>
+          <strong>Optimistic local update</strong>
+          <div class="detail">A temporary solve with a placeholder id is prepended to local state immediately. UI feels instant. Sorted-times array gets a binary-search insert; running median tracker pushes the new value; circular buffer pushes too.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">4</div>
         <div class="flow-content">
-          <strong>Flask: require_auth → validate_create_solve → RLS insert</strong>
-          <div class="detail">Auth check, then schema validation (422 if bad), then <code>supabase.table('solves').insert(data).execute()</code>. The user-scoped token means RLS enforces that <code>user_id</code> must equal <code>auth.uid()</code>.</div>
+          <strong>api.createSolve — axios POST to Flask</strong>
+          <div class="detail"><code>services/api.ts</code> fetches the current access token via <code>supabaseAuthClient.getAccessToken()</code> and POSTs to <code>/api/v1/solves</code> with <code>Authorization: Bearer &lt;token&gt;</code>. The axios interceptor parses the standardized error envelope on failure.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">5</div>
         <div class="flow-content">
-          <strong>Flask: _maybe_record_pb()</strong>
-          <div class="detail">Queries <code>personal_bests</code> for current best, compares, inserts a new PB row if beaten. Best-effort — exceptions are swallowed.</div>
+          <strong>Flask: before_request hooks fire</strong>
+          <div class="detail"><code>_attach_request_id</code> sets <code>g.request_id = uuid4().hex</code>. <code>_legacy_api_deprecation</code> tags the request if it landed on the unversioned <code>/api</code> mount. Then route dispatch.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">6</div>
         <div class="flow-content">
-          <strong>Flask returns the saved solve object</strong>
-          <div class="detail">The full row (with DB-generated <code>id</code> and <code>created_at</code>) is returned as JSON.</div>
+          <strong>require_auth: validate JWT (fast → slow)</strong>
+          <div class="detail">Local JWKS verification first. On failure, Supabase fallback with <code>auth_slow_path</code> log. Sets <code>g.user_id</code> and <code>g.supabase</code>.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">7</div>
         <div class="flow-content">
-          <strong>SolveSession updates state — three simultaneous updates</strong>
-          <div class="detail"><code>setSolves(prev =&gt; [savedSolve, ...prev])</code> prepends to the main list. The circular buffer gets <code>push(savedSolve)</code>. Binary search runs to insert the time into <code>sortedTimes</code> and compute the percentile. React batches all three state updates into a single re-render.</div>
+          <strong>Rate limit and validation</strong>
+          <div class="detail">flask-limiter checks <code>g.user_id</code> bucket (30/min for create_solve). <code>validate_create_solve(data)</code> runs allowlist-based checks, returns 422 with field errors on failure.</div>
         </div>
       </div>
       <div class="flow-step">
         <div class="flow-num">8</div>
         <div class="flow-content">
-          <strong>Components re-render with new data</strong>
-          <div class="detail">SolveLog gets the new solves array. SolveHub gets updated stats and the percentile. A new scramble is generated (the <code>key</code> prop on Scramble changes when <code>solves.length</code> changes, unmounting and remounting the Scramble component).</div>
+          <strong>SolvesService.create_solve</strong>
+          <div class="detail">Reads the user_stats row to check the 100,000 lifetime cap (atomic counter, not a count(*) query). Inserts the solve via <code>SolvesRepository</code>. The insert triggers <code>update_user_solve_count</code>, which atomically increments <code>user_stats.solve_count</code>.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">9</div>
+        <div class="flow-content">
+          <strong>Atomic PB write via Postgres RPC</strong>
+          <div class="detail">If the solve is not DNF, calls <code>record_pb_if_better(user_id, puzzle_type, solve_id, time)</code> via <code>.rpc()</code>. The RPC compares against existing PBs and inserts a new PB row in a single transaction. No race conditions; previously this was two round-trips with TOCTOU.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">10</div>
+        <div class="flow-content">
+          <strong>after_request: structured access log</strong>
+          <div class="detail"><code>_access_log</code> emits one JSON line via <code>app.access</code> logger: <code>{"timestamp": "...", "level": "INFO", "message": "POST /api/v1/solves 201", "request_id": "...", "user_id": "..."}</code>. Security headers and the response are returned.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">11</div>
+        <div class="flow-content">
+          <strong>Frontend: server response replaces optimistic record</strong>
+          <div class="detail">The temp solve is swapped for the server-assigned id, created_at, and any other DB-generated fields. <code>invalidateSolveCaches(qc, puzzleType)</code> tells TanStack Query that the Stats page's full-list query is stale, so the next visit to /stats refetches.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">12</div>
+        <div class="flow-content">
+          <strong>scrambleQueue advances; new scramble appears</strong>
+          <div class="detail">Decoupled from the API call. The queue keeps the next scramble ready in the background so there is no pause between solves.</div>
         </div>
       </div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 06 ══ -->
+  <!-- 06 -->
   <div class="section" id="frontend">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(97,218,251,0.1); border:1px solid rgba(97,218,251,0.3);">⚛️</div>
       <div>
         <h2>Frontend Architecture</h2>
-        <div class="sub">Component hierarchy, state ownership, and data flow</div>
+        <div class="sub">Routing, state ownership, TanStack Query, and the component tree</div>
       </div>
     </div>
 
-    <h3>Component Tree</h3>
-    <div class="component-tree"><span class="ct-root">App.js</span>  <span class="ct-arrow">── session state (Supabase onAuthStateChange)</span>
-├── <span class="ct-parent">Auth.js</span>  <span class="ct-arrow">── rendered when no session</span>
-└── <span class="ct-root">SolveSession.js</span>  <span class="ct-arrow">← THE ORCHESTRATOR — owns all app state</span>
-    │
-    ├── <span class="ct-state">[state]</span> solves, scramble, puzzleType, nextCursor
-    ├── <span class="ct-state">[state]</span> sortedTimes, lastPercentile, pbHistory
-    ├── <span class="ct-state">[hook]</span>  useCircularBuffer(12) → recentSolves
-    │
-    ├── <span class="ct-parent">Header.js</span>  <span class="ct-arrow">← puzzle type selector, logout</span>
-    │       props: type, handleTypeChange
-    │
-    ├── <span class="ct-parent">Timer.js</span>   <span class="ct-arrow">← spacebar/touch timer, self-contained</span>
-    │       props: onSolveComplete
-    │       owns: isRunning, isReady, time (display), timeRef (actual)
-    │
-    ├── <span class="ct-parent">Scramble.js</span>  <span class="ct-arrow">← cubing.js scramble generation</span>
-    │       props: type, onScrambleGenerated
-    │       key={`${puzzleType}-${solves.length}`}  <span class="ct-arrow">← remounts on each solve</span>
-    │
-    ├── <span class="ct-parent">SolveHub.js</span>  <span class="ct-arrow">← stats summary + charts</span>
-    │       props: solves, recentSolves, pbHistory, lastPercentile
-    │
-    └── <span class="ct-parent">SolveLog.js</span>  <span class="ct-arrow">← scrollable solve list + inline stats</span>
-            props: solves, onSolveUpdate, onSolveDelete, onReset,
-                   onLoadMore, hasMore, isLoadingMore</div>
+    <h3>Routing shell</h3>
+    <p>The top-level <code>App.tsx</code> is a routing shell. It mounts an <code>ErrorBoundary</code> at the root, then a <code>Routes</code> tree with all non-timer routes wrapped in <code>React.lazy</code> so their bundles do not load until needed. The home route (timer) is intentionally eager so the most common path is fast.</p>
 
-    <h3>Why SolveSession is the orchestrator</h3>
-    <p><strong>Single source of truth</strong> — React's data model is unidirectional: data flows down through props, events flow up through callbacks. <code>SolveSession</code> owns the <code>solves</code> array, and both <code>SolveLog</code> and <code>SolveHub</code> receive it as a prop. If each component fetched its own data, you'd have two arrays that could get out of sync (one showing 5 solves, the other showing 6 after a delete).</p>
+    <div class="component-tree"><span class="ct-root">main.tsx</span>
+└── <span class="ct-parent">QueryClientProvider</span>
+    └── <span class="ct-parent">AuthProvider</span>
+        └── <span class="ct-parent">SettingsProvider</span> + <span class="ct-parent">ScramblePreviewSettingsProvider</span>
+            └── <span class="ct-parent">ThemedToaster</span> (sonner)
+                └── <span class="ct-root">App.tsx</span> <span class="ct-arrow">— ErrorBoundary + Routes</span>
+                    │
+                    ├── <span class="ct-parent">/</span>          → <span class="ct-child">SolveSession</span> (timer; eager)
+                    ├── <span class="ct-parent">/stats</span>     → <span class="ct-child">Stats</span> (lazy)
+                    ├── <span class="ct-parent">/trainers</span>  → <span class="ct-child">Trainers</span> (lazy)
+                    ├── <span class="ct-parent">/s/:token</span>  → <span class="ct-child">SharedSolve</span> (lazy)
+                    └── <span class="ct-parent">/login</span>     → <span class="ct-child">Auth</span> (lazy)</div>
 
-    <p>The tradeoff is <strong>prop drilling</strong> — passing data through components that don't use it themselves just to get it to a child. Here, the tree is two levels deep at most, so this is fine. The threshold for adding a Context or a state manager (Redux, Zustand) is typically when prop drilling goes 4+ levels deep, or when unrelated components at the same level need the same state.</p>
+    <h3>The SolveSession orchestrator</h3>
+    <p>The timer page's logic lives in <code>useSolveSession</code>, which composes several smaller hooks: <code>useSortedSolveStats</code> (maintains the sorted-times array, percentile, and median tracker), <code>useReplayState</code> (consumes the location state when navigating from a solve detail's "use this scramble" button), and a TanStack Query subscription for the active page of solves. The previous monolithic 290-line hook was split during the E.9 refactor.</p>
 
-    <h3>The Scramble Key Trick</h3>
-    <div class="code-block"><span class="cmt">// Forces Scramble to unmount and remount on each new solve</span>
-&lt;Scramble
-  <span class="fn">key</span>={`${puzzleType}-${solves.length}`}
-  <span class="hi">type</span>={puzzleType}
-  <span class="hi">onScrambleGenerated</span>={handleScrambleGenerated}
-/&gt;</div>
-    <p>When React sees a component's <code>key</code> change, it unmounts the old instance and mounts a fresh one. <code>Scramble.js</code> generates a scramble in a <code>useEffect</code> that runs on mount. So changing the key is the cleanest way to trigger a new scramble after each solve — no imperative "generate new scramble" call needed. This is an idiomatic React pattern.</p>
+    <div class="component-tree"><span class="ct-root">SolveSession.tsx</span>  <span class="ct-arrow">— route component</span>
+│
+├── <span class="ct-state">useSolveSession()</span>  <span class="ct-arrow">— CRUD orchestration, replay state, query subscription</span>
+│   ├── <span class="ct-state">useSortedSolveStats()</span>  <span class="ct-arrow">— sorted array + percentile + two-heap median</span>
+│   ├── <span class="ct-state">useReplayState()</span>      <span class="ct-arrow">— one-shot read of location.state for replays</span>
+│   └── <span class="ct-state">useAllSolvesQuery()</span>   <span class="ct-arrow">— TanStack Query: full list for stats etc</span>
+│
+├── <span class="ct-parent">Header</span>           <span class="ct-arrow">— puzzle picker, settings panel, sign-in/out</span>
+├── <span class="ct-parent">Timer</span>            <span class="ct-arrow">— useTimerMachine; phase state machine</span>
+├── <span class="ct-parent">Scramble</span>         <span class="ct-arrow">— current scramble text + 3D preview gate</span>
+├── <span class="ct-parent">ScramblePreview</span>  <span class="ct-arrow">— twisty player (gated on settings)</span>
+├── <span class="ct-parent">SolveHub</span>         <span class="ct-arrow">— stats grid + recent-12 line chart</span>
+├── <span class="ct-parent">SolveLog</span>         <span class="ct-arrow">— virtualized scrollable log</span>
+└── <span class="ct-parent">SolveDetailModal</span> <span class="ct-arrow">— focus-trapped modal opened from SolveLog</span></div>
 
-    <h3>useCallback and useMemo — Why They Matter Here</h3>
-    <p><code>useCallback</code> memoizes a function — it returns the same function reference across renders unless its dependencies change. This matters when a function is passed as a prop to a child: without memoization, the function is a new reference on every render, causing the child to re-render unnecessarily.</p>
-    <p><code>useMemo</code> memoizes a computed value — the Ao5/Ao12/mean/bestSingle block in <code>SolveLog</code> and the stat block in <code>SolveHub</code> only recompute when <code>solves</code> changes, not on every render caused by unrelated state updates.</p>
+    <h3>TanStack Query for solves</h3>
+    <p>Solves are fetched through <code>useAllSolvesQuery(puzzleType, isGuest)</code> from <code>queries/solves.ts</code>. The query key is <code>['solves', puzzleType, 'full', isGuest]</code>. After every mutation (create, update, delete), <code>useSolveSession</code> calls <code>invalidateSolveCaches(qc, puzzleType)</code>, which invalidates everything keyed under <code>['solves', puzzleType]</code>. The Stats page subscribes to the same key, so it sees fresh data on next mount without manual coordination.</p>
+
+    <div class="callout callout-blue">
+      <strong>Cancellation:</strong> The query function receives an <code>AbortSignal</code> that is threaded into <code>api.getSolves(puzzleType, cursor, signal)</code>. Switching puzzles mid-fetch cancels in-flight requests. Visible in DevTools Network as canceled requests when throttled to slow 3G.
+    </div>
+
+    <h3>Why useSolveSession is the orchestrator</h3>
+    <p><strong>Single source of truth.</strong> React's data model is unidirectional. <code>SolveSession</code> owns the active page of solves; all of its child components receive what they need via props. The TanStack Query cache is the underlying source of truth for the full history; <code>useSolveSession</code> manages the local, mutation-aware view of it.</p>
+
+    <h3>The scramble queue</h3>
+    <p>Scramble generation is async and CPU-bound (especially for big cubes). The <code>scrambleQueue</code> in <code>lib/scrambleQueue.ts</code> keeps the next scramble pre-generated so there is no visible pause between solves. The current scramble is rendered as text in <code>Scramble.tsx</code> and (when enabled in settings) as a 3D preview in <code>ScramblePreview.tsx</code> using cubing.js's TwistyPlayer.</p>
+
+    <h3>Memoization, useCallback, useMemo</h3>
+    <p>The codebase makes liberal use of <code>useCallback</code> on event handlers and <code>useMemo</code> on derived values. The audit's C cluster identified specific hot paths where stale-identity callbacks were causing re-render storms; those are all resolved. The Timer's running phase writes directly to a DOM ref via <code>textContent</code> instead of calling <code>setState</code> 60 times per second.</p>
+
+    <h3>The lazy-loaded routes</h3>
+    <p>Stats, Trainers, SharedSolve, and Auth are wrapped in <code>React.lazy</code>. The Suspense fallback is a small div with <code>aria-busy="true"</code>. This keeps Recharts, @nivo/calendar, and the trainer's case data out of the timer route bundle. Bundle analyzer confirms separate chunks.</p>
 
     <div class="talking-point">
       <div class="tp-label">Talking Point</div>
-      <div class="tp-body">"SolveSession is the single source of truth — it owns all solve state and passes it down. Callbacks flow back up. This keeps data consistency guaranteed: you can't have a stale count in one component and a fresh list in another. I used useCallback on all event handlers so their references are stable across renders, and useMemo for all derived stat computations so they only run when the solves array actually changes."</div>
+      <div class="tp-body">"The frontend uses React 18 + TypeScript strict + noUncheckedIndexedAccess. Routing is a thin shell with lazy-loaded routes and a top-level error boundary. Server state lives in TanStack Query so creating a solve on the timer page invalidates the Stats query and the user sees fresh data on next navigation. UI state lives in component-local hooks. The biggest hook, useSolveSession, was decomposed into focused sub-hooks during the audit — useSortedSolveStats handles the sorted-times array and median tracker, useReplayState handles navigation-based replay, the original hook is now a thin orchestrator."</div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 07 ══ -->
+  <!-- 07 -->
   <div class="section" id="backend">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(168,216,168,0.1); border:1px solid rgba(168,216,168,0.3);">🐍</div>
       <div>
         <h2>Backend Architecture</h2>
-        <div class="sub">Flask as an authenticated proxy — Blueprint, App Factory, and why</div>
+        <div class="sub">Service + repository layers, error envelope, structured logging</div>
       </div>
     </div>
 
-    <h3>The Authenticated Proxy Pattern</h3>
-    <p>Flask's job is narrow and well-defined: validate the JWT, run validation and rate-limiting, then forward the request to Supabase using the user's own token. It doesn't own a database connection pool, doesn't manage schema migrations, and doesn't store session state. It is a <strong>stateless processing layer</strong>.</p>
+    <h3>The authenticated proxy pattern</h3>
+    <p>Flask's job is narrow and well-defined: validate the JWT, run validation and rate limiting, then forward the request to Supabase using the user's own token. It does not own a database connection pool, does not manage schema migrations, and does not store session state. It is a <strong>stateless processing layer</strong>.</p>
 
     <div class="callout callout-green">
-      <strong>Why not call Supabase directly from the frontend?</strong> For <em>reads</em> with RLS, you technically could. But for <em>writes</em>, you need server-side validation — the frontend can be tampered with. Also, rate limiting needs to happen server-side. The backend gives you a single, auditable point where every request is inspected before it reaches the database.
+      <strong>Why not call Supabase directly from the frontend?</strong> For reads with RLS, you technically could. But for writes you need server-side validation; the frontend can be tampered with. Rate limiting needs to happen server-side. The lifetime cap needs an atomic check that the frontend cannot bypass. The backend gives you a single, auditable point where every request is inspected before it reaches the database.
     </div>
 
-    <h3>Flask Application Factory</h3>
-    <div class="code-block"><span class="cmt"># app/__init__.py — the factory function</span>
+    <h3>Service + repository layering</h3>
+    <p>The audit's E.11 refactor split the previous monolithic <code>routes/solves.py</code> into three layers:</p>
+    <div class="code-block"><span class="cmt"># routes/solves.py — thin HTTP adapter</span>
+@solves.<span class="fn">route</span>(<span class="str">'/solves'</span>, methods=[<span class="str">'POST'</span>])
+@require_auth
+@limiter.<span class="fn">limit</span>(<span class="str">"30 per minute"</span>)
+<span class="kw">def</span> <span class="fn">create_solve</span>():
+    data = request.<span class="fn">get_json</span>()
+    errors = <span class="fn">validate_create_solve</span>(data)
+    <span class="kw">if</span> errors:
+        <span class="kw">return</span> <span class="fn">error_response</span>(VALIDATION_FAILED, <span class="str">"Validation failed"</span>, <span class="num">422</span>, fields=errors)
+    <span class="kw">try</span>:
+        solve = service.<span class="fn">create_solve</span>(g.user_id, data)
+    <span class="kw">except</span> SolveLimitReached:
+        <span class="kw">return</span> <span class="fn">error_response</span>(SOLVE_LIMIT_REACHED, <span class="str">"Solve limit reached"</span>, <span class="num">429</span>)
+    <span class="kw">return</span> <span class="fn">jsonify</span>(solve), <span class="num">201</span>
+
+<span class="cmt"># services/solves_service.py — business logic</span>
+<span class="kw">class</span> <span class="fn">SolvesService</span>:
+    <span class="kw">def</span> <span class="fn">create_solve</span>(<span class="hi">self</span>, user_id, data):
+        count = <span class="hi">self</span>.repo.<span class="fn">get_solve_count</span>(user_id)
+        <span class="kw">if</span> count &gt;= SOLVE_LIFETIME_CAP:
+            <span class="kw">raise</span> <span class="fn">SolveLimitReached</span>()
+        solve = <span class="hi">self</span>.repo.<span class="fn">insert_solve</span>(user_id, data)
+        <span class="kw">if not</span> solve[<span class="str">'dnf'</span>]:
+            <span class="hi">self</span>.pb_repo.<span class="fn">record_pb_if_better</span>(...)  <span class="cmt"># RPC call, atomic</span>
+        <span class="kw">return</span> solve
+
+<span class="cmt"># repositories/solves_repo.py — Supabase access</span>
+<span class="kw">class</span> <span class="fn">SolvesRepository</span>:
+    <span class="kw">def</span> <span class="fn">insert_solve</span>(<span class="hi">self</span>, user_id, data):
+        result = <span class="hi">self</span>.supabase.<span class="fn">table</span>(<span class="str">'solves'</span>).<span class="fn">insert</span>({...}).<span class="fn">execute</span>()
+        <span class="kw">return</span> result.data[<span class="num">0</span>]</div>
+
+    <p>Routes do HTTP. Services do business logic. Repositories own Supabase access. Tests can mock at any layer.</p>
+
+    <h3>Standardized error envelope</h3>
+    <p>Every 4xx/5xx response goes through <code>error_response(code, message, status, fields=None)</code> from <code>app/errors.py</code>:</p>
+    <div class="code-block">{
+  <span class="str">"error"</span>: {
+    <span class="str">"code"</span>: <span class="str">"SOLVE_LIMIT_REACHED"</span>,        <span class="cmt">// stable upper-snake-case</span>
+    <span class="str">"message"</span>: <span class="str">"Solve limit reached"</span>,      <span class="cmt">// human-readable</span>
+    <span class="str">"fields"</span>: { <span class="str">"time"</span>: <span class="str">"Must be > 0"</span> }    <span class="cmt">// optional, present on 422</span>
+  }
+}</div>
+    <p>Frontend switches on <code>code</code> for branching; falls back to <code>message</code> for unknown codes. Codes are documented in <code>backend/app/errors.py</code>. Even framework-emitted errors (rate limit 429, missing route 404, generic 500) go through the same envelope via app-level <code>@app.errorhandler</code> registrations.</p>
+
+    <h3>Application Factory</h3>
+    <div class="code-block"><span class="cmt"># app/__init__.py</span>
 <span class="kw">def</span> <span class="fn">create_app</span>(config_class=Config):
+    <span class="fn">configure_logging</span>(os.environ.<span class="fn">get</span>(<span class="str">"LOG_LEVEL"</span>, <span class="str">"INFO"</span>))
+    access_logger = logging.<span class="fn">getLogger</span>(<span class="str">"app.access"</span>)
+
     app = <span class="fn">Flask</span>(__name__)
-    <span class="fn">CORS</span>(app, ...)                 <span class="cmt"># cross-origin headers</span>
-    limiter.<span class="fn">init_app</span>(app)           <span class="cmt"># rate limiter wired in here</span>
-    app.<span class="fn">register_blueprint</span>(solves, url_prefix=<span class="str">'/api'</span>)
+    app.wsgi_app = <span class="fn">ProxyFix</span>(app.wsgi_app, x_for=<span class="num">1</span>, x_proto=<span class="num">1</span>)
+    <span class="fn">CORS</span>(app, ...)
+    app.config.<span class="fn">from_object</span>(config_class)
+
+    <span class="cmt"># Boot-time config validation (B.4)</span>
+    <span class="cmt"># Raises if SUPABASE_URL / ANON / SERVICE_ROLE / SHARE_SECRET missing</span>
+    <span class="cmt"># or SHARE_SECRET shorter than 32 chars</span>
+    ...
+
+    limiter.<span class="fn">init_app</span>(app)
+    app.<span class="fn">register_blueprint</span>(solves, url_prefix=<span class="str">'/api/v1'</span>)
+    app.<span class="fn">register_blueprint</span>(solves, url_prefix=<span class="str">'/api'</span>, name=<span class="str">'solves_legacy'</span>)
+
+    <span class="hi">@app.before_request</span>
+    <span class="kw">def</span> <span class="fn">_attach_request_id</span>(): g.request_id = uuid.<span class="fn">uuid4</span>().hex
+
+    <span class="hi">@app.after_request</span>
+    <span class="kw">def</span> <span class="fn">_access_log</span>(response):
+        access_logger.<span class="fn">info</span>(<span class="fn">f</span><span class="str">"{request.method} {request.path} {response.status_code}"</span>)
+        <span class="kw">return</span> response
+
+    <span class="hi">@app.after_request</span>
+    <span class="kw">def</span> <span class="fn">_security_headers</span>(response):
+        response.headers.<span class="fn">setdefault</span>(<span class="str">"Content-Security-Policy-Report-Only"</span>, csp)
+        response.headers.<span class="fn">setdefault</span>(<span class="str">"X-Frame-Options"</span>, <span class="str">"DENY"</span>)
+        response.headers.<span class="fn">setdefault</span>(<span class="str">"X-Content-Type-Options"</span>, <span class="str">"nosniff"</span>)
+        response.headers.<span class="fn">setdefault</span>(<span class="str">"Referrer-Policy"</span>, <span class="str">"no-referrer"</span>)
+        response.headers.<span class="fn">setdefault</span>(<span class="str">"Strict-Transport-Security"</span>, <span class="str">"max-age=31536000; includeSubDomains"</span>)
+        <span class="kw">return</span> response
+
     <span class="kw">return</span> app</div>
 
-    <p>The Application Factory pattern creates the Flask app inside a function instead of at module level. <strong>Why?</strong> Two reasons:</p>
-    <ul style="padding-left:1.5rem; margin-bottom:0.9rem;">
-      <li><strong>Testing</strong> — you can call <code>create_app(TestConfig)</code> to create an isolated test instance with a different config, no database side effects.</li>
-      <li><strong>Extension initialization</strong> — extensions like <code>Flask-Limiter</code> support <code>init_app()</code> so they can be instantiated before the app exists (avoiding circular imports) and wired in later.</li>
-    </ul>
+    <h3>The /api/v1 prefix and the legacy alias</h3>
+    <p>The blueprint is registered twice: once at <code>/api/v1</code> (canonical) and once at <code>/api</code> (transitional). The legacy mount is required because saved share-link URLs are in the wild. Responses on the legacy mount carry <code>Deprecation: true</code>, <code>Sunset: Wed, 01 Jul 2026</code>, and <code>Link: &lt;/api/v1&gt;; rel="successor-version"</code> headers (RFC 8594) so clients can discover the new path. After the sunset date, the legacy mount and its hooks can be deleted.</p>
 
-    <h3>Blueprint for Route Organization</h3>
-    <div class="code-block">solves = <span class="fn">Blueprint</span>(<span class="str">'solves'</span>, __name__)
+    <h3>The dangerous_admin module</h3>
+    <p>The service-role Supabase key bypasses RLS. Any code path using it is a potential RLS-bypass vector and needs careful review. The H.8 refactor moved <code>get_supabase_service_client</code> from <code>db.py</code> into <code>backend/app/dangerous_admin.py</code>:</p>
+    <div class="code-block"><span class="str">"""Service-role Supabase client — BYPASSES RLS.
 
-<span class="cmt"># All registered together and mounted at /api prefix</span>
-app.<span class="fn">register_blueprint</span>(solves, url_prefix=<span class="str">'/api'</span>)</div>
-    <p>A Blueprint is Flask's way of grouping related routes. If this app grew to include a leaderboard, a friends system, or a competition mode, each would become its own Blueprint — clean separation without a monolithic routes file.</p>
+Only call this with explicit, audited authorization. Currently used only
+by the share-link read route, which has its own signature verification.
+"""</span>
+<span class="kw">def</span> <span class="fn">get_supabase_service_client</span>(): ...</div>
+    <p>The import path is loud at the call site: <code>from ..dangerous_admin import get_supabase_service_client</code>. Code review can grep for that import string. Currently only the share-read route imports it.</p>
 
-    <h3>The Supabase Client Per Request</h3>
-    <div class="code-block"><span class="kw">def</span> <span class="fn">get_supabase_client</span>(access_token=None):
-    client = <span class="fn">create_client</span>(url, key)
-    <span class="kw">if</span> access_token:
-        client.postgrest.<span class="fn">auth</span>(access_token)  <span class="cmt"># ← user-scoped</span>
-    <span class="kw">return</span> client</div>
-    <p>A new Supabase client is created on every request, scoped to the user's token. This is intentional — each request must run as that specific user so that Supabase's RLS policies see <code>auth.uid()</code> as the correct user ID. Sharing a single global client would mean all requests run as the service role (bypassing RLS entirely). The per-request cost is negligible — <code>create_client</code> just constructs an HTTP client with the right headers.</p>
+    <h3>Rate limiter</h3>
+    <p><code>extensions.py</code> exports a single <code>Limiter</code> instance that keys on <code>g.user_id</code> when authenticated, falling back to <code>get_remote_address()</code> for anonymous routes. Auth runs before the limit check via decorator ordering. Storage is in-memory by default; <code>LIMITER_STORAGE_URI</code> env var swaps to Redis for multi-process deployments without code changes.</p>
 
-    <h3>CORS Configuration — and the Bug We Fixed</h3>
-    <p>CORS (Cross-Origin Resource Sharing) is a browser mechanism that requires the server to explicitly allow requests from other origins. Our frontend (<code>localhost:3000</code>) calls our backend (<code>localhost:5000</code>) — different ports, different "origins."</p>
-    <p>The original code had <code>@cross_origin()</code> decorators on individual routes. This caused a subtle bug: placing <code>@cross_origin()</code> <em>above</em> <code>@blueprint.route()</code> in the decorator stack set <code>provide_automatic_options = False</code> on the already-registered view. Flask then routed browser preflight OPTIONS requests directly to the view function — which hit <code>require_auth</code> and returned 401. The fix: remove all per-route decorators and rely solely on the app-level <code>CORS(app, ...)</code> in <code>create_app</code>.</p>
+    <h3>Per-request Supabase client</h3>
+    <p>A new Supabase client is created per request inside <code>require_auth</code> and stored on <code>g.supabase</code>. This is intentional: each request runs as that specific user so RLS sees the correct <code>auth.uid()</code>. Sharing a global client would mean all requests run as the service role, bypassing RLS. The per-request cost is negligible; <code>create_client</code> just constructs an HTTP client with the right headers.</p>
 
     <div class="talking-point">
       <div class="tp-label">Talking Point</div>
-      <div class="tp-body">"The backend is a stateless authenticated proxy — it validates the JWT on every request, runs validation and rate limiting, then forwards to Supabase using the user's own token so row-level security still applies at the database. A new Supabase client is created per request rather than shared globally, because using a global service-role client would bypass RLS entirely."</div>
+      <div class="tp-body">"The backend is layered: routes do HTTP and authentication, services do business logic, repositories own Supabase access. The standardized error envelope ({error: {code, message, fields}}) means every error response on the wire has the same shape, and the frontend switches on the stable code field. Structured JSON logging via stdlib dictConfig folds in request_id and user_id on every log line. The /api/v1 prefix gives us a versioning runway; the legacy /api mount stays alive with RFC 8594 Sunset headers so external share links keep working until 2026-07-01."</div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 08 ══ -->
+  <!-- 08 -->
   <div class="section" id="database">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3);">🗄️</div>
       <div>
         <h2>Database Design</h2>
-        <div class="sub">Schema decisions, RLS, and why relational beats NoSQL here</div>
+        <div class="sub">Schema, RLS, indexes, triggers, RPCs</div>
       </div>
     </div>
 
     <h3>The solves table</h3>
     <div class="code-block">CREATE TABLE solves (
   id          uuid DEFAULT <span class="fn">gen_random_uuid</span>() PRIMARY KEY,
-  user_id     uuid REFERENCES auth.users NOT NULL,
+  user_id     uuid REFERENCES auth.users <span class="hi">ON DELETE CASCADE</span> NOT NULL,
   puzzle_type text NOT NULL,            <span class="cmt">-- '333', '444', 'pyram', etc.</span>
   time        numeric NOT NULL,         <span class="cmt">-- seconds, e.g. 12.47</span>
-  dnf         boolean DEFAULT false,    <span class="cmt">-- Did Not Finish</span>
-  plus_two    boolean DEFAULT false,    <span class="cmt">-- +2 second penalty</span>
+  dnf         boolean DEFAULT false,
+  plus_two    boolean DEFAULT false,
   scramble    text DEFAULT '',
-  created_at  timestamptz DEFAULT now() NOT NULL
+  created_at  timestamptz DEFAULT now() NOT NULL,
+  deleted_at  timestamptz,              <span class="cmt">-- soft delete; NULL means active</span>
+  metadata    jsonb DEFAULT '{}'        <span class="cmt">-- forward-compat for enrichment</span>
 );</div>
 
-    <p><strong>UUID primary key</strong> vs. sequential integer: UUIDs are unguessable — you can't enumerate other users' solve IDs by incrementing a number. They're also safe to generate client-side if needed. The tradeoff is larger index size and slightly slower B-tree operations (16 bytes vs 4). For this table size, negligible.</p>
-    <p><strong>numeric for time</strong> vs. float: <code>numeric</code> is exact decimal arithmetic in PostgreSQL. <code>float</code> has floating point precision errors (12.47 might become 12.469999999...). For times displayed to the user, exact values matter.</p>
+    <p><strong>UUID primary key</strong> over sequential integer: unguessable, can be generated client-side, safe to expose in URLs (share links use them). 16 bytes vs 4 is negligible at this table size.</p>
+    <p><strong>numeric for time</strong> over float: exact decimal arithmetic in PostgreSQL. <code>float</code> would have floating-point precision errors (12.47 might become 12.469999...). For times displayed to the user, exact values matter.</p>
+    <p><strong>ON DELETE CASCADE on user_id</strong>: deleting a Supabase auth user automatically cleans up their solves. Same for <code>personal_bests</code>. Audit D.3 added this.</p>
+    <p><strong>deleted_at for soft delete</strong>: A.6 + B.6. Hard delete would orphan share-link tokens and break PB references. Soft delete preserves history; reads filter <code>WHERE deleted_at IS NULL</code> via the partial index.</p>
+    <p><strong>metadata jsonb default '{}'</strong>: H.12 forward-compat column for future enrichment fields (device, app version, comp tags). No code reads it today.</p>
 
-    <h3>Row Level Security — The Database Enforces Access Control</h3>
-    <div class="code-block">ALTER TABLE solves ENABLE ROW LEVEL SECURITY;
-
-<span class="cmt">-- Users can only SELECT rows where user_id = their own auth.uid()</span>
-CREATE POLICY <span class="str">"Users can view own solves"</span>
-  ON solves FOR SELECT
-  USING (<span class="fn">auth.uid</span>() = user_id);
-
-<span class="cmt">-- Same for INSERT — the check ensures user_id in the payload matches</span>
-CREATE POLICY <span class="str">"Users can insert own solves"</span>
-  ON solves FOR INSERT
-  WITH CHECK (<span class="fn">auth.uid</span>() = user_id);</div>
-
-    <p>RLS is enforced by the <strong>PostgreSQL engine itself</strong> — not by application code. This means even if there's a bug in Flask that accidentally passes the wrong <code>user_id</code>, the database will reject it. Even if someone bypasses Flask entirely and calls the Supabase PostgREST API directly with a valid JWT, they still can't read another user's solves.</p>
-
-    <div class="callout callout-purple">
-      <strong>Defense in depth:</strong> Access control is enforced at three independent layers — (1) the Supabase JS client only works when logged in, (2) Flask's require_auth validates the JWT and scopes queries to the user, (3) PostgreSQL RLS physically prevents cross-user data access at the row level. A vulnerability in any single layer doesn't compromise the data.
-    </div>
-
-    <h3>personal_bests — A Materialized Derived Table</h3>
+    <h3>The personal_bests table</h3>
     <div class="code-block">CREATE TABLE personal_bests (
-  id          uuid PRIMARY KEY,
-  user_id     uuid REFERENCES auth.users,
-  puzzle_type text,
-  time        numeric,       <span class="cmt">-- the PB time</span>
-  achieved_at timestamptz,   <span class="cmt">-- when it happened</span>
+  id          uuid DEFAULT <span class="fn">gen_random_uuid</span>() PRIMARY KEY,
+  user_id     uuid REFERENCES auth.users <span class="hi">ON DELETE CASCADE</span> NOT NULL,
+  puzzle_type text NOT NULL,
+  time        numeric NOT NULL,
+  achieved_at timestamptz NOT NULL,
   solve_id    uuid REFERENCES solves(id) ON DELETE SET NULL
 );</div>
-    <p>This is a <strong>write-time materialized view</strong> — data that could be computed from <code>solves</code> but is instead stored pre-computed for fast reads. Every time a new solve is inserted, the backend checks if it's a PB and appends to this table. The chart query is then a simple indexed scan instead of a full-table scan + running minimum.</p>
+    <p>Write-time materialized view of the running minimum solve time per puzzle, per user. Updated by the atomic <code>record_pb_if_better</code> RPC (migration 010) at solve insert time. The Stats page reads this directly for the PB progression chart in O(1) instead of scanning all solves.</p>
+
+    <h3>The user_stats counter table</h3>
+    <div class="code-block">CREATE TABLE user_stats (
+  user_id     uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+  solve_count integer NOT NULL DEFAULT 0
+);
+
+CREATE FUNCTION <span class="fn">update_user_solve_count</span>() RETURNS trigger AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO user_stats (user_id, solve_count) VALUES (NEW.user_id, 1)
+    ON CONFLICT (user_id) DO UPDATE SET solve_count = user_stats.solve_count + 1;
+  ELSIF (TG_OP = 'UPDATE' AND OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) THEN
+    UPDATE user_stats SET solve_count = solve_count - 1 WHERE user_id = NEW.user_id;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER solves_solve_count_trigger
+  AFTER INSERT OR UPDATE ON solves
+  FOR EACH ROW EXECUTE FUNCTION <span class="fn">update_user_solve_count</span>();</div>
+
+    <p>The 100,000-solve lifetime cap (audit A.2 + D.4) was originally enforced by a <code>count(*)</code> query before every insert. That had two problems: (1) slow at scale, (2) a TOCTOU race meant two concurrent inserts could both think they were below the cap. The counter table fixes both: read is a single index lookup; the trigger is atomic inside the insert transaction.</p>
+
+    <h3>Row Level Security</h3>
+    <div class="code-block">ALTER TABLE solves ENABLE ROW LEVEL SECURITY;
+
+<span class="cmt">-- Per-operation policies, all gating on auth.uid() = user_id</span>
+CREATE POLICY <span class="str">"Users can view own solves"</span>     ON solves FOR SELECT USING (auth.<span class="fn">uid</span>() = user_id);
+CREATE POLICY <span class="str">"Users can insert own solves"</span>   ON solves FOR INSERT WITH CHECK (auth.<span class="fn">uid</span>() = user_id);
+CREATE POLICY <span class="str">"Users can update own solves"</span>   ON solves FOR UPDATE USING (auth.<span class="fn">uid</span>() = user_id);
+CREATE POLICY <span class="str">"Users can delete own solves"</span>   ON solves FOR DELETE USING (auth.<span class="fn">uid</span>() = user_id);
+
+<span class="cmt">-- Same shape on personal_bests, plus the audit's A.9 fix:</span>
+CREATE POLICY <span class="str">"Users can delete own personal bests"</span> ON personal_bests FOR DELETE USING (auth.<span class="fn">uid</span>() = user_id);
+CREATE POLICY <span class="str">"Users can update own personal bests"</span> ON personal_bests FOR UPDATE USING (auth.<span class="fn">uid</span>() = user_id);</div>
+
+    <p>RLS is enforced by the <strong>PostgreSQL engine itself</strong>, not by application code. Even if there is a bug in Flask that accidentally passes the wrong <code>user_id</code>, the database rejects it. Even if someone bypasses Flask and calls Supabase's PostgREST API directly with a valid JWT, they still cannot read another user's solves.</p>
+
+    <div class="callout callout-purple">
+      <strong>Defense in depth:</strong> Access control is enforced at three independent layers — (1) the Supabase JS client only works when logged in, (2) Flask's require_auth validates the JWT and scopes queries to the user, (3) PostgreSQL RLS physically prevents cross-user data access at the row level. A vulnerability in any single layer does not compromise the data.
+    </div>
 
     <h3>Indexes</h3>
-    <div class="code-block"><span class="cmt">-- Supports cursor pagination: WHERE user_id=X AND puzzle_type=Y AND created_at &lt; cursor</span>
-CREATE INDEX solves_user_puzzle_created_idx
-  ON solves (user_id, puzzle_type, created_at DESC);
+    <div class="code-block"><span class="cmt">-- Cursor pagination over active solves (D.1: includes deleted_at predicate)</span>
+CREATE INDEX solves_user_puzzle_created_active_idx
+  ON solves (user_id, puzzle_type, created_at DESC)
+  WHERE deleted_at IS NULL;
 
-<span class="cmt">-- Supports PB history chart: WHERE user_id=X AND puzzle_type=Y ORDER BY achieved_at</span>
-CREATE INDEX personal_bests_user_puzzle_time_idx
-  ON personal_bests (user_id, puzzle_type, achieved_at ASC);</div>
-    <p>A composite index is useful when your WHERE clause filters on multiple columns. PostgreSQL can use the index for the first column(s) in order, then filter on the rest. The column order matters: put the most selective column first. <code>user_id</code> comes first because filtering by user is always the first thing that happens.</p>
+<span class="cmt">-- PB-min lookup by time (D.2)</span>
+CREATE INDEX personal_bests_user_puzzle_min_time_idx
+  ON personal_bests (user_id, puzzle_type, time ASC);</div>
+
+    <p>The partial index on <code>solves</code> makes the WHERE clause sargable without a recheck row in the query plan. Composite column order matters: most selective filter (<code>user_id</code>) first.</p>
+
+    <h3>Atomic PB write via RPC</h3>
+    <p>Audit D.8 replaced the read-then-insert PB pattern with a single atomic RPC:</p>
+    <div class="code-block">CREATE FUNCTION <span class="fn">record_pb_if_better</span>(
+  p_user_id uuid,
+  p_puzzle_type text,
+  p_solve_id uuid,
+  p_time numeric
+) RETURNS void AS $$
+BEGIN
+  INSERT INTO personal_bests (user_id, puzzle_type, time, achieved_at, solve_id)
+  SELECT p_user_id, p_puzzle_type, p_time, now(), p_solve_id
+  WHERE NOT EXISTS (
+    SELECT 1 FROM personal_bests
+    WHERE user_id = p_user_id AND puzzle_type = p_puzzle_type AND time &lt;= p_time
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY INVOKER;</div>
+
+    <p>One round-trip, atomic. Concurrent inserts cannot race to insert duplicate PB rows for ties.</p>
+
+    <h3>Cursor pagination with tiebreaker</h3>
+    <div class="code-block"><span class="cmt"># Cursor encodes (created_at, id) so identical microsecond timestamps</span>
+<span class="cmt"># do not drop a row across pages.</span>
+cursor_str = <span class="fn">b64encode</span>(<span class="fn">f</span><span class="str">"{created_at}|{id}"</span>.<span class="fn">encode</span>())
+
+<span class="cmt"># Decoder accepts both shapes for one release window (D.9)</span>
+<span class="kw">def</span> <span class="fn">_decode_solve_cursor</span>(s):
+    decoded = <span class="fn">b64decode</span>(s).<span class="fn">decode</span>()
+    <span class="kw">if</span> <span class="str">"|"</span> <span class="kw">in</span> decoded:
+        ts, solve_id = decoded.<span class="fn">split</span>(<span class="str">"|"</span>, <span class="num">1</span>)
+        <span class="kw">return</span> ts, solve_id
+    <span class="kw">return</span> decoded, <span class="kw">None</span>  <span class="cmt"># legacy: timestamp only</span></div>
+
+    <p>Tiebreaker means duplicate timestamps (rare but possible under bulk inserts) cannot drop a row across pages. The query becomes <code>WHERE created_at &lt; X OR (created_at = X AND id &lt; Y)</code>.</p>
 
     <div class="talking-point">
       <div class="tp-label">Talking Point</div>
-      <div class="tp-body">"I chose Supabase over Firebase because the data is fundamentally relational — solves belong to users, have puzzle types, and you want queries like 'minimum time by puzzle type.' That's a SQL-native question. PostgreSQL's row-level security also means the database enforces data ownership independent of the application layer, which is a much stronger security guarantee than application-level access control. I also explicitly chose numeric over float for solve times to avoid floating-point precision errors in displayed values."</div>
+      <div class="tp-body">"I chose Supabase over Firebase because the data is fundamentally relational. PostgreSQL's row-level security means the database itself enforces data ownership. The schema includes a per-user counter table maintained by trigger to enforce a 100,000-solve cap atomically — a count(*) check would have a TOCTOU race. Personal-best history is a write-time materialized view updated by an atomic Postgres function so concurrent solves cannot race. Soft delete via deleted_at preserves history and keeps share links valid. Cursor pagination uses (created_at, id) as the tiebreaker so identical-timestamp inserts cannot drop a row across pages."</div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 09 ══ -->
+  <!-- 09 -->
   <div class="section" id="security">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);">🛡️</div>
       <div>
         <h2>Security Layers</h2>
-        <div class="sub">How the app defends against the most common attack patterns</div>
+        <div class="sub">Defense in depth from headers to the database engine</div>
       </div>
     </div>
 
@@ -964,184 +1249,418 @@ CREATE INDEX personal_bests_user_puzzle_time_idx
       <tr><th>Threat</th><th>Layer 1</th><th>Layer 2</th><th>Layer 3</th></tr>
       <tr>
         <td><strong>Unauthenticated access</strong></td>
-        <td>Supabase anon key only allows access per RLS</td>
-        <td>Flask require_auth returns 401</td>
-        <td>RLS blocks all reads without auth.uid()</td>
+        <td>Supabase anon key only allows operations per RLS</td>
+        <td>Flask require_auth returns 401 (AUTH_MISSING_TOKEN)</td>
+        <td>RLS blocks every read without a valid auth.uid()</td>
       </tr>
       <tr>
         <td><strong>Cross-user data read</strong></td>
-        <td>Flask scopes all queries to request.user_id</td>
-        <td>RLS: auth.uid() = user_id enforced by Postgres engine</td>
+        <td>Flask scopes all queries to g.user_id</td>
+        <td>RLS: auth.uid() = user_id enforced by Postgres</td>
         <td>—</td>
       </tr>
       <tr>
-        <td><strong>Malformed input / data corruption</strong></td>
+        <td><strong>Malformed input</strong></td>
         <td>Frontend validation (basic)</td>
-        <td>Flask validators.py → 422</td>
+        <td>Backend validators.py → 422 with VALIDATION_FAILED + field map</td>
         <td>DB constraints (NOT NULL, type enforcement)</td>
       </tr>
       <tr>
         <td><strong>API abuse / spam</strong></td>
-        <td>Token bucket rate limiter (30/min POST)</td>
+        <td>flask-limiter, per-user when authenticated, per-IP otherwise</td>
+        <td>Solve lifetime cap (100,000) via atomic counter</td>
         <td>Supabase has its own rate limiting on the DB tier</td>
-        <td>—</td>
       </tr>
       <tr>
         <td><strong>CSRF</strong></td>
-        <td>Bearer token auth — CSRF only applies to cookie-based auth. Bearer tokens aren't sent automatically by the browser, so CSRF is impossible by design.</td>
+        <td>Bearer token auth — bearer tokens aren't sent automatically by the browser</td>
         <td>—</td>
         <td>—</td>
       </tr>
       <tr>
         <td><strong>SQL injection</strong></td>
-        <td>supabase-py uses parameterized queries — user input is never interpolated into SQL strings</td>
+        <td>supabase-py uses parameterized queries; user input never interpolated into SQL</td>
+        <td>Cursor format strictly validated (ISO timestamp + UUID regex)</td>
         <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Existence oracle on PATCH</strong></td>
+        <td>Empty PATCH body returns 400 (audit A.6)</td>
+        <td>PATCH and DELETE include is_('deleted_at', None) filter (A.3)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Share-link tampering</strong></td>
+        <td>HMAC-SHA256 signature verified per request</td>
+        <td>30-day TTL embedded in token; expired tokens 404</td>
         <td>—</td>
       </tr>
       <tr>
         <td><strong>Secrets exposure</strong></td>
-        <td>All secrets in .env files (gitignored)</td>
-        <td>Backend uses server-side env vars only</td>
-        <td>Frontend only uses REACT_APP_ prefixed keys (anon key, safe to expose)</td>
+        <td>All secrets in .env (gitignored, including .env at any depth)</td>
+        <td>Backend secrets server-side only; SHARE_SECRET ≥ 32 chars enforced at boot</td>
+        <td>Frontend uses VITE_-prefixed vars (anon key only, RLS-safe)</td>
+      </tr>
+      <tr>
+        <td><strong>XSS / clickjacking</strong></td>
+        <td>CSP (Report-Only today; phase 2 flips to enforcing)</td>
+        <td>X-Frame-Options DENY, X-Content-Type-Options nosniff</td>
+        <td>HSTS, Referrer-Policy</td>
       </tr>
     </table>
 
+    <h3>Security headers</h3>
+    <div class="code-block"><span class="cmt"># app/__init__.py</span>
+csp = (
+    <span class="str">"default-src 'self'; "</span>
+    <span class="str">"script-src 'self' 'wasm-unsafe-eval'; "</span>      <span class="cmt"># cubing.js needs wasm</span>
+    <span class="str">"style-src 'self' 'unsafe-inline'; "</span>
+    <span class="str">"img-src 'self' data: blob:; "</span>
+    <span class="str">"font-src 'self'; "</span>
+    <span class="str">"connect-src 'self' https://*.supabase.co wss://*.supabase.co; "</span>
+    <span class="str">"worker-src 'self' blob:; "</span>
+    <span class="str">"frame-ancestors 'none'; "</span>
+    <span class="str">"base-uri 'self'; "</span>
+    <span class="str">"form-action 'self'"</span>
+)
+
+<span class="hi">@app.after_request</span>
+<span class="kw">def</span> <span class="fn">_security_headers</span>(response):
+    response.headers.<span class="fn">setdefault</span>(<span class="str">"Content-Security-Policy-Report-Only"</span>, csp)  <span class="cmt"># phase 1</span>
+    response.headers.<span class="fn">setdefault</span>(<span class="str">"X-Frame-Options"</span>, <span class="str">"DENY"</span>)
+    response.headers.<span class="fn">setdefault</span>(<span class="str">"X-Content-Type-Options"</span>, <span class="str">"nosniff"</span>)
+    response.headers.<span class="fn">setdefault</span>(<span class="str">"Referrer-Policy"</span>, <span class="str">"no-referrer"</span>)
+    response.headers.<span class="fn">setdefault</span>(<span class="str">"Strict-Transport-Security"</span>, <span class="str">"max-age=31536000; includeSubDomains"</span>)
+    <span class="kw">return</span> response</div>
+
+    <p>CSP currently ships as <code>Content-Security-Policy-Report-Only</code> (phase 1). Browsers report violations to DevTools but do not block. After a one-to-two-week burn-in with no violations in production, the header name flips to <code>Content-Security-Policy</code> (phase 2) and violations actively block.</p>
+
+    <h3>Per-user rate limiter</h3>
+    <p>Audit B.10 changed the limiter key from IP to authenticated user (with IP fallback for anonymous routes). Behind a corporate NAT, IP-based limiting punishes innocent users; for an attacker, IP rotation evades it. User-keyed limiting is fairer and tighter.</p>
+
     <div class="callout callout-blue">
-      <strong>Why Bearer tokens prevent CSRF:</strong> CSRF (Cross-Site Request Forgery) works by tricking a victim's browser into making a request to your API while the victim is logged in — the browser automatically includes cookies. Bearer tokens (in localStorage, attached by JavaScript) are <em>never</em> automatically included by the browser on cross-origin requests. An attacker's evil website can't access <code>localStorage</code> from another origin (same-origin policy). So CSRF is structurally impossible with Bearer token auth.
+      <strong>Why Bearer tokens prevent CSRF:</strong> CSRF works by tricking a victim's browser into making a request to your API while the victim is logged in. The browser automatically includes cookies. Bearer tokens (in localStorage, attached by JavaScript) are never automatically included by the browser on cross-origin requests. An attacker's site cannot access localStorage from another origin. CSRF is structurally impossible with Bearer token auth.
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 10 ══ -->
+  <!-- 10 -->
+  <div class="section" id="share">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(45,212,191,0.1); border:1px solid rgba(45,212,191,0.3);">🔗</div>
+      <div>
+        <h2>Share Links</h2>
+        <div class="sub">Stateless HMAC tokens with embedded TTL</div>
+      </div>
+    </div>
+
+    <h3>The feature</h3>
+    <p>From the SolveDetailModal, an authenticated user can mint a read-only public link to a single solve: <code>https://&lt;host&gt;/s/&lt;token&gt;</code>. Anyone with the link can view the solve (time, scramble, date) without signing in. The link expires after 30 days.</p>
+
+    <h3>Token format</h3>
+    <div class="diagram"><span class="d-blue">b64url(solve_id)</span><span class="d-white">.</span><span class="d-green">b64url(iat)</span><span class="d-white">.</span><span class="d-orange">b64url(exp)</span><span class="d-white">.</span><span class="d-red">b64url(mac)</span>
+
+       │              │            │            │
+       │              │            │            └── HMAC-SHA256(SHARE_SECRET, "id:iat:exp")[:16]
+       │              │            └── unix timestamp 8 bytes big-endian
+       │              └── unix timestamp 8 bytes big-endian
+       └── solve UUID</div>
+
+    <p>Stateless: no database lookup needed to verify. The verifier recomputes the MAC and checks expiry. If either fails, 404.</p>
+
+    <h3>Why this design</h3>
+    <table class="tradeoff-table">
+      <tr><th>Option</th><th>Approach</th><th>Tradeoff</th></tr>
+      <tr>
+        <td class="chosen">Stateless HMAC (current) ✓</td>
+        <td>Sign with SHARE_SECRET; embed iat + exp in payload</td>
+        <td class="pro">No DB writes per share, no DB reads per verify, naturally expiring. Cap blast radius via TTL.</td>
+      </tr>
+      <tr>
+        <td class="unchosen">DB-backed share_links table</td>
+        <td>Random opaque token; row stores solve_id, expiry, optional revoked_at</td>
+        <td class="con">Needed if per-link revocation matters. Adds a write per share, a read per verify, and a migration. Documented in audit A.7 option 2 as a future option.</td>
+      </tr>
+      <tr>
+        <td class="unchosen">Plaintext id only</td>
+        <td>The URL contains the solve UUID directly</td>
+        <td class="con">Anyone with a UUID guesses no one else's, but tampering is trivial — change a character and try someone else's solve. No expiry. Was the original (broken) implementation.</td>
+      </tr>
+    </table>
+
+    <h3>SHARE_SECRET rotation</h3>
+    <p>Rotation invalidates every outstanding link the instant the new secret takes effect. The runbook at <code>docs/share-secret-rotation.md</code> documents the hard-cutover procedure today and a recommended future dual-secret rolling-window pattern (~30 lines of Python) if frequent rotation becomes necessary.</p>
+
+    <div class="callout callout-orange">
+      <strong>SHARE_SECRET length floor:</strong> create_app refuses to boot if SHARE_SECRET is shorter than 32 characters. Generate with <code>python -c "import secrets; print(secrets.token_urlsafe(48))"</code>.
+    </div>
+  </div>
+
+
+  <!-- 11 -->
+  <div class="section" id="guest">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3);">👤</div>
+      <div>
+        <h2>Guest Mode</h2>
+        <div class="sub">localStorage-backed solves with one-shot migration on sign-in</div>
+      </div>
+    </div>
+
+    <h3>Why guest mode</h3>
+    <p>The friction of sign-up before trying the timer is real. Guest mode lets a visitor solve immediately; if they sign up later, their solves migrate in one batched request to <code>POST /api/v1/solves/batch</code>.</p>
+
+    <h3>How it works</h3>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <strong>No auth required to use the timer</strong>
+          <div class="detail"><code>AuthContext.isGuest</code> is true when there is no session. <code>useSolveSession</code> branches on this: in guest mode it reads from and writes to <code>services/guestStorage</code>, which uses localStorage with a per-puzzle key prefix.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <strong>Guest solves accumulate in localStorage</strong>
+          <div class="detail">Each puzzle has its own key. Stats, SolveLog, and the chart all read from the same store. Lifetime cap and PB tracking do not apply in guest mode (intentional simplification).</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <strong>Sign in or sign up</strong>
+          <div class="detail">The AuthClient's onSignIn callback fires. <code>AuthContext</code> checks for guest solves; if any exist, sorts them chronologically (B.12: out-of-order migration would corrupt PB materialization) and POSTs them in one batch.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+          <strong>Backend batch insert + PB recompute</strong>
+          <div class="detail"><code>POST /api/v1/solves/batch</code> validates each solve (caps at 1,000), inserts in a single transaction, then calls <code>recompute_pbs_for_user</code> RPC to rebuild PB rows from scratch in chronological order. Separate rate-limit bucket (5/min).</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content">
+          <strong>Migration toast; localStorage cleared on success</strong>
+          <div class="detail">Sonner toast confirms the count migrated. Failed solves (rare) are reported with their error codes; the user can retry. Local solves are cleared after a successful migration.</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Detailed feature matrix in <code>docs/guest-mode.md</code>.</p>
+  </div>
+
+
+  <!-- 12 -->
   <div class="section" id="timer">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3);">⏱️</div>
       <div>
-        <h2>The Timer: useState vs. useRef</h2>
-        <div class="sub">Why a high-precision timer can't rely on React state alone</div>
+        <h2>Timer Architecture</h2>
+        <div class="sub">Phase state machine, RAF + textContent, useTimerMachine extraction</div>
       </div>
     </div>
 
-    <h3>The Stale Closure Problem</h3>
-    <p>The timer runs with <code>setInterval</code> every 10ms. But when <code>stopTimer</code> fires, it needs the <em>actual current time</em> — not the time as of the last render. This is the stale closure problem:</p>
+    <h3>The phase state machine</h3>
+    <p>The timer has four exclusive phases: <code>idle</code>, <code>ready</code>, <code>inspection</code>, <code>running</code>. Booleans (<code>isRunning</code>, <code>isReady</code>) would explode combinations and admit illegal states. A phase enum makes the state machine explicit.</p>
 
-    <div class="code-block"><span class="cmt">// ❌ Naive approach — stale closure bug</span>
-<span class="kw">const</span> [time, setTime] = <span class="fn">useState</span>(<span class="num">0</span>);
+    <div class="diagram"><span class="d-white">IDLE ──(space down)──&gt; READY ──(space up)──&gt; INSPECTION ──(space down)──&gt; RUNNING</span>
+<span class="d-white">  ^                                                                              │</span>
+<span class="d-white">  └──────────────────────────────(space down)────────────────────────────────────┘</span>
 
-<span class="kw">const</span> stopTimer = <span class="fn">useCallback</span>(() => {
-  <span class="fn">onSolveComplete</span>(time / <span class="num">1000</span>);  <span class="cmt">// 'time' is captured from the closure at</span>
-                               <span class="cmt">// useCallback creation time — may be stale!</span>
-}, [time]);  <span class="cmt">// adding 'time' to deps causes stopTimer to recreate every 10ms</span></div>
+  INSPECTION: countdown ticks 15 → 0; +2 if &gt; 15s, DNF if &gt; 17s (at user discretion)
+  RUNNING:    RAF loop writes elapsed milliseconds directly to the DOM
+  Transition RUNNING → IDLE: read elapsed from timeRef.current, fire onSolveComplete</div>
 
-    <p>If <code>time</code> is in the dependency array, <code>stopTimer</code> becomes a new function every 10ms (as time increments). The keydown event handler holds a reference to the old <code>stopTimer</code>, so it may read a stale value.</p>
+    <h3>useTimerMachine hook (E.10 extraction)</h3>
+    <p>The timer's logic was extracted from <code>Timer.tsx</code> into <code>hooks/useTimerMachine.ts</code>. The component became a 60-line presentational shell. The hook owns:</p>
+    <ul style="padding-left: 1.5rem; margin-bottom: 0.85rem;">
+      <li><code>phaseRef</code> + <code>phase</code> state — see stale-closure section below</li>
+      <li><code>timeRef</code> — RAF-mutated, current elapsed ms</li>
+      <li>RAF handle and inspection interval</li>
+      <li>Keyboard and touch event handlers</li>
+      <li>Inspection countdown via <code>tickInspection(elapsed)</code> pure helper (also extracted, fully unit-testable)</li>
+    </ul>
 
-    <h3>The Fix: useRef for Mutable Synchronous Values</h3>
-    <div class="code-block"><span class="cmt">// ✓ Correct approach — ref is always current</span>
-<span class="kw">const</span> [time, setTime] = <span class="fn">useState</span>(<span class="num">0</span>);        <span class="cmt">// for DISPLAY only</span>
-<span class="kw">const</span> timeRef = <span class="fn">useRef</span>(<span class="num">0</span>);                  <span class="cmt">// for COMPUTATION</span>
+    <h3>The stale-closure problem and the ref fix</h3>
+    <p>React event handlers registered in <code>useEffect</code> capture state values at the time the effect runs. If <code>phase</code> state changes, the old handler still sees the old value. The fix: <code>phaseRef</code> is mutated synchronously alongside the state update; event handlers read from the ref, React renders read from the state.</p>
 
-<span class="cmt">// In setInterval: update BOTH</span>
-<span class="fn">setInterval</span>(() => {
-  <span class="fn">setTime</span>(prev => {
-    <span class="kw">const</span> next = prev + <span class="num">10</span>;
-    timeRef.current = next;  <span class="cmt">// ref updated synchronously, always current</span>
-    <span class="kw">return</span> next;
-  });
-}, <span class="num">10</span>);
+    <div class="code-block"><span class="kw">const</span> phaseRef = <span class="fn">useRef</span>&lt;Phase&gt;(<span class="str">'idle'</span>);
+<span class="kw">const</span> [phase, setPhase] = <span class="fn">useState</span>&lt;Phase&gt;(<span class="str">'idle'</span>);
 
-<span class="cmt">// stopTimer reads the ref — always accurate, no stale closure</span>
-<span class="kw">const</span> stopTimer = <span class="fn">useCallback</span>(() => {
-  <span class="fn">onSolveComplete</span>(timeRef.current / <span class="num">1000</span>);  <span class="cmt">// ← always the real current time</span>
-}, [onSolveComplete]);  <span class="cmt">// no 'time' dependency needed</span></div>
+<span class="kw">const</span> setPhaseSync = (next: Phase) => {
+  phaseRef.current = next;  <span class="cmt">// for event handlers (always fresh)</span>
+  <span class="fn">setPhase</span>(next);          <span class="cmt">// for rendering</span>
+};
 
-    <p><strong>The key insight:</strong> <code>useRef</code> returns a mutable container whose <code>.current</code> property does not cause re-renders when changed, and is never captured by closures — every read of <code>timeRef.current</code> gets the actual current value. <code>useState</code> is for values that should trigger UI updates. <code>useRef</code> is for values you need to read imperatively from event handlers and callbacks.</p>
+<span class="kw">const</span> handleKeyDown = (event: KeyboardEvent) => {
+  <span class="kw">const</span> p = phaseRef.current;     <span class="cmt">// not stale</span>
+  <span class="kw">if</span> (p === <span class="str">'idle'</span>)        <span class="fn">setPhaseSync</span>(<span class="str">'ready'</span>);
+  <span class="kw">else if</span> (p === <span class="str">'inspection'</span>) <span class="fn">startRunning</span>();
+  <span class="kw">else if</span> (p === <span class="str">'running'</span>)    <span class="fn">finishSolve</span>();
+};</div>
 
-    <h3>Touch Events</h3>
-    <p>The timer also supports touch — <code>onTouchStart</code> for ready state, <code>onTouchEnd</code> to start/stop — making the app usable on phones and tablets. <code>e.preventDefault()</code> prevents the browser from also firing synthetic mouse events on touch (which would double-fire the handler).</p>
+    <h3>RAF + textContent: zero re-renders during running</h3>
+    <p>The naïve approach calls <code>setTime</code> 60 times per second to update the displayed elapsed milliseconds. That triggers a React commit on every tick. The C.1 audit pass replaced this with direct DOM writes:</p>
+
+    <div class="code-block"><span class="kw">const</span> timerNodeRef = <span class="fn">useRef</span>&lt;HTMLDivElement&gt;(<span class="kw">null</span>);
+
+<span class="kw">const</span> tick = () => {
+  <span class="kw">const</span> elapsed = <span class="fn">performance.now</span>() - startRef.current;
+  timeRef.current = elapsed;
+  <span class="kw">if</span> (timerNodeRef.current) {
+    timerNodeRef.current.textContent = <span class="fn">formatTime</span>(elapsed / <span class="num">1000</span>);
+  }
+  rafIdRef.current = <span class="fn">requestAnimationFrame</span>(tick);
+};</div>
+
+    <p>React commits zero times during the running phase. Only phase transitions cause re-renders. Confirmed via React DevTools Profiler.</p>
+
+    <h3>Inspection countdown</h3>
+    <p>Inspection ticks every 250ms but only updates state when the displayed integer second changes (audit C.2). This produces ~4 renders per visible second change instead of 10/s.</p>
+
+    <h3>Penalty rule</h3>
+    <p>If <code>inspectionMs &gt; 15000</code>, the resulting solve is flagged <code>plus_two: true</code>. The display flashes red at &gt; 12s and yellow at &gt; 8s.</p>
 
     <div class="talking-point">
       <div class="tp-label">Talking Point</div>
-      <div class="tp-body">"The timer needs to capture the exact elapsed milliseconds at the moment the user releases the key. The naive approach of reading the time from useState hits React's stale closure problem — the stopTimer callback captures the time value from its creation closure, which might be 10-100ms stale. The fix is to maintain a useRef that's updated synchronously inside the setInterval callback. Refs are not captured by closures — reading timeRef.current always gives the actual current value. useState still drives the display (it re-renders the visible timer), while useRef drives the computation."</div>
+      <div class="tp-body">"The timer is a four-phase state machine implemented with a phase enum. Two booleans would have produced 4 combinations, three booleans 8 — most of which are illegal. The phase enum makes the state space explicit and impossible to violate. To capture the exact elapsed milliseconds at the moment of stop without React closure staleness, I keep a phaseRef synchronized with the phase state — event handlers read the ref, React reads the state. During the running phase, RAF writes directly to a DOM ref's textContent so React commits zero times for 5-10 seconds of solving. Profiler confirms a flat flame graph between phase transitions."</div>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 11 ══ -->
+  <!-- 13 -->
   <div class="section" id="state">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3);">🔄</div>
       <div>
         <h2>State Management Strategy</h2>
-        <div class="sub">Why there's no Redux or Zustand — and when you'd add one</div>
+        <div class="sub">TanStack Query for server state, hooks for UI state, no Redux</div>
       </div>
     </div>
 
-    <h3>Why useState + prop drilling is correct here</h3>
-    <p>The state in this app lives in one component (<code>SolveSession</code>) and is consumed by its direct children. The prop drilling is at most two levels deep. Every state update is triggered by a user action (solve complete, delete, update) or a data fetch.</p>
+    <h3>Server state vs. UI state</h3>
+    <p>The codebase distinguishes two kinds of state:</p>
+    <ul style="padding-left: 1.5rem; margin-bottom: 0.85rem;">
+      <li><strong>Server state</strong> (solves, personal bests): owned by Supabase, cached locally by TanStack Query. Mutations invalidate keys; consumers refetch on next view.</li>
+      <li><strong>UI state</strong> (timer phase, modal open/close, settings panel): owned by React component-local hooks. No global store needed because the tree is shallow and state stays close to its consumer.</li>
+    </ul>
 
-    <div class="callout callout-orange">
-      <strong>The rule of thumb:</strong> Add a state manager when (a) you're drilling props more than 3-4 levels deep, (b) unrelated components at the same level need the same state and prop drilling would require threading through components that don't care about the data, or (c) you need time-travel debugging or complex action patterns. None of these apply here.
-    </div>
+    <h3>Why TanStack Query over Redux/Zustand</h3>
+    <p>Server state has fundamentally different needs from UI state: cache invalidation, deduplication, request cancellation, refetch-on-focus, stale-while-revalidate. Redux and Zustand are general-purpose stores that do not solve these problems out of the box; you would re-implement them. TanStack Query is purpose-built for this.</p>
 
-    <h3>What each state variable owns</h3>
     <table class="tradeoff-table">
       <tr><th>State</th><th>Lives in</th><th>Why there</th></tr>
-      <tr><td><code>solves</code></td><td>SolveSession</td><td>Both SolveLog and SolveHub need it — nearest common ancestor</td></tr>
-      <tr><td><code>puzzleType</code></td><td>SolveSession</td><td>Drives both API fetches and scramble generation</td></tr>
-      <tr><td><code>scramble</code></td><td>SolveSession</td><td>Set by Scramble, consumed when a solve is saved</td></tr>
-      <tr><td><code>sortedTimes</code></td><td>SolveSession</td><td>Maintained alongside solves; drives percentile computation</td></tr>
-      <tr><td><code>pbHistory</code></td><td>SolveSession</td><td>Fetched once per puzzle type; passed to SolveHub chart</td></tr>
-      <tr><td><code>time</code> (display)</td><td>Timer</td><td>Only Timer shows the running clock — no other component needs it</td></tr>
-      <tr><td><code>isRunning, isReady</code></td><td>Timer</td><td>Timer-internal UI state — irrelevant to siblings</td></tr>
-      <tr><td><code>session</code></td><td>App</td><td>Determines Auth vs SolveSession render — nearest common ancestor</td></tr>
+      <tr><td><code>solves</code> cache</td><td>TanStack Query</td><td>Shared between timer and Stats; needs invalidation on mutate</td></tr>
+      <tr><td>active session view</td><td>useSolveSession</td><td>Local to the timer page; uses optimistic updates</td></tr>
+      <tr><td><code>puzzleType</code></td><td>URL search params</td><td>Bookmarkable, sharable, drives both timer and Stats</td></tr>
+      <tr><td>scramble</td><td>scrambleQueue (lib)</td><td>Background-generated; consumed when a solve fires</td></tr>
+      <tr><td>sortedTimes, median tracker</td><td>useSortedSolveStats</td><td>Derived from solves; maintained in parallel with the cache</td></tr>
+      <tr><td>timer phase + time</td><td>useTimerMachine</td><td>Strictly internal to Timer; no other component needs it</td></tr>
+      <tr><td>session</td><td>AuthContext</td><td>App-global; isGuest gate everywhere</td></tr>
+      <tr><td>settings (theme, sound, inspection)</td><td>SettingsProvider (Context)</td><td>App-global UI preference; persisted to localStorage</td></tr>
     </table>
 
-    <h3>If the app grew — what would change first?</h3>
-    <p>If you added a <strong>leaderboard</strong> or <strong>friends list</strong> that needed user data in a sidebar component unrelated to SolveSession, you'd reach for React Context first (lightweight, built-in). If actions got complex (optimistic updates, rollback on failure, offline queue), Zustand's simple store model would fit before Redux's ceremony is warranted.</p>
+    <div class="callout callout-orange">
+      <strong>Rule of thumb:</strong> Add a global state manager when (a) prop drilling exceeds 3-4 levels, or (b) unrelated components at the same level need the same state. The current shape has neither problem for UI state. For server state, TanStack Query covers the cross-page invalidation that would otherwise require a global store.
+    </div>
   </div>
 
 
-  <!-- ══════════════════════════════════════════════════════ 12 ══ -->
+  <!-- 14 -->
+  <div class="section" id="observability">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(45,212,191,0.1); border:1px solid rgba(45,212,191,0.3);">🔭</div>
+      <div>
+        <h2>Observability</h2>
+        <div class="sub">Structured logging, /api/ready, slow-path counter, error boundary</div>
+      </div>
+    </div>
+
+    <h3>Structured JSON logging</h3>
+    <p>Hand-rolled <code>JsonFormatter</code> wired via stdlib <code>logging.config.dictConfig</code> from <code>create_app</code>. Every log line is a single JSON object on stdout:</p>
+    <div class="code-block">{
+  <span class="str">"timestamp"</span>: <span class="str">"2026-04-29T20:05:03.332867+00:00"</span>,
+  <span class="str">"level"</span>:    <span class="str">"INFO"</span>,
+  <span class="str">"logger"</span>:   <span class="str">"app.access"</span>,
+  <span class="str">"message"</span>:  <span class="str">"GET /api/v1/solves 200"</span>,
+  <span class="str">"request_id"</span>: <span class="str">"a114d46e6bd8426781140344dee43f5f"</span>,
+  <span class="str">"user_id"</span>:    <span class="str">"7c3e..."</span>
+}</div>
+
+    <p><code>request_id</code> is set by a <code>before_request</code> hook (uuid hex). <code>user_id</code> is folded in when present on <code>flask.g</code> (set by <code>require_auth</code>). Operators can pipe stdout through <code>jq</code> for ad-hoc analysis.</p>
+
+    <h3>Slow-path counter</h3>
+    <p><code>require_auth</code> emits <code>auth_slow_path event=auth_slow_path</code> at INFO whenever it falls back from local JWKS to <code>supabase.auth.get_user</code>. Operators aggregate this to track fallback rate. Healthy steady state is under 1% of authenticated requests; sustained spikes above 5% mean JWKS unreachability or recent key rotation.</p>
+
+    <h3>Readiness probe at /api/ready</h3>
+    <div class="code-block"><span class="hi">@app.route(</span><span class="str">'/api/ready'</span><span class="hi">)</span>
+<span class="kw">def</span> <span class="fn">readiness_check</span>():
+    checks = {}
+    overall_ok = <span class="kw">True</span>
+
+    <span class="kw">try</span>:
+        client = db_module.<span class="fn">get_supabase_client</span>()
+        client.<span class="fn">table</span>(<span class="str">'solves'</span>).<span class="fn">select</span>(<span class="str">'id'</span>).<span class="fn">limit</span>(<span class="num">1</span>).<span class="fn">execute</span>()
+        checks[<span class="str">'supabase'</span>] = <span class="str">'ok'</span>
+    <span class="kw">except</span> Exception:
+        checks[<span class="str">'supabase'</span>] = <span class="str">'fail'</span>; overall_ok = <span class="kw">False</span>
+
+    checks[<span class="str">'jwks'</span>] = <span class="fn">jwks_cache_state</span>()  <span class="cmt"># 'fresh' or 'cold'</span>
+
+    <span class="kw">return</span> <span class="fn">jsonify</span>({<span class="str">"status"</span>: <span class="str">"ready"</span> <span class="kw">if</span> overall_ok <span class="kw">else</span> <span class="str">"not_ready"</span>, <span class="str">"checks"</span>: checks}), \
+           (<span class="num">200</span> <span class="kw">if</span> overall_ok <span class="kw">else</span> <span class="num">503</span>)</div>
+
+    <p>Distinct from <code>/api/health</code>, which is a liveness probe (always 200 if the process is up). The readiness check actually pings Supabase and reports the JWKS cache state — useful for Kubernetes-style readiness gating.</p>
+
+    <h3>Top-level Error Boundary</h3>
+    <p>Frontend wraps <code>&lt;Routes&gt;</code> in <code>ErrorBoundary</code> (audit H.5). A render-time throw in any route now produces a fallback UI with a "Reload" button and a sonner toast, instead of a blank screen. Lazy-route load failures are caught too. Vendor-pick error reporting (Sentry / PostHog / Highlight / GlitchTip) is deferred (H.6).</p>
+  </div>
+
+
+  <!-- 15 -->
   <div class="section" id="interview">
     <div class="section-header">
       <div class="section-icon" style="background:rgba(61,201,66,0.1); border:1px solid rgba(61,201,66,0.3);">🎤</div>
       <div>
         <h2>Full Interview Script</h2>
-        <div class="sub">How to walk someone through this project in 3-5 minutes</div>
+        <div class="sub">How to walk someone through this project in 4-6 minutes</div>
       </div>
     </div>
 
     <h4>Opening (30 seconds)</h4>
     <div class="callout callout-green">
-      "Ao5 is a speedcubing timer app — it's fully full-stack: a React frontend, a Flask backend acting as an authenticated proxy, and Supabase as the hosted PostgreSQL database. Users log in, solve puzzles with the spacebar, and their times are saved with rolling stats like Ao5 and Ao12, a personal best progression chart, and a live percentile rank after each solve."
+      "Ao5 is a speedcubing timer app — fully full-stack: a React 18 + TypeScript frontend on Vite, a Flask 3 backend acting as an authenticated proxy, and Supabase as the hosted PostgreSQL database. Users sign in (or use guest mode), solve puzzles with the spacebar, and their times are saved with rolling stats like Ao5 and Ao12, a personal-best progression chart, a running median, OLL/PLL trainers, and shareable read-only solve links."
     </div>
 
     <h4>Architecture (60 seconds)</h4>
     <div class="callout callout-blue">
-      "The architecture is three layers. The React frontend handles all the UI and talks to Flask over HTTP. Flask's only job is to validate the JWT on every request, run input validation and rate limiting, then forward the query to Supabase using the user's own token. By forwarding the user's token instead of a service-role token, Supabase's row-level security still applies at the database engine level — so even a bug in Flask couldn't expose another user's data. Auth is handled directly between the browser and Supabase — Flask isn't in the login flow at all."
+      "The architecture is three layers. The React frontend handles all UI and talks to Flask over HTTP. Flask validates the JWT on every request — fast path is local JWKS verification via PyJWT, slow path falls back to Supabase auth.get_user with an INFO log so we can watch fallback rate. Then it runs validation, rate limiting, and forwards to Supabase using the user's own token so row-level security applies at the database layer. The frontend talks to the Supabase JS client through an AuthClient seam so the rest of the app does not couple directly to Supabase. Auth itself is direct browser-to-Supabase; Flask is not in the login flow."
     </div>
 
     <h4>Interesting engineering decisions (90 seconds)</h4>
     <div class="callout callout-purple">
-      "A few things I'm particularly happy about: First, the timer uses a useRef alongside useState — useState drives the display, but the ref captures the exact time at stop because React closures can go stale in a 10ms interval loop. Second, I replaced an O(n²) rolling average bug with a sliding window — the original code was slicing the entire remaining array on each iteration to use only 5 elements. Third, I replaced a naive full-table load with cursor-based pagination using a composite B-tree index — offset pagination re-scans all prior rows and produces duplicates under concurrent writes, both of which get worse as solve count grows. Fourth, personal best history uses write-time materialization — instead of scanning all solves on every chart load, I record a row in a personal_bests table at insert time if a new PB is set. The read is then O(1). This is the CQRS pattern."
+      "A few things I'm particularly happy about. First, the timer uses a phase state machine with both a ref and state — the ref drives event handlers without stale closures, the state drives rendering. During the running phase RAF writes directly to a DOM ref's textContent so React commits zero times during a 5-10 second solve. Second, I replaced an O(n²) rolling Ao5 with a sliding window. Third, I replaced count(*) cap checks with an atomic per-user counter table maintained by trigger — the original had a TOCTOU race that could let a user exceed the lifetime cap. Fourth, personal-best history uses write-time materialization via an atomic Postgres function, so concurrent solves cannot race. Fifth, share links are stateless HMAC tokens with embedded TTL — no per-share DB write, no per-verify DB read, naturally expiring after 30 days. Sixth, TanStack Query gives cross-page cache consistency: creating a solve on the timer page invalidates the Stats page query so it sees the new solve on next view without manual coordination."
     </div>
 
     <h4>Technology choices (45 seconds)</h4>
     <div class="callout callout-teal">
-      "I chose React CRA over Next.js because every page requires authentication — SSR provides zero benefit when there's nothing to prerender. Flask over Django because this backend is a thin proxy, not a full application framework — I don't need an ORM, admin panel, or form handling. Supabase over Firebase because the data is relational, and I wanted SQL-level row security enforced by the database engine rather than application code. And client-side scramble generation with cubing.js so there's no server round-trip before the user can start timing."
+      "I chose Vite + React 18 over Next.js because every interactive page requires authentication; SSR provides zero benefit when there is nothing to prerender. Flask over Django because this backend is a thin proxy, not a full application framework. Supabase over Firebase because the data is fundamentally relational and PostgreSQL's row-level security gives database-engine-level access control. Hand-rolled validators over Pydantic to avoid a C compile step. PyJWT with cached JWKS for the fast path so the common case never needs a network round-trip. TanStack Query for server state because it solves cache invalidation and request cancellation out of the box."
     </div>
 
-    <h4>If they push further — what would you do differently?</h4>
+    <h4>What you would do differently (30 seconds)</h4>
     <div class="callout callout-orange">
-      "A few things I'd tackle next: add a Redis cache for the stats endpoint so that GET /stats doesn't recompute on every load for users with large solve counts — with a 30-second TTL and invalidation on writes. I'd also move the rate limiter key from IP address to user ID, since behind a NAT multiple users can share an IP. And I'd add optimistic updates on the frontend so the solve appears in the list immediately while the API call is in flight — better perceived performance."
+      "Three things on the deferred list. One, wire an error reporting vendor — the error boundary is in place but the dashboard is not. Two, swap the rate limiter storage from in-memory to Redis when the deployment moves multi-process. Three, migrate from Bearer-token-in-localStorage to PKCE plus an httpOnly cookie via @supabase/ssr — the current scheme has full account takeover as the XSS impact, which the CSP mitigates but does not eliminate. The decision is recorded; implementation is XL and architectural so it lives separately."
     </div>
   </div>
 
 
   <!-- Footer -->
   <div class="footer">
-    <p>Ao5 Architecture Study Guide &mdash; React · Flask · Supabase · PostgreSQL</p>
-    <p style="margin-top:0.4rem;">See <code>ENGINEERING_NOTES.html</code> for the DSA and system design deep-dives.</p>
+    <p>Ao5 Architecture Study Guide &mdash; React 18 · TypeScript · Vite · Flask 3 · Supabase · PostgreSQL</p>
+    <p style="margin-top:0.4rem;">See <code>ENGINEERING_NOTES.html</code> for the DSA and system design deep-dives, and <code>docs/audits/2026-04-25-full-stack-audit.md</code> for the audit that shaped this codebase.</p>
   </div>
 
 </div>
