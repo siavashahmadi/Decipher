@@ -352,3 +352,70 @@ These were considered during Cluster H but intentionally not done:
 - **Drop the un-versioned `/api` legacy mount.** Currently advertised for removal on 2026-07-01 via the `Sunset` header. After that date, the second `app.register_blueprint(solves, url_prefix='/api', name='solves_legacy')` line in `backend/app/__init__.py` plus the `_legacy_api_deprecation` and `_legacy_api_headers` hooks can be deleted. Existing share links will 404 if regenerated under the legacy path; mint new ones from `/api/v1/solves/<id>/share-token`.
 - **Lift optimistic-update boilerplate into react-query mutations.** `useSolveSession`'s manual snapshot/rollback pattern was preserved in H.3 to keep the timer hot path stable. Future work can replace it with react-query's `onMutate` and `onError` lifecycle. Not urgent: behavior is correct, code is just a bit longer than necessary.
 - **Migrate personal_bests reads to react-query.** `useSolveSession` still fetches PBs via a `useEffect`. Putting it in the shared cache (key `['personalBests', puzzleType]`) plus invalidation on mutations would close the same cross-page consistency gap H.3 closed for solves.
+
+## Audit Cluster I (2026-04-29)
+
+All 13 Cluster I items shipped as 12 commits between `0614562` and `4e482ac`. Tests pass: backend 201/201, frontend 465/465, tsc clean. I.10 was verified-already-shipped during Cluster E (no commit needed). Remaining work is observation-only after deploy, plus one manual keyboard a11y check.
+
+### I.5 + I.6 JSON logging and slow-path observability (post-deploy check)
+
+Backend now emits one structured JSON object per log line. The JSON formatter folds `request_id` (uuid hex set by a new `before_request` hook) and `user_id` (set by `require_auth`) onto every record. JWT fast/slow paths and operator commands are documented at `docs/jwt-verification.md`.
+
+After deploying:
+
+1. Tail your host's stdout (Render / Fly / Railway log stream). Every line should be valid JSON. Pipe through `jq .` to confirm:
+   ```bash
+   <log stream> | jq -r '.timestamp + " " + .level + " " + .message'
+   ```
+2. Hit any authenticated endpoint. The corresponding `app.access` log line should include both `request_id` (uuid hex) and `user_id` (the JWT subject).
+3. Force the slow path: hit an authenticated endpoint with a token signed by a different Supabase project, or revert `verify_token_local` to always return `None` in a pre-prod env. You should see `event=auth_slow_path` at INFO from logger `app.routes.solves`. In normal traffic this should fire on under 1% of authenticated requests; sustained spikes above 5% mean JWKS unreachability or recent key rotation.
+4. To change log verbosity in production, set `LOG_LEVEL=DEBUG` (or WARNING) on the host. Default is INFO.
+
+### I.7 Focus trap on dialogs (manual a11y check)
+
+`SolveDetailModal` and `HotkeyHelp` now render `aria-modal="true"` and use a hand-rolled `useFocusTrap` hook. To verify in a real browser (jsdom in the test suite cannot fully exercise focus and tab cycles):
+
+1. Open the timer page. Click any solve in the SolveLog to open the detail modal.
+2. Press Tab repeatedly. Focus should cycle through the buttons inside the modal (Close, Copy scramble, Use this scramble, Copy share link, +2, DNF, Delete) and wrap back to the first when it reaches the last.
+3. Press Shift+Tab from the first focusable. Focus should jump to the last.
+4. Press Esc (or click outside). Modal closes; focus returns to the row you clicked.
+5. Repeat for HotkeyHelp: open with `?`, Tab cycles inside the help panel, Esc returns focus to the prior element.
+
+If focus escapes to the page underneath, `useFocusTrap` is not engaging. Most likely cause: a child component portals out of the modal root, so the focusables query in `frontend/src/hooks/useFocusTrap.ts` cannot see them.
+
+### I.13 aria-busy (optional screen-reader sanity)
+
+`aria-busy` was added to the Stats loading paragraph, the `Scramble` container, and the Auth submit button. Optional check with VoiceOver (Cmd+F5 on macOS) or NVDA on Windows: while Stats is loading, the screen reader should announce "busy"; same for the Auth submit button while a sign-in is in flight; same for the Scramble panel while a new scramble generates.
+
+### I.4 SHARE_SECRET rotation (reference doc, no immediate action)
+
+`docs/share-secret-rotation.md` now documents the rotation procedure. Two key operational reminders:
+
+- Rotation is a hard cutover today. Every outstanding share link breaks the instant the new secret takes effect (max blast radius is the 30-day token TTL). Communicate to anyone depending on long-lived links before deploying a new secret.
+- The doc includes a recommended future "dual-secret rolling window" pattern (~30 lines of Python) if you anticipate frequent rotation. Not implemented; track separately when needed.
+
+## Audit complete (Clusters 0 through I, 2026-04-29)
+
+All 13 audit clusters have shipped. Snapshot:
+
+| Cluster | Status | Manual notes section |
+|---|---|---|
+| 0 (CI baseline) | shipped | none — `.github/workflows/ci.yml` runs backend pytest + frontend tsc/vitest on every PR and push to main |
+| A (critical bugs) | shipped | above |
+| B (security) | shipped | above |
+| C (perf) | shipped | above |
+| D (DB integrity) | shipped | above |
+| E (refactors) | shipped | none — pure code restructure, behavior unchanged, covered by existing tests |
+| F (type safety) | shipped | none — compile-time only (noUncheckedIndexedAccess, predicate types, BEARER_PREFIX constant, etc.) |
+| G (test coverage) | shipped | none — adds tests, no behavior change |
+| H (architecture) | shipped (3 vendor picks deferred) | above |
+| I (docs and ops polish) | shipped | above |
+
+The remaining audit-tracked work items are:
+
+- **Deferred vendor picks** in `docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md`: H.6 error reporting (Sentry / PostHog / Highlight / GlitchTip / no-op), H.10 backend host (Render / Fly / Railway / Cloud Run / Vercel functions), H.11 migration runner (yoyo-migrations / Supabase CLI / sqitch / hand-rolled).
+- **Deferred follow-ups** listed under individual cluster sections above: CSP Report-Only → enforcing flip (B.7 phase 2), drop legacy `/api` mount post-Sunset (2026-07-01), per-route MAX_CONTENT_LENGTH cap, drop legacy timestamp-only cursor branch (D.9), migrate PB reads to react-query, replace `useSolveSession` snapshot/rollback with react-query `onMutate`, dual-secret SHARE_SECRET rotation support, SQL-level integration tests for triggers and RPCs.
+- **Pending Supabase SQL applies** (gated on the project being unpaused): migration 005 (Cluster A), migrations 006-011 (Cluster D), migration 012 (Cluster H).
+- **Long-term token storage migration** from localStorage to PKCE + httpOnly cookie via `@supabase/ssr` (B.13). Decision recorded at `docs/decisions/2026-04-26-token-storage.md`; implementation is XL and architectural, intentionally not bundled into this audit pass.
+
+If a new audit pass is run, start a fresh `Audit Cluster J` section below this summary so the historical structure stays readable.
