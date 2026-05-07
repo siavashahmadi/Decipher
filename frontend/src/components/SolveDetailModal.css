@@ -112,7 +112,6 @@
 
   .solve-detail-actions {
     flex-wrap: wrap;
-    gap: 0.5rem;
   }
 
   .solve-detail-actions button {
