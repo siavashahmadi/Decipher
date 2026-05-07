@@ -41,3 +41,23 @@
   font-style: italic;
   margin: 0;
 }
+
+@media (max-width: 600px) {
+  .scramble-history-row {
+    grid-template-columns: auto auto;
+    gap: 0.25rem;
+  }
+  .scramble-history-text {
+    grid-column: 1 / -1;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+  }
+  .scramble-history-replay {
+    grid-column: 1 / -1;
+    justify-self: end;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+  }
+}

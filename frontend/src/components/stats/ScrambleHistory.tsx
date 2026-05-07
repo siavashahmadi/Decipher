@@ -9,10 +9,6 @@ interface ScrambleHistoryProps {
 }
 
 const MAX_ROWS = 100;
-const TRUNCATE = 60;
-
-const truncate = (s: string): string =>
-  s.length <= TRUNCATE ? s : `${s.slice(0, TRUNCATE)}...`;
 
 const ScrambleHistory = ({ solves }: ScrambleHistoryProps): ReactElement => {
   const navigate = useNavigate();
@@ -38,7 +34,7 @@ const ScrambleHistory = ({ solves }: ScrambleHistoryProps): ReactElement => {
           </span>
           <span className="scramble-history-time">{formatSolveLabel(s)}</span>
           <code className="scramble-history-text" title={s.scramble}>
-            {truncate(s.scramble || '\u2014')}
+            {s.scramble || '\u2014'}
           </code>
           <button
             type="button"
