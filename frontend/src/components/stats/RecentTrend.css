@@ -26,3 +26,6 @@
 }
 .recent-trend-delta.improving { color: #3dc942; }
 .recent-trend-delta.regressing { color: #ef4444; }
+@media (max-width: 600px) {
+  .recent-trend { gap: 0.75rem; }
+}
