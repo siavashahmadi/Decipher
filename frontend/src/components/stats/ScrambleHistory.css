@@ -46,7 +46,6 @@
   .scramble-history-row {
     grid-template-columns: auto auto;
     gap: 0.25rem;
-    padding: 0.5rem 0.25rem;
   }
   .scramble-history-text {
     grid-column: 1 / -1;
