@@ -1,0 +1,29 @@
+{
+  "name": "ao5",
+  "version": "1.0.0",
+  "description": "Full-stack speedcubing timer for WCA puzzles with WCA scrambles, full session history, deep stats, and case-by-case algorithm trainers (OLL, PLL, F2L, CMLL).",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "cd frontend && npx vitest run --reporter=dot",
+    "typecheck": "cd frontend && npx tsc --noEmit",
+    "build": "cd frontend && npm run build",
+    "sandcastle": "npx tsx .sandcastle/main.mts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siavashahmadi/Decipher.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/siavashahmadi/Decipher/issues"
+  },
+  "homepage": "https://github.com/siavashahmadi/Decipher#readme",
+  "devDependencies": {
+    "@ai-hero/sandcastle": "^0.5.8"
+  }
+}

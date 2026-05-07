@@ -27,3 +27,6 @@ yarn-debug.log*
 yarn-error.log*
 **/__pycache__
 *.pyc
+
+# Root devDependencies (sandcastle, tsx)
+/node_modules
