@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useState, type ReactElement } from 'react';
+import { useMemo, useRef, useCallback, useState, type CSSProperties, type ReactElement } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatTime } from '../utils/formatTime';
 import { ao5, ao12, type AverageResult } from '../utils/averages';
@@ -12,6 +12,7 @@ const fmt = (v: AverageResult): string =>
   v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
 
 const ROW_HEIGHT = 40;
+const AFFORDANCE_WIDTH = 70;
 
 interface SolveLogProps {
   solves: Solve[];
@@ -32,7 +33,7 @@ interface SwipeRowProps {
   onSolveDelete: (solve: Solve) => void;
   onSolveClick: (solve: Solve, index: number) => void;
   measureRef: (el: Element | null) => void;
-  style: React.CSSProperties;
+  style: CSSProperties;
   ao5Value: AverageResult;
 }
 
@@ -68,11 +69,24 @@ const SwipeRow = ({
   }, [confirming, onSolveDelete, solve, reset]);
 
   const swiping = isPhone && (revealed || offsetX < 0);
-  const translateX = revealed ? -70 : offsetX < 0 ? Math.max(offsetX, -70) : 0;
+
+  let translateX = 0;
+  if (revealed) {
+    translateX = -AFFORDANCE_WIDTH;
+  } else if (offsetX < 0) {
+    translateX = Math.max(offsetX, -AFFORDANCE_WIDTH);
+  }
+
+  const animateTransition = revealed || offsetX === 0;
+  const contentStyle: CSSProperties | undefined = isPhone
+    ? {
+        transform: `translateX(${translateX}px)`,
+        transition: animateTransition ? 'transform 0.2s ease' : 'none',
+      }
+    : undefined;
 
   return (
     <li
-      key={solve.id}
       data-index={index}
       ref={rowRef}
       className={`solve-log-item ${swiping ? 'swiping' : ''}`}
@@ -80,7 +94,7 @@ const SwipeRow = ({
     >
       <div
         className="solve-row-content"
-        style={isPhone ? { transform: `translateX(${translateX}px)`, transition: revealed || offsetX === 0 ? 'transform 0.2s ease' : 'none' } : undefined}
+        style={contentStyle}
       >
         <button
           type="button"

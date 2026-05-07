@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSwipeToReveal } from './useSwipeToReveal';
 
@@ -19,6 +19,10 @@ describe('useSwipeToReveal', () => {
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    container.remove();
   });
 
   it('returns revealed: true when swiped left past threshold', () => {
