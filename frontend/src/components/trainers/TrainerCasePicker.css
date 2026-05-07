@@ -48,3 +48,10 @@
 .trainer-skip-btn:hover {
   border-color: var(--color-accent, #f80);
 }
+
+@media (max-width: 600px) {
+  .trainer-case-picker {
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+}

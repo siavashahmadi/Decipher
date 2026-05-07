@@ -17,3 +17,9 @@
   display: flex;
   justify-content: center;
 }
+
+@media (max-width: 600px) {
+  .pll-trainer {
+    padding: 0.75rem;
+  }
+}
