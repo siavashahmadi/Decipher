@@ -6,7 +6,11 @@ import './SettingsPanel.css';
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 const themeLabel = (t: Theme): string => t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark';
 
-const SettingsPanel = (): ReactElement => {
+interface SettingsPanelProps {
+  asModal?: boolean;
+}
+
+const SettingsPanel = ({ asModal }: SettingsPanelProps): ReactElement => {
   const {
     theme, setTheme,
     inspectionEnabled, setInspectionEnabled,
@@ -20,7 +24,7 @@ const SettingsPanel = (): ReactElement => {
   } = useScramblePreviewSettings();
 
   return (
-    <div className="settings-panel" role="dialog" aria-label="Settings">
+    <div className={`settings-panel${asModal ? ' settings-panel-modal' : ''}`} role="dialog" aria-label="Settings" aria-modal={asModal || undefined}>
       <h2 className="settings-panel-title">Settings</h2>
 
       <div className="settings-row">

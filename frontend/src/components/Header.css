@@ -159,13 +159,139 @@
   }
 }
 
-/* Tier 3: mobile dropdown select is mounted in place of the button row by
-   the matchMedia check in Header.tsx. Only one of .puzzle-buttons or
-   .puzzle-select exists in the DOM at any time. */
-@media (max-width: 639px) {
-  .puzzle-select {
-    padding: 8px;
-    border-radius: 4px;
-    margin-left: 0.5rem;
-  }
+/* Mobile: hamburger layout */
+.header-mobile {
+  gap: 0.5rem;
+}
+
+.header-mobile .title-container {
+  padding: 0.25rem;
+}
+
+.header-mobile .puzzle-select {
+  flex: 1;
+  margin: 0;
+}
+
+.hamburger-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hamburger-button:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
+.hamburger-icon {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--color-text);
+  position: relative;
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--color-text);
+  position: absolute;
+  left: 0;
+}
+
+.hamburger-icon::before {
+  top: -6px;
+}
+
+.hamburger-icon::after {
+  top: 6px;
+}
+
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-panel);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5rem 0;
+  z-index: 90;
+}
+
+.mobile-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mobile-menu-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.mobile-menu-item:focus-visible {
+  outline: 2px solid var(--color-blue-border);
+  outline-offset: -2px;
+}
+
+.mobile-menu-separator {
+  height: 1px;
+  margin: 4px 1rem;
+  background: var(--color-border);
+}
+
+.settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.settings-modal {
+  position: relative;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  min-width: min(20rem, 90vw);
+  max-width: 24rem;
+}
+
+.settings-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.settings-panel-modal {
+  position: static;
+  min-width: unset;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
