@@ -33,3 +33,22 @@
     font-size: 1rem;
   }
 }
+
+@media (max-width: 600px) {
+  .scramble-text {
+    padding: 1rem 0.5rem;
+    word-break: break-word;
+  }
+
+  .scramble-text.large {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+
+  .scramble-text.medium {
+    font-size: clamp(1.25rem, 5.5vw, 1.5rem);
+  }
+
+  .scramble-text.small {
+    font-size: clamp(1.1rem, 5vw, 1.35rem);
+  }
+}
