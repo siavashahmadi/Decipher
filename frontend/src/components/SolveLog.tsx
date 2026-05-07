@@ -1,18 +1,18 @@
-import { useMemo, useRef, type ReactElement } from 'react';
+import { useMemo, useRef, useCallback, useState, type CSSProperties, type ReactElement } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatTime } from '../utils/formatTime';
 import { ao5, ao12, type AverageResult } from '../utils/averages';
 import { formatSolveLabel } from '../utils/solveLabel';
+import { useSwipeToReveal } from '../hooks/useSwipeToReveal';
+import useMatchMedia from '../hooks/useMatchMedia';
 import type { Solve } from '../types';
 import './SolveLog.css';
 
 const fmt = (v: AverageResult): string =>
   v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
 
-// Approximate row height; the virtualizer uses dynamic measurement to
-// correct as items render. Set close to actual to minimize the first
-// scroll-frame correction.
 const ROW_HEIGHT = 40;
+const AFFORDANCE_WIDTH = 70;
 
 interface SolveLogProps {
   solves: Solve[];
@@ -25,6 +25,128 @@ interface SolveLogProps {
   isLoadingMore: boolean;
 }
 
+interface SwipeRowProps {
+  solve: Solve;
+  index: number;
+  isPhone: boolean;
+  onSolveUpdate: (solve: Solve) => void;
+  onSolveDelete: (solve: Solve) => void;
+  onSolveClick: (solve: Solve, index: number) => void;
+  measureRef: (el: Element | null) => void;
+  style: CSSProperties;
+  ao5Value: AverageResult;
+}
+
+const SwipeRow = ({
+  solve,
+  index,
+  isPhone,
+  onSolveUpdate,
+  onSolveDelete,
+  onSolveClick,
+  measureRef,
+  style,
+  ao5Value,
+}: SwipeRowProps): ReactElement => {
+  const { ref: swipeRef, revealed, offsetX, reset } = useSwipeToReveal();
+  const [confirming, setConfirming] = useState(false);
+
+  const rowRef = useCallback((el: HTMLLIElement | null) => {
+    measureRef(el);
+    if (isPhone) {
+      swipeRef(el);
+    }
+  }, [measureRef, swipeRef, isPhone]);
+
+  const handleDeleteTap = useCallback(() => {
+    if (confirming) {
+      onSolveDelete(solve);
+      reset();
+      setConfirming(false);
+    } else {
+      setConfirming(true);
+    }
+  }, [confirming, onSolveDelete, solve, reset]);
+
+  const swiping = isPhone && (revealed || offsetX < 0);
+
+  let translateX = 0;
+  if (revealed) {
+    translateX = -AFFORDANCE_WIDTH;
+  } else if (offsetX < 0) {
+    translateX = Math.max(offsetX, -AFFORDANCE_WIDTH);
+  }
+
+  const animateTransition = revealed || offsetX === 0;
+  const contentStyle: CSSProperties | undefined = isPhone
+    ? {
+        transform: `translateX(${translateX}px)`,
+        transition: animateTransition ? 'transform 0.2s ease' : 'none',
+      }
+    : undefined;
+
+  return (
+    <li
+      data-index={index}
+      ref={rowRef}
+      className={`solve-log-item ${swiping ? 'swiping' : ''}`}
+      style={style}
+    >
+      <div
+        className="solve-row-content"
+        style={contentStyle}
+      >
+        <button
+          type="button"
+          className="solve-row-button"
+          onClick={() => onSolveClick(solve, index)}
+          aria-label={`Solve ${index + 1} details`}
+        >
+          <span className="solve-time">
+            {formatSolveLabel(solve)}
+          </span>
+          <span className="solve-ao5">
+            {ao5Value !== null ? `(${fmt(ao5Value)})` : ''}
+          </span>
+        </button>
+        <div className="solve-actions" onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
+            className={`dnf-button ${solve.dnf ? 'active' : ''}`}
+          >
+            DNF
+          </button>
+          <button
+            onClick={() => onSolveUpdate({ ...solve, plus_two: !solve.plus_two })}
+            className={`plus_two-button ${solve.plus_two ? 'active' : ''}`}
+          >
+            +2
+          </button>
+          {!isPhone && (
+            <button
+              onClick={() => onSolveDelete(solve)}
+              className="delete-button"
+              title="Delete solve"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+      {isPhone && (
+        <button
+          className={`swipe-delete-affordance ${confirming ? 'confirming' : ''}`}
+          onClick={handleDeleteTap}
+          aria-label="Delete solve"
+          data-testid="swipe-delete"
+        >
+          {confirming ? 'Confirm' : 'Delete'}
+        </button>
+      )}
+    </li>
+  );
+};
+
 const SolveLog = ({
   solves,
   onSolveUpdate,
@@ -35,6 +157,8 @@ const SolveLog = ({
   hasMore,
   isLoadingMore,
 }: SolveLogProps): ReactElement => {
+  const isPhone = useMatchMedia('(max-width: 600px)');
+
   const { currentAo5, currentAo12, sessionMean, bestSingle } = useMemo(() => {
     const currentAo5 = ao5(solves);
     const currentAo12 = ao12(solves);
@@ -48,8 +172,6 @@ const SolveLog = ({
     return { currentAo5, currentAo12, sessionMean, bestSingle };
   }, [solves]);
 
-  // DSA-1: Sliding window O(n) — each step slices exactly 5 elements (O(1)),
-  // not the entire tail (O(n-i)). Total: O(n) vs the previous O(n²).
   const perSolveAo5 = useMemo(
     () => solves.map((_, index) => ao5(solves.slice(index, index + 5))),
     [solves]
@@ -99,11 +221,15 @@ const SolveLog = ({
             const itemAo5 = perSolveAo5[vi.index];
             if (!solve || itemAo5 === undefined) return null;
             return (
-              <li
+              <SwipeRow
                 key={solve.id}
-                data-index={vi.index}
-                ref={virtualizer.measureElement}
-                className="solve-log-item"
+                solve={solve}
+                index={vi.index}
+                isPhone={isPhone}
+                onSolveUpdate={onSolveUpdate}
+                onSolveDelete={onSolveDelete}
+                onSolveClick={onSolveClick}
+                measureRef={virtualizer.measureElement}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -111,48 +237,13 @@ const SolveLog = ({
                   right: 0,
                   transform: `translateY(${vi.start}px)`,
                 }}
-              >
-                <button
-                  type="button"
-                  className="solve-row-button"
-                  onClick={() => onSolveClick(solve, vi.index)}
-                  aria-label={`Solve ${vi.index + 1} details`}
-                >
-                  <span className="solve-time">
-                    {formatSolveLabel(solve)}
-                  </span>
-                  <span className="solve-ao5">
-                    {itemAo5 !== null ? `(${fmt(itemAo5)})` : ''}
-                  </span>
-                </button>
-                <div className="solve-actions" onClick={e => e.stopPropagation()}>
-                  <button
-                    onClick={() => onSolveUpdate({ ...solve, dnf: !solve.dnf })}
-                    className={`dnf-button ${solve.dnf ? 'active' : ''}`}
-                  >
-                    DNF
-                  </button>
-                  <button
-                    onClick={() => onSolveUpdate({ ...solve, plus_two: !solve.plus_two })}
-                    className={`plus_two-button ${solve.plus_two ? 'active' : ''}`}
-                  >
-                    +2
-                  </button>
-                  <button
-                    onClick={() => onSolveDelete(solve)}
-                    className="delete-button"
-                    title="Delete solve"
-                  >
-                    ×
-                  </button>
-                </div>
-              </li>
+                ao5Value={itemAo5}
+              />
             );
           })}
         </ul>
       </div>
 
-      {/* SD-2: Load more for cursor-based pagination */}
       {hasMore && (
         <button
           className="load-more-button"

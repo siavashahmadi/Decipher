@@ -176,3 +176,52 @@
 .solve-row-button:hover {
   color: var(--color-text);
 }
+
+.solve-row-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.swipe-delete-affordance {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 70px;
+  background: var(--color-red);
+  color: white;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swipe-delete-affordance.confirming {
+  background: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .solve-log-item {
+    overflow: hidden;
+  }
+
+  .solve-row-content {
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  .dnf-button, .plus_two-button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
