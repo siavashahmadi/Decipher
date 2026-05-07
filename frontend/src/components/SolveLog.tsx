@@ -9,9 +9,6 @@ import './SolveLog.css';
 const fmt = (v: AverageResult): string =>
   v === null ? '-' : v === 'DNF' ? 'DNF' : formatTime(v);
 
-// Approximate row height; the virtualizer uses dynamic measurement to
-// correct as items render. Set close to actual to minimize the first
-// scroll-frame correction.
 const ROW_HEIGHT = 40;
 
 interface SolveLogProps {
@@ -48,8 +45,6 @@ const SolveLog = ({
     return { currentAo5, currentAo12, sessionMean, bestSingle };
   }, [solves]);
 
-  // DSA-1: Sliding window O(n) — each step slices exactly 5 elements (O(1)),
-  // not the entire tail (O(n-i)). Total: O(n) vs the previous O(n²).
   const perSolveAo5 = useMemo(
     () => solves.map((_, index) => ao5(solves.slice(index, index + 5))),
     [solves]
@@ -152,7 +147,6 @@ const SolveLog = ({
         </ul>
       </div>
 
-      {/* SD-2: Load more for cursor-based pagination */}
       {hasMore && (
         <button
           className="load-more-button"
