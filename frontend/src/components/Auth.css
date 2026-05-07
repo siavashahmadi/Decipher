@@ -104,3 +104,14 @@
 .auth-link-button:hover {
   color: var(--color-text);
 }
+
+@media (max-width: 600px) {
+  .auth-logo-text {
+    font-size: 2.25rem;
+  }
+
+  .auth-button {
+    min-height: 44px;
+    padding: 0.9rem;
+  }
+}
