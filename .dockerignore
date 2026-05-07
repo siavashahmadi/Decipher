@@ -28,7 +28,12 @@ TODO_manual_edits.md
 README.md
 CLAUDE.md
 
-# Env files (loaded via compose env_file, not baked into the image)
+# Env files. Backend secrets stay out of the image (compose loads .env at
+# runtime via env_file). frontend/.env is the exception: Vite reads it at
+# BUILD time and inlines values into the bundle, so it must be in the build
+# context. The anon key is the only Supabase value that ships there and is
+# already public in the bundle, so this is safe.
 .env
 **/.env
+!frontend/.env
 *.env.local
