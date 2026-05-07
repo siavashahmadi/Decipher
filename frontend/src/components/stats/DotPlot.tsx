@@ -49,28 +49,32 @@ const DotPlot = ({ solves }: { solves: Solve[] }): ReactElement => {
   if (!points.length) return <p className="dot-plot-empty">No solves in range.</p>;
 
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <ComposedChart data={merged}>
-        <XAxis dataKey="index" stroke={colors.axis} tick={{ fill: colors.axis }} />
-        <YAxis dataKey="time" stroke={colors.axis} tick={{ fill: colors.axis }}
-          tickFormatter={v => formatTime(v)} />
-        <Tooltip
-          formatter={(v: number | string) =>
-            typeof v === 'number' ? formatTime(v) : v}
-          labelFormatter={l => `Solve #${l}`}
-        />
-        <Line type="monotone" dataKey="ao5" stroke={colors.recent} dot={false}
-          strokeWidth={2} strokeOpacity={0.55} isAnimationActive={false} />
-        <Scatter dataKey="time" isAnimationActive={false}
-          shape={(props: { cx?: number; cy?: number; payload?: Point }) => {
-            const { cx, cy, payload } = props;
-            if (cx === undefined || cy === undefined || !payload) return <g />;
-            const fill = payload.isPb ? colors.pb : payload.isWorst ? colors.heatmap.worst : colors.recent;
-            return <circle cx={cx} cy={cy} r={3} fill={fill} />;
-          }}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <div className="dot-plot-scroll-outer">
+      <div className="dot-plot-scroll-inner">
+        <ResponsiveContainer width="100%" height={260}>
+          <ComposedChart data={merged}>
+            <XAxis dataKey="index" stroke={colors.axis} tick={{ fill: colors.axis }} />
+            <YAxis dataKey="time" stroke={colors.axis} tick={{ fill: colors.axis }}
+              tickFormatter={v => formatTime(v)} />
+            <Tooltip
+              formatter={(v: number | string) =>
+                typeof v === 'number' ? formatTime(v) : v}
+              labelFormatter={l => `Solve #${l}`}
+            />
+            <Line type="monotone" dataKey="ao5" stroke={colors.recent} dot={false}
+              strokeWidth={2} strokeOpacity={0.55} isAnimationActive={false} />
+            <Scatter dataKey="time" isAnimationActive={false}
+              shape={(props: { cx?: number; cy?: number; payload?: Point }) => {
+                const { cx, cy, payload } = props;
+                if (cx === undefined || cy === undefined || !payload) return <g />;
+                const fill = payload.isPb ? colors.pb : payload.isWorst ? colors.heatmap.worst : colors.recent;
+                return <circle cx={cx} cy={cy} r={3} fill={fill} />;
+              }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 };
 

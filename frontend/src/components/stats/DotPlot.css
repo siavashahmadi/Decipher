@@ -1,1 +1,25 @@
 .dot-plot-empty { color: var(--color-text-muted); text-align: center; padding: 2rem 0; }
+
+@media (max-width: 600px) {
+  .dot-plot-scroll-outer {
+    position: relative;
+  }
+  .dot-plot-scroll-outer::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, var(--color-surface));
+    pointer-events: none;
+    z-index: 1;
+  }
+  .dot-plot-scroll-inner {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dot-plot-scroll-inner > .recharts-responsive-container {
+    min-width: 720px;
+  }
+}
