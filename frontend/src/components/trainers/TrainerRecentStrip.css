@@ -28,3 +28,10 @@
   font-size: 0.85rem;
   font-style: italic;
 }
+
+@media (max-width: 600px) {
+  .trainer-recent-strip {
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
