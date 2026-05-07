@@ -100,3 +100,21 @@
   padding: 0.4rem 0.75rem;
   cursor: pointer;
 }
+
+@media (max-width: 600px) {
+  .solve-detail-modal {
+    padding: 1.25rem;
+  }
+
+  .solve-detail-time {
+    font-size: 2rem;
+  }
+
+  .solve-detail-actions {
+    flex-wrap: wrap;
+  }
+
+  .solve-detail-actions button {
+    min-height: 44px;
+  }
+}
