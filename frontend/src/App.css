@@ -9,12 +9,12 @@ body {
 }
 
 .app-wrapper {
-  min-height: 100vh;
+  min-height: 100dvh;
   color: var(--color-text);
 }
 
 .route-loading {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .error-boundary {

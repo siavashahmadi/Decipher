@@ -1,5 +1,5 @@
 .header {
-  padding: 1rem;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem 1rem;
   display: flex;
   align-items: center;
   gap: 2rem;

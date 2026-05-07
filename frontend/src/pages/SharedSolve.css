@@ -2,8 +2,8 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 3rem 1rem;
-  min-height: 100vh;
+  padding: 3rem 1rem max(3rem, env(safe-area-inset-bottom)) 1rem;
+  min-height: 100dvh;
 }
 .shared-solve-card {
   background: var(--color-surface);
