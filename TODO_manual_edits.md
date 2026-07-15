@@ -2,9 +2,13 @@
 
 Actions Claude can't perform. Do these yourself.
 
+> **Live deploy status (2026-05-06):** ao5 is in production at https://decipher.siaahmadi.com (home server, NPM + Cloudflare Origin Certificate). All Supabase migrations 005 through 012 are verified applied to project `xpazxsdytcupmdmmdome`. Items below tagged **STATUS: COMPLETE** were verified during or before this deploy; everything else is still actionable.
+
 ## Phase 1
 
 ### 1.2 Verify Supabase RLS (dashboard)
+
+**STATUS: COMPLETE (2026-05-06).** Verified via Supabase MCP: `relrowsecurity=true` on both `solves` and `personal_bests`, and `personal_bests` carries all four policies (SELECT, INSERT, UPDATE, DELETE) keyed on `auth.uid() = user_id`.
 
 The anon key ships in the frontend. If RLS is off, any visitor can read/write every user's data using the anon key directly.
 
@@ -26,6 +30,8 @@ If RLS is off, enable it and add the policies before shipping anything else.
 ## Phase 7
 
 ### 7.5 Shareable solve link — env vars
+
+**STATUS: COMPLETE (2026-05-06).** Both env vars are set on the home server in `~/sites/ao5/.env`. The boot-time check in `create_app` would have raised `RuntimeError` otherwise; the container is running healthy.
 
 The share endpoints require two new env vars. Both must be set locally (`backend/.env`) and in your deployed host.
 
@@ -64,6 +70,8 @@ After deploying on an asymmetric-keys project:
 
 ### Supabase project is paused
 
+**STATUS: STALE.** No longer applies. The original paused project was retired; ao5 now runs against a fresh Supabase project (`xpazxsdytcupmdmmdome`, ACTIVE_HEALTHY, created 2026-04-30) with all migrations 005-012 already applied.
+
 The Supabase project has been paused (no app usage for a couple weeks). All Cluster A items that touch the live DB are gated on unpausing first. Specifically: A.9 (apply migration 005) and any future end-to-end checks. Code-only items (A.4 validator change, A.7 share-link expiry) ship without touching the DB.
 
 To unpause: Supabase dashboard → project picker → "Restore project". Wait for the status to go green before applying A.9.
@@ -73,6 +81,8 @@ To unpause: Supabase dashboard → project picker → "Restore project". Wait fo
 The plan originally called for an audit of `solves.puzzle_type` to check for `'minx', '333bf', '333oh', '444bf', '555bf'` rows that would be rejected by the new validator. Verified by codebase grep: those tokens exist ONLY in `backend/app/validators.py` and nowhere else in the application (no UI button, no hotkey, no scramble generator, no display path). Realistically no row in any environment has those values. A.4 ships without a data migration.
 
 ### A.9 Apply migration 005 (personal_bests RLS)
+
+**STATUS: COMPLETE (2026-05-06).** Migration applied to the live project (most likely via MCP in an earlier session). Verified: `personal_bests` carries DELETE and UPDATE policies in addition to SELECT and INSERT.
 
 Migration file: `backend/migrations/005_personal_bests_delete_policy.sql`
 
@@ -92,6 +102,8 @@ To fix:
 
 ### A.7 Share-link tokens reissued (breaking change)
 
+**STATUS: COMPLETE (2026-05-06).** Fresh deploy with no users on prior versions, so no external share links pre-existed the cutover. `SHARE_SECRET` on the home server is long enough to satisfy the ≥32 boot-time check (the container is running, which means it passed validation).
+
 The share-link token format changed from 2 segments (`b64(id).b64(mac)`) to 4 segments (`b64(id).b64(iat).b64(exp).b64(mac)`) and now expires 30 days after issue. Any existing share links 404 immediately on deploy. If anyone has externally-pasted share links pointing at this app, they need a new one.
 
 Also: `SHARE_SECRET` must now be at least 32 characters in production. The startup check in `create_app` raises `RuntimeError` if the env var is shorter. Generate a fresh value if needed: `openssl rand -hex 32`.
@@ -99,6 +111,8 @@ Also: `SHARE_SECRET` must now be at least 32 characters in production. The start
 ## Audit Cluster B (2026-04-26)
 
 ### B.4 New required env vars
+
+**STATUS: COMPLETE (2026-05-06).** All four required env vars (the three Supabase keys plus `SHARE_SECRET`) are set on the home server. The container booted cleanly and `/api/ready` returns `"supabase":"ok"`, confirming the values are correct.
 
 `create_app` now refuses to boot on any missing required env var. In addition to `SHARE_SECRET` (already required), these three must be set in `backend/.env` AND in your deployed host:
 
@@ -209,6 +223,8 @@ All 12 items shipped as 16 commits between `6b25694` and `c295dde`. Backend pyte
 
 ### D.1 to D.4, D.7, D.8: apply migrations 006 through 011
 
+**STATUS: COMPLETE (2026-05-06).** All six migrations applied to the live project, verified via MCP. Specifically: indexes `solves_user_puzzle_created_active_idx` and `personal_bests_user_puzzle_min_time_idx` exist; both `solves.user_id` and `personal_bests.user_id` foreign keys have `confdeltype='c'` (cascade); `user_stats` table and `trg_solves_user_stats` trigger present; `record_pb_if_better(uuid, text, uuid, numeric, timestamptz)` and `recompute_pbs_for_user(uuid, text[])` RPCs registered.
+
 The Supabase project may still be paused (see Cluster A note). Unpause first. Then in Supabase dashboard → SQL editor, run the up-migrations in order. Each has a paired `*.down.sql` if you need to roll back.
 
 1. `006_solves_active_index.sql` replaces the cursor-pagination index with a partial composite that includes `WHERE deleted_at IS NULL`. Verify the new index is being used:
@@ -299,6 +315,8 @@ These were flagged by the cluster review but deliberately not done in this round
 
 ### H.12 Apply migration 012 (solves.metadata)
 
+**STATUS: COMPLETE (2026-05-06).** Verified via MCP: `solves.metadata` column present, type `jsonb`.
+
 Migration file: `backend/migrations/012_solves_metadata.sql`
 
 Adds a `metadata jsonb NOT NULL DEFAULT '{}'` column to `solves`. Forward-compat for future enrichment fields (device, app version, comp tags). No code reads the column today, so there is no rush, but apply the migration before any feature that depends on it ships.
@@ -331,9 +349,9 @@ The audit called for mounting Auth at `/login`. Confirmed during Cluster H execu
 
 Three Cluster H items are blocked on vendor decisions:
 
-- **H.6** error reporting: Sentry vs PostHog vs Highlight vs GlitchTip vs no-op.
-- **H.10** backend host: Render vs Fly vs Railway vs Cloud Run vs Vercel functions.
-- **H.11** migration runner: yoyo-migrations vs Supabase CLI vs sqitch vs hand-rolled.
+- **H.6** error reporting: Sentry vs PostHog vs Highlight vs GlitchTip vs no-op. **STATUS: still pending.**
+- **H.10** backend host: Render vs Fly vs Railway vs Cloud Run vs Vercel functions. **STATUS: RESOLVED (2026-05-06)** by self-hosting on the home server (sia-server) behind Nginx Proxy Manager. None of the listed vendors apply.
+- **H.11** migration runner: yoyo-migrations vs Supabase CLI vs sqitch vs hand-rolled. **STATUS: still pending.**
 
 A placeholder plan with full step outlines per item lives at `docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md`. Fill in the "Decision log" section at the top of that file when you pick vendors, then ask Claude to execute the matching task.
 
@@ -413,9 +431,10 @@ All 13 audit clusters have shipped. Snapshot:
 
 The remaining audit-tracked work items are:
 
-- **Deferred vendor picks** in `docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md`: H.6 error reporting (Sentry / PostHog / Highlight / GlitchTip / no-op), H.10 backend host (Render / Fly / Railway / Cloud Run / Vercel functions), H.11 migration runner (yoyo-migrations / Supabase CLI / sqitch / hand-rolled).
+- **Deferred vendor picks** in `docs/superpowers/plans/2026-04-29-audit-cluster-h-deferred.md`: H.6 error reporting (Sentry / PostHog / Highlight / GlitchTip / no-op) and H.11 migration runner (yoyo-migrations / Supabase CLI / sqitch / hand-rolled) still pending. H.10 backend host **resolved 2026-05-06** by self-hosting on the home server.
 - **Deferred follow-ups** listed under individual cluster sections above: CSP Report-Only → enforcing flip (B.7 phase 2), drop legacy `/api` mount post-Sunset (2026-07-01), per-route MAX_CONTENT_LENGTH cap, drop legacy timestamp-only cursor branch (D.9), migrate PB reads to react-query, replace `useSolveSession` snapshot/rollback with react-query `onMutate`, dual-secret SHARE_SECRET rotation support, SQL-level integration tests for triggers and RPCs.
-- **Pending Supabase SQL applies** (gated on the project being unpaused): migration 005 (Cluster A), migrations 006-011 (Cluster D), migration 012 (Cluster H).
+- **Pending Supabase SQL applies:** all migrations 005 through 012 applied 2026-05-06 to project `xpazxsdytcupmdmmdome` and verified via MCP. No DB applies remain.
+- **Post-deploy verifications** still to walk through on the live deploy at https://decipher.siaahmadi.com (each 5-10 min): ProxyFix IP check (Phase 1), share-link end-to-end (7.5), JWT fast-path log check (8.1), per-user rate limiting (B.10), C.* perf profiler checks, batch endpoint end-to-end (D.7), `user_stats` trigger drift (D.4, after some usage), `/api/v1` versioning headers (H.1), cross-page invalidation (H.3), JSON logging post-deploy (I.5/I.6), focus-trap a11y (I.7).
 - **Long-term token storage migration** from localStorage to PKCE + httpOnly cookie via `@supabase/ssr` (B.13). Decision recorded at `docs/decisions/2026-04-26-token-storage.md`; implementation is XL and architectural, intentionally not bundled into this audit pass.
 
 If a new audit pass is run, start a fresh `Audit Cluster J` section below this summary so the historical structure stays readable.
